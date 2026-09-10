@@ -327,6 +327,7 @@
   .tab{background:none;border:none;padding:11px 20px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;border-radius:8px 8px 0 0;transition:color .15s,border-color .15s}
   .tab:hover{color:var(--navy);background:#F7F9FC}
   .tab.active{color:var(--navy);border-bottom-color:var(--green)}
+  .tab-badge{display:inline-block;margin-left:6px;background:var(--red);color:#fff;border-radius:999px;font-size:10.5px;font-weight:800;padding:1px 6px;vertical-align:2px}
 
   /* ---------- Pipeline board ---------- */
   #view-pipeline{padding:16px 26px 40px}
@@ -441,6 +442,7 @@
   .chat-convo-title{font-weight:700;font-size:13px;color:var(--heading);display:flex;align-items:center;gap:6px}
   .chat-convo-kind{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teal-deep);background:#fff;border-radius:4px;padding:1px 5px}
   .chat-convo-snippet{font-size:11.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chat-convo-unread{background:var(--red);color:#fff;border-radius:999px;font-size:10px;font-weight:800;padding:0 6px;margin-left:auto}
   .chat-main{flex:1;display:flex;flex-direction:column;min-width:0}
   .chat-thread-head{padding:12px 16px;border-bottom:1px solid var(--line);font-weight:800;color:var(--heading);font-size:15px}
   .chat-list{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:12px}
@@ -947,7 +949,7 @@
   <button class="tab" data-view="forecast">Reports &amp; Sales Forecast</button>
   <button class="tab mgr-only" data-view="import">Import</button>
   <button class="tab" data-view="export">Export</button>
-  <button class="tab" data-view="chat">Team Chat</button>
+  <button class="tab" data-view="chat">Team Chat<span class="tab-badge" id="chatTabBadge" hidden>0</span></button>
   <button class="tab plat-only" data-view="platform" style="margin-left:auto">Platform</button>
 </nav>
 
@@ -4283,6 +4285,7 @@ let CHAT_CONVOS = [];           // cache from chat_my_conversations()
 let CHAT_PICKER_TAB = "people";
 let CHAT_PICKER_PEOPLE = [];
 let CHAT_PICKER_TEAMS = [];
+let CHAT_UNREAD = {};           // key: conversation id or "everyone" -> count
 
 function chatTime(iso){
   const d = new Date(iso);
@@ -4312,27 +4315,60 @@ function chatScrollToBottom(){
 
 function chatSameConvo(a, b){ return (a ?? null) === (b ?? null); }
 
+function chatUnreadKey(id){ return id === null || id === undefined ? "everyone" : id; }
+
+async function chatRefreshBadge(){
+  if(!ME || ME.chat_enabled === false) return;
+  const {data, error} = await sb.rpc("chat_unread_summary");
+  CHAT_UNREAD = {};
+  let total = 0;
+  if(!error){
+    (data || []).forEach(row => {
+      CHAT_UNREAD[chatUnreadKey(row.conversation_id)] = row.unread_count;
+      total += row.unread_count;
+    });
+  }
+  const badge = document.getElementById("chatTabBadge");
+  if(badge){ badge.hidden = total === 0; badge.textContent = total > 99 ? "99+" : String(total); }
+}
+
 function chatSubscribe(){
   if(CHAT_CHANNEL) return; // already listening, don't stack subscriptions
   CHAT_CHANNEL = sb.channel("platform_messages_stream")
     .on("postgres_changes", {event:"INSERT", schema:"public", table:"platform_messages"}, payload => {
       const list = document.getElementById("chatList");
-      if(list && chatSameConvo(payload.new.conversation_id, CHAT_CONVERSATION)){
+      const onThisConvo = chatSameConvo(payload.new.conversation_id, CHAT_CONVERSATION);
+      const onChatTab = currentView === "chat";
+      if(list && onThisConvo){
         const atBottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 40;
         list.insertAdjacentHTML("beforeend", chatMsgRow(payload.new));
         if(atBottom) chatScrollToBottom();
       }
-      // a message anywhere can change a sidebar snippet/ordering
-      if(document.getElementById("chatConvoList")) chatLoadSidebar();
+      if(payload.new.sender_id === (ME && ME.id)){
+        if(document.getElementById("chatConvoList")) chatLoadSidebar();
+        return;
+      }
+      if(onThisConvo && onChatTab){
+        // already looking straight at it - keep it marked read instead of badging it
+        sb.rpc("chat_mark_read", {p_conversation_id: CHAT_CONVERSATION}).then(()=>{
+          if(document.getElementById("chatConvoList")) chatLoadSidebar(); else chatRefreshBadge();
+        });
+      }else if(document.getElementById("chatConvoList")){
+        chatLoadSidebar();
+      }else{
+        chatRefreshBadge();
+      }
     })
     .subscribe();
 }
 
 function chatConvoRow(c){
   const active = chatSameConvo(c.conversation_id, CHAT_CONVERSATION);
+  const n = CHAT_UNREAD[chatUnreadKey(c.conversation_id)] || 0;
   return `<button class="chat-convo-item${active ? " active" : ""}" data-convo="${c.conversation_id || ""}">
     <div class="chat-convo-title">${esc(c.title || "Someone")}
-      <span class="chat-convo-kind">${c.kind === "team" ? "Team" : "DM"}</span></div>
+      <span class="chat-convo-kind">${c.kind === "team" ? "Team" : "DM"}</span>
+      ${n > 0 ? '<span class="chat-convo-unread">'+(n>99?"99+":n)+'</span>' : ""}</div>
     <div class="chat-convo-snippet">${esc(c.last_body || "No messages yet")}</div>
   </button>`;
 }
@@ -4340,12 +4376,15 @@ function chatConvoRow(c){
 async function chatLoadSidebar(){
   const host = document.getElementById("chatConvoList");
   if(!host) return;
+  await chatRefreshBadge();
   const {data, error} = await sb.rpc("chat_my_conversations");
   CHAT_CONVOS = error ? [] : (data || []);
   const everyoneActive = CHAT_CONVERSATION === null;
+  const everyoneUnread = CHAT_UNREAD.everyone || 0;
   host.innerHTML =
     `<button class="chat-convo-item${everyoneActive ? " active" : ""}" data-convo="">
-       <div class="chat-convo-title">Everyone <span class="chat-convo-kind">All</span></div>
+       <div class="chat-convo-title">Everyone <span class="chat-convo-kind">All</span>
+         ${everyoneUnread > 0 ? '<span class="chat-convo-unread">'+(everyoneUnread>99?"99+":everyoneUnread)+'</span>' : ""}</div>
        <div class="chat-convo-snippet">The whole platform, one channel</div>
      </button>` +
     CHAT_CONVOS.map(chatConvoRow).join("");
@@ -4380,6 +4419,8 @@ async function chatLoadThread(){
     list.innerHTML = data.map(chatMsgRow).join("");
   }
   chatScrollToBottom();
+  await sb.rpc("chat_mark_read", {p_conversation_id: CHAT_CONVERSATION});
+  chatLoadSidebar();
 }
 
 function chatOpenConversation(id){
@@ -5241,7 +5282,13 @@ function paintIdentity(){
   document.getElementById("teamBtn").style.display = isManager() ? "" : "none";
   document.body.classList.toggle("is-manager", isManager());
   document.body.classList.toggle("is-platform", IS_PLATFORM);
-  document.querySelector('.tab[data-view="chat"]').style.display = (ME && ME.chat_enabled === false) ? "none" : "";
+  // Team Chat is temporarily hidden platform-wide (feature flag off) -
+  // everything behind it (schema, RLS, RPCs) is untouched and intact,
+  // this is the only line that needs to change to bring it back.
+  const CHAT_FEATURE_ENABLED = false;
+  document.querySelector('.tab[data-view="chat"]').style.display =
+    (CHAT_FEATURE_ENABLED && ME && ME.chat_enabled !== false) ? "" : "none";
+  if(CHAT_FEATURE_ENABLED && ME && ME.chat_enabled !== false){ chatSubscribe(); chatRefreshBadge(); }
   populateRepFilter();
 
   // tenant branding
@@ -5276,6 +5323,7 @@ async function switchCompany(companyId){
   selectedId = null;
   REP_OWNER = "";   // a rep id from the old company means nothing in the new one
   DASH_OWNER = "";  // same for the dashboard's consultant filter
+  CHAT_CONVERSATION = null;  // a team conversation may not apply to the new company
 
   await loadMe();
   await loadData();
