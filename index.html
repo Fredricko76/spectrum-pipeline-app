@@ -942,7 +942,7 @@
   </div>
   <div class="field mgr-only">
     <label>Assigned to</label>
-    <select id="repFilter"><option value="">All reps</option></select>
+    <select id="repFilter"><option value="">All Sales Consultants</option></select>
   </div>
   <div class="field">
     <label>&nbsp;</label>
@@ -2055,7 +2055,7 @@ function renderForecast(listIn){
   FC_REPORT = Object.assign({}, FC_REPORT || {}, {
     fc, fcWin: win, manager: isManager(),
     company: COMPANY ? COMPANY.name : "Your company",
-    scope: !isManager() ? "Your clients only" : (scoped ? repName(REP_OWNER) : "All reps")
+    scope: !isManager() ? "Your clients only" : (scoped ? repName(REP_OWNER) : "All Sales Consultants")
   });
   renderUpcoming(list);
 }
@@ -2154,14 +2154,14 @@ async function renderReports(){
   }
 
   const repOpts = isManager()
-    ? '<option value="">All reps</option>' +
+    ? '<option value="">All Sales Consultants</option>' +
       TEAM.filter(p=>p.active).map(p=>'<option value="'+p.id+'"'+(p.id===REP_OWNER?" selected":"")+'>' +
         esc(repName(p.id)) + (p.id===(ME&&ME.id)?" (you)":"") + '</option>').join("")
     : "";
 
   const scope = !isManager() ? "Your clients only."
-    : (REP_OWNER ? "Filtered to " + esc(repName(REP_OWNER)) + " — the forecast, appointments and PDF below follow this too. Switch back to All reps for the business-wide picture."
-                 : "Every rep in " + esc(COMPANY ? COMPANY.name : "your company") + ", including clients that are unassigned.");
+    : (REP_OWNER ? "Filtered to " + esc(repName(REP_OWNER)) + " — the forecast, appointments and PDF below follow this too. Switch back to All Sales Consultants for the business-wide picture."
+                 : "Every Sales Consultant in " + esc(COMPANY ? COMPANY.name : "your company") + ", including clients that are unassigned.");
 
   host.innerHTML = `
     <div class="fc-card full" style="margin-bottom:18px">
@@ -2173,7 +2173,7 @@ async function renderReports(){
         </div>
         <div style="display:flex;gap:14px;flex-wrap:wrap">
           ${isManager() ? `<div class="month-pick">
-            <label for="repOwner">Reps</label>
+            <label for="repOwner">Sales Consultants</label>
             <select id="repOwner">${repOpts}</select>
           </div>` : ""}
           <div class="month-pick">
@@ -2295,8 +2295,8 @@ function renderForecastBody(list, win){
       ${isManager() ? `
       <div class="fc-card full">
         <h3>Forecast by consultant</h3>
-        <p class="hint">Whose pipeline the ${esc(winLabel)} forecast belongs to. For a single rep's monthly activity,
-        use the <em>Reps</em> selector at the top of the page.</p>
+        <p class="hint">Whose pipeline the ${esc(winLabel)} forecast belongs to. For a single Sales Consultant's monthly activity,
+        use the <em>Sales Consultants</em> selector at the top of the page.</p>
         ${consultantTable(list)}
       </div>` : ""}
     </div>`;
@@ -4168,7 +4168,7 @@ function renderExport(){
           </select></div>
         ${isManager() ? `
         <div class="field"><label>Assigned to</label>
-          <select id="expRep"><option value="">All reps</option>
+          <select id="expRep"><option value="">All Sales Consultants</option>
             ${TEAM.filter(p=>p.active).map(p=>'<option value="'+p.id+'"'+(p.id===EXP.rep?" selected":"")+'>'+esc(repName(p.id))+'</option>').join("")}
             <option value="__none"${EXP.rep==="__none"?" selected":""}>Unassigned</option>
           </select></div>` : ""}
@@ -4211,6 +4211,7 @@ function renderExport(){
    has since moved on still counts in the month it passed through.
    ============================================================ */
 let DASH_MONTH = null;
+let DASH_OWNER = "";  // manager-only: "" = whole company, else a Sales Consultant's id
 
 function thisMonth(){
   const d = new Date();
@@ -4228,11 +4229,12 @@ async function renderDashboard(){
   if(!ME){ host.innerHTML = ""; return; }
   if(!DASH_MONTH) DASH_MONTH = thisMonth();
   const PREV_MONTH = prevMonthOf(DASH_MONTH);
+  const owner = (isManager() && DASH_OWNER) ? DASH_OWNER : null;
 
   const [mRes, dRes, pRes] = await Promise.all([
     sb.rpc("dashboard_months"),
-    sb.rpc("dashboard_metrics", {p_month: DASH_MONTH}),
-    sb.rpc("dashboard_metrics", {p_month: PREV_MONTH})
+    sb.rpc("dashboard_metrics", {p_month: DASH_MONTH, p_owner: owner}),
+    sb.rpc("dashboard_metrics", {p_month: PREV_MONTH, p_owner: owner})
   ]);
   if(dRes.error){
     host.innerHTML = '<div class="dash-section"><p class="note">' + esc(friendlyError(dRes.error)) + '</p></div>';
@@ -4264,19 +4266,30 @@ async function renderDashboard(){
 
   const monthEmpty = (m.leads + m.discovery_appointments + m.estimates_presented + m.review_meetings + m.sales_won + m.sales_lost) === 0;
 
+  const dashOwnerOpts = isManager()
+    ? '<option value="">All Sales Consultants</option>' +
+      TEAM.filter(p=>p.active).map(p=>'<option value="'+p.id+'"'+(p.id===DASH_OWNER?" selected":"")+'>' +
+        esc(repName(p.id)) + (p.id===(ME&&ME.id)?" (you)":"") + '</option>').join("")
+    : "";
+
   host.innerHTML = `
     <div class="dash-head">
       <div>
         <h2>Sales dashboard</h2>
-        <p class="sub">${isManager()
-          ? "Whole of " + esc(COMPANY ? COMPANY.name : "your company")
-          : "Clients assigned to you"}</p>
+        <p class="sub">${!isManager() ? "Clients assigned to you"
+          : (owner ? "Filtered to " + esc(repName(owner)) : "Whole of " + esc(COMPANY ? COMPANY.name : "your company"))}</p>
       </div>
-      <div class="month-pick">
-        <label for="dashMonth">Reporting month</label>
-        <select id="dashMonth">
-          ${months.map(x=>'<option value="'+x.ym+'"'+(x.ym===DASH_MONTH?" selected":"")+'>'+esc(x.label)+'</option>').join("")}
-        </select>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        ${isManager() ? `<div class="month-pick">
+          <label for="dashOwner">Sales Consultants</label>
+          <select id="dashOwner">${dashOwnerOpts}</select>
+        </div>` : ""}
+        <div class="month-pick">
+          <label for="dashMonth">Reporting month</label>
+          <select id="dashMonth">
+            ${months.map(x=>'<option value="'+x.ym+'"'+(x.ym===DASH_MONTH?" selected":"")+'>'+esc(x.label)+'</option>').join("")}
+          </select>
+        </div>
       </div>
     </div>
 
@@ -4330,7 +4343,13 @@ async function renderDashboard(){
     DASH_MONTH = e.target.value;
     renderDashboard();
   });
-  renderTasksWidget(clients, "dashTasksWidget", "Dash");
+  const doSel = document.getElementById("dashOwner");
+  if(doSel) doSel.addEventListener("change", e=>{
+    DASH_OWNER = e.target.value || "";
+    renderDashboard();
+  });
+  const taskClients = owner ? clients.filter(c => c.ownerId === owner) : clients;
+  renderTasksWidget(taskClients, "dashTasksWidget", "Dash");
 }
 
 /* ============================================================
@@ -4938,6 +4957,7 @@ async function switchCompany(companyId){
   tkSig.clear();
   selectedId = null;
   REP_OWNER = "";   // a rep id from the old company means nothing in the new one
+  DASH_OWNER = "";  // same for the dashboard's consultant filter
 
   await loadMe();
   await loadData();
@@ -4961,9 +4981,9 @@ function populateRepFilter(){
   const sel = document.getElementById("repFilter");
   if(!sel) return;
   // consultants never see this control - don't put the roster in their DOM
-  if(!isManager()){ sel.innerHTML = '<option value="">All reps</option>'; sel.value = ""; return; }
+  if(!isManager()){ sel.innerHTML = '<option value="">All Sales Consultants</option>'; sel.value = ""; return; }
   const keep = sel.value;
-  sel.innerHTML = '<option value="">All reps</option>'
+  sel.innerHTML = '<option value="">All Sales Consultants</option>'
     + TEAM.filter(p=>p.active).map(p => '<option value="' + p.id + '">' + esc(repName(p.id)) + (p.id === (ME&&ME.id) ? " (you)" : "") + '</option>').join("")
     + '<option value="__none">Unassigned</option>';
   sel.value = keep;
