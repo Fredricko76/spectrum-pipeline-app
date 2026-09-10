@@ -431,7 +431,18 @@
   .task-del:hover{color:var(--red)}
   /* ---------- Tasks widget (Clients tab) ---------- */
   .tasks-widget{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--green);border-radius:var(--radius);box-shadow:var(--shadow);margin:16px 26px 2px;overflow:hidden}
-  .chat-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin:16px 26px 26px;display:flex;flex-direction:column;height:min(65vh,640px);overflow:hidden}
+  .chat-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin:16px 26px 26px;display:flex;height:min(65vh,640px);overflow:hidden}
+  .chat-sidebar{width:230px;flex:none;border-right:1px solid var(--line);display:flex;flex-direction:column;background:var(--bg)}
+  .chat-sidebar-head{padding:12px;border-bottom:1px solid var(--line)}
+  .chat-convo-list{flex:1;overflow-y:auto}
+  .chat-convo-item{display:block;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--line);padding:10px 12px;cursor:pointer;font:inherit}
+  .chat-convo-item:hover{background:var(--teal-soft)}
+  .chat-convo-item.active{background:var(--teal-soft);border-left:3px solid var(--teal)}
+  .chat-convo-title{font-weight:700;font-size:13px;color:var(--heading);display:flex;align-items:center;gap:6px}
+  .chat-convo-kind{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teal-deep);background:#fff;border-radius:4px;padding:1px 5px}
+  .chat-convo-snippet{font-size:11.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chat-main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .chat-thread-head{padding:12px 16px;border-bottom:1px solid var(--line);font-weight:800;color:var(--heading);font-size:15px}
   .chat-list{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:12px}
   .chat-msg{max-width:78%;align-self:flex-start}
   .chat-msg.mine{align-self:flex-end}
@@ -445,6 +456,19 @@
   .chat-send textarea{flex:1;resize:none;max-height:120px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13.5px;line-height:1.4}
   .chat-send textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(20,128,140,.18)}
   @media(max-width:640px){ .chat-msg{max-width:92%} }
+  .chat-picker-tabs{display:flex;gap:6px;margin-top:10px}
+  .chat-picker-tabs button{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer}
+  .chat-picker-tabs button.active{background:var(--teal);border-color:var(--teal);color:#fff}
+  .chat-picker-list{max-height:320px;overflow-y:auto;border:1px solid var(--line);border-radius:10px}
+  .chat-picker-row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+  .chat-picker-row:last-child{border-bottom:none}
+  .chat-picker-row:hover{background:var(--teal-soft)}
+  .chat-picker-row .nm{font-weight:700;font-size:13px;color:var(--heading)}
+  .chat-picker-row .sub{font-size:11.5px;color:var(--muted)}
+  @media(max-width:720px){
+    .chat-wrap{flex-direction:column;height:min(75vh,680px)}
+    .chat-sidebar{width:100%;max-height:160px;border-right:none;border-bottom:1px solid var(--line)}
+  }
   .tasks-widget .tw-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
   .tasks-widget .tw-head h3{margin:0;font-size:16px;font-weight:800;color:var(--heading);display:flex;align-items:center;gap:9px}
   .tw-count{background:var(--green-soft);color:var(--green-deep);border-radius:999px;padding:1px 10px;font-size:12px;font-weight:800}
@@ -1177,6 +1201,24 @@
         Invites are links, not emails &mdash; copy the link and send it however you like.
         A consultant sees only the clients assigned to them. Admins and owners see the whole company pipeline.
       </p>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="chatPickerOverlay">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-head">
+      <h2>Start a new chat</h2>
+      <button class="x" id="chatPickerClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="hint" style="margin-top:0">Only people and teams with chat turned on are shown here.</p>
+      <div class="chat-picker-tabs">
+        <button class="active" data-ptab="people" id="chatPickerTabPeople">People</button>
+        <button data-ptab="teams" id="chatPickerTabTeams">Teams</button>
+      </div>
+      <input type="text" id="chatPickerSearch" placeholder="Search by name&hellip;" style="width:100%;margin:10px 0" />
+      <div class="chat-picker-list" id="chatPickerList"></div>
     </div>
   </div>
 </div>
@@ -4225,16 +4267,22 @@ function renderExport(){
 }
 
 /* ============================================================
-   TEAM CHAT - one shared channel for every user on the platform,
-   across every company. Deliberately not scoped to a company -
-   this is the one place in the app where that isolation is
-   intentionally not applied. Sender identity (name + company) is
-   always stamped server-side by a trigger from the real auth
-   session, never trusted from the client, so nobody can post as
-   someone else or under a company they are not in.
+   TEAM CHAT - an "Everyone" channel open to every chat-enabled
+   user across every company (deliberately the one place company
+   isolation is not applied), plus private 1:1 and whole-team
+   conversations started from the "New chat" picker. The picker
+   only ever lists people/teams with chat currently turned on -
+   chat_people_directory() and chat_teams_directory() already
+   filter that server-side. Sender identity is always stamped
+   server-side, never trusted from the client.
    ============================================================ */
 let CHAT_CHANNEL = null;
 let CHAT_SENDING = false;
+let CHAT_CONVERSATION = null;   // null = the "Everyone" channel
+let CHAT_CONVOS = [];           // cache from chat_my_conversations()
+let CHAT_PICKER_TAB = "people";
+let CHAT_PICKER_PEOPLE = [];
+let CHAT_PICKER_TEAMS = [];
 
 function chatTime(iso){
   const d = new Date(iso);
@@ -4262,17 +4310,158 @@ function chatScrollToBottom(){
   if(list) list.scrollTop = list.scrollHeight;
 }
 
+function chatSameConvo(a, b){ return (a ?? null) === (b ?? null); }
+
 function chatSubscribe(){
   if(CHAT_CHANNEL) return; // already listening, don't stack subscriptions
   CHAT_CHANNEL = sb.channel("platform_messages_stream")
     .on("postgres_changes", {event:"INSERT", schema:"public", table:"platform_messages"}, payload => {
       const list = document.getElementById("chatList");
-      if(!list) return; // chat tab isn't open right now
-      const atBottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 40;
-      list.insertAdjacentHTML("beforeend", chatMsgRow(payload.new));
-      if(atBottom) chatScrollToBottom();
+      if(list && chatSameConvo(payload.new.conversation_id, CHAT_CONVERSATION)){
+        const atBottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 40;
+        list.insertAdjacentHTML("beforeend", chatMsgRow(payload.new));
+        if(atBottom) chatScrollToBottom();
+      }
+      // a message anywhere can change a sidebar snippet/ordering
+      if(document.getElementById("chatConvoList")) chatLoadSidebar();
     })
     .subscribe();
+}
+
+function chatConvoRow(c){
+  const active = chatSameConvo(c.conversation_id, CHAT_CONVERSATION);
+  return `<button class="chat-convo-item${active ? " active" : ""}" data-convo="${c.conversation_id || ""}">
+    <div class="chat-convo-title">${esc(c.title || "Someone")}
+      <span class="chat-convo-kind">${c.kind === "team" ? "Team" : "DM"}</span></div>
+    <div class="chat-convo-snippet">${esc(c.last_body || "No messages yet")}</div>
+  </button>`;
+}
+
+async function chatLoadSidebar(){
+  const host = document.getElementById("chatConvoList");
+  if(!host) return;
+  const {data, error} = await sb.rpc("chat_my_conversations");
+  CHAT_CONVOS = error ? [] : (data || []);
+  const everyoneActive = CHAT_CONVERSATION === null;
+  host.innerHTML =
+    `<button class="chat-convo-item${everyoneActive ? " active" : ""}" data-convo="">
+       <div class="chat-convo-title">Everyone <span class="chat-convo-kind">All</span></div>
+       <div class="chat-convo-snippet">The whole platform, one channel</div>
+     </button>` +
+    CHAT_CONVOS.map(chatConvoRow).join("");
+  host.querySelectorAll("[data-convo]").forEach(btn=>{
+    btn.addEventListener("click", ()=> chatOpenConversation(btn.dataset.convo || null));
+  });
+}
+
+async function chatLoadThread(){
+  const list = document.getElementById("chatList");
+  const head = document.getElementById("chatThreadHead");
+  if(!list) return;
+  if(head){
+    if(CHAT_CONVERSATION === null) head.textContent = "Everyone";
+    else{
+      const c = CHAT_CONVOS.find(x=>x.conversation_id === CHAT_CONVERSATION);
+      head.textContent = c ? c.title + (c.kind === "team" ? " (team)" : "") : "Chat";
+    }
+  }
+  list.innerHTML = '<p class="hint">Loading messages&hellip;</p>';
+  let q = sb.from("platform_messages")
+    .select("id, sender_id, sender_name, company_name, body, created_at")
+    .order("created_at", {ascending:true})
+    .limit(200);
+  q = CHAT_CONVERSATION === null ? q.is("conversation_id", null) : q.eq("conversation_id", CHAT_CONVERSATION);
+  const {data, error} = await q;
+  if(error){
+    list.innerHTML = '<p class="hint" style="color:var(--red)">' + esc(friendlyError(error)) + '</p>';
+  }else if(!data || data.length===0){
+    list.innerHTML = '<p class="hint">No messages yet &mdash; say hello.</p>';
+  }else{
+    list.innerHTML = data.map(chatMsgRow).join("");
+  }
+  chatScrollToBottom();
+}
+
+function chatOpenConversation(id){
+  CHAT_CONVERSATION = id || null;
+  document.querySelectorAll("#chatConvoList .chat-convo-item").forEach(el=>{
+    el.classList.toggle("active", (el.dataset.convo || null) === (CHAT_CONVERSATION || null));
+  });
+  chatLoadThread();
+}
+
+function chatPickerRow(kind, item){
+  if(kind === "people")
+    return `<div class="chat-picker-row" data-person="${item.user_id}">
+      <div><div class="nm">${esc(item.full_name)}</div><div class="sub">${esc(item.company_name || "")}</div></div>
+    </div>`;
+  return `<div class="chat-picker-row" data-team="${item.company_id}">
+    <div><div class="nm">${esc(item.company_name)}</div><div class="sub">${item.chat_enabled_count} on chat</div></div>
+  </div>`;
+}
+
+function chatRenderPickerList(){
+  const host = document.getElementById("chatPickerList");
+  const q = (document.getElementById("chatPickerSearch").value || "").trim().toLowerCase();
+  if(CHAT_PICKER_TAB === "people"){
+    const rows = CHAT_PICKER_PEOPLE.filter(p => !q || p.full_name.toLowerCase().includes(q) || (p.company_name||"").toLowerCase().includes(q));
+    host.innerHTML = rows.length ? rows.map(p=>chatPickerRow("people", p)).join("")
+      : '<p class="hint" style="padding:12px">No one matches, or nobody else has chat turned on yet.</p>';
+    host.querySelectorAll("[data-person]").forEach(el=>{
+      el.addEventListener("click", ()=> chatPickStart("dm", el.dataset.person));
+    });
+  }else{
+    const rows = CHAT_PICKER_TEAMS.filter(t => !q || t.company_name.toLowerCase().includes(q));
+    host.innerHTML = rows.length ? rows.map(t=>chatPickerRow("teams", t)).join("")
+      : '<p class="hint" style="padding:12px">No other teams have chat turned on yet.</p>';
+    host.querySelectorAll("[data-team]").forEach(el=>{
+      el.addEventListener("click", ()=> chatPickStart("team", el.dataset.team));
+    });
+  }
+}
+
+async function chatPickStart(kind, id){
+  const rpc = kind === "dm" ? "chat_start_dm" : "chat_start_team";
+  const arg = kind === "dm" ? {p_other_user: id} : {p_company_id: id};
+  const {data, error} = await sb.rpc(rpc, arg);
+  if(error){ toast(friendlyError(error)); return; }
+  chatClosePicker();
+  await chatLoadSidebar();
+  chatOpenConversation(data);
+}
+
+async function chatOpenPicker(){
+  document.getElementById("chatPickerOverlay").classList.add("open");
+  document.getElementById("chatPickerSearch").value = "";
+  document.getElementById("chatPickerList").innerHTML = '<p class="hint" style="padding:12px">Loading&hellip;</p>';
+  const [{data:people}, {data:teams}] = await Promise.all([
+    sb.rpc("chat_people_directory"),
+    sb.rpc("chat_teams_directory")
+  ]);
+  CHAT_PICKER_PEOPLE = people || [];
+  CHAT_PICKER_TEAMS = teams || [];
+  chatRenderPickerList();
+}
+
+function chatClosePicker(){
+  document.getElementById("chatPickerOverlay").classList.remove("open");
+}
+
+function chatWirePicker(){
+  document.getElementById("chatPickerClose").addEventListener("click", chatClosePicker);
+  document.getElementById("chatPickerTabPeople").addEventListener("click", ()=>{
+    CHAT_PICKER_TAB = "people";
+    document.getElementById("chatPickerTabPeople").classList.add("active");
+    document.getElementById("chatPickerTabTeams").classList.remove("active");
+    chatRenderPickerList();
+  });
+  document.getElementById("chatPickerTabTeams").addEventListener("click", ()=>{
+    CHAT_PICKER_TAB = "teams";
+    document.getElementById("chatPickerTabTeams").classList.add("active");
+    document.getElementById("chatPickerTabPeople").classList.remove("active");
+    chatRenderPickerList();
+  });
+  document.getElementById("chatPickerSearch").addEventListener("input", chatRenderPickerList);
 }
 
 async function renderChat(){
@@ -4288,32 +4477,28 @@ async function renderChat(){
     <div class="dash-head">
       <div>
         <h2>Team Chat</h2>
-        <p class="sub">Everyone on the platform, across every company &mdash; one shared channel.</p>
+        <p class="sub">Everyone, or start a private chat with a person or a whole team.</p>
       </div>
+      <button class="btn btn-primary btn-sm" id="chatNewBtn">+ New chat</button>
     </div>
     <div class="chat-wrap">
-      <div class="chat-list" id="chatList"><p class="hint">Loading messages&hellip;</p></div>
-      <div class="chat-send">
-        <textarea id="chatInput" placeholder="Message the team&hellip;" maxlength="2000" rows="1"></textarea>
-        <button class="btn btn-primary" id="chatSend">Send</button>
+      <div class="chat-sidebar">
+        <div class="chat-convo-list" id="chatConvoList"><p class="hint" style="padding:12px">Loading&hellip;</p></div>
+      </div>
+      <div class="chat-main">
+        <div class="chat-thread-head" id="chatThreadHead">Everyone</div>
+        <div class="chat-list" id="chatList"><p class="hint">Loading messages&hellip;</p></div>
+        <div class="chat-send">
+          <textarea id="chatInput" placeholder="Message&hellip;" maxlength="2000" rows="1"></textarea>
+          <button class="btn btn-primary" id="chatSend">Send</button>
+        </div>
       </div>
     </div>`;
 
-  const {data, error} = await sb.from("platform_messages")
-    .select("id, sender_id, sender_name, company_name, body, created_at")
-    .order("created_at", {ascending:true})
-    .limit(200);
-
-  const list = document.getElementById("chatList");
-  if(error){
-    list.innerHTML = '<p class="hint" style="color:var(--red)">' + esc(friendlyError(error)) + '</p>';
-  }else if(!data || data.length===0){
-    list.innerHTML = '<p class="hint">No messages yet &mdash; say hello.</p>';
-  }else{
-    list.innerHTML = data.map(chatMsgRow).join("");
-  }
-  chatScrollToBottom();
+  await chatLoadSidebar();
+  await chatLoadThread();
   chatSubscribe();
+  document.getElementById("chatNewBtn").addEventListener("click", chatOpenPicker);
 
   const input = document.getElementById("chatInput");
   const sendBtn = document.getElementById("chatSend");
@@ -4321,7 +4506,7 @@ async function renderChat(){
     const body = input.value.trim();
     if(!body || CHAT_SENDING) return;
     CHAT_SENDING = true; sendBtn.disabled = true;
-    const {error:sendErr} = await sb.from("platform_messages").insert({body});
+    const {error:sendErr} = await sb.from("platform_messages").insert({body, conversation_id: CHAT_CONVERSATION});
     CHAT_SENDING = false; sendBtn.disabled = false;
     if(sendErr){ toast(friendlyError(sendErr)); return; }
     input.value = "";
@@ -5348,6 +5533,7 @@ async function boot(){
   initOptions();
   wireAuth();
   wireTeam();
+  chatWirePicker();
   await checkInvite();
   await handleRecovery();
   const {data:{session}} = await sb.auth.getSession();
