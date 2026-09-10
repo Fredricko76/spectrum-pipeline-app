@@ -431,6 +431,20 @@
   .task-del:hover{color:var(--red)}
   /* ---------- Tasks widget (Clients tab) ---------- */
   .tasks-widget{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--green);border-radius:var(--radius);box-shadow:var(--shadow);margin:16px 26px 2px;overflow:hidden}
+  .chat-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin:16px 26px 26px;display:flex;flex-direction:column;height:min(65vh,640px);overflow:hidden}
+  .chat-list{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:12px}
+  .chat-msg{max-width:78%;align-self:flex-start}
+  .chat-msg.mine{align-self:flex-end}
+  .chat-msg-meta{display:flex;gap:8px;align-items:baseline;font-size:11px;color:var(--muted);margin-bottom:2px}
+  .chat-msg.mine .chat-msg-meta{justify-content:flex-end}
+  .chat-msg-name{font-weight:700;color:var(--heading)}
+  .chat-msg-company{color:var(--teal-deep)}
+  .chat-msg-body{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13.5px;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+  .chat-msg.mine .chat-msg-body{background:var(--teal-soft);border-color:#BFE1E5}
+  .chat-send{display:flex;gap:10px;align-items:flex-end;padding:12px 16px;border-top:1px solid var(--line);background:var(--card)}
+  .chat-send textarea{flex:1;resize:none;max-height:120px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:13.5px;line-height:1.4}
+  .chat-send textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(20,128,140,.18)}
+  @media(max-width:640px){ .chat-msg{max-width:92%} }
   .tasks-widget .tw-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
   .tasks-widget .tw-head h3{margin:0;font-size:16px;font-weight:800;color:var(--heading);display:flex;align-items:center;gap:9px}
   .tw-count{background:var(--green-soft);color:var(--green-deep);border-radius:999px;padding:1px 10px;font-size:12px;font-weight:800}
@@ -555,7 +569,7 @@
 
   /* ---------- Team modal ---------- */
   .team-row{
-    display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;
+    display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:center;
     padding:10px 0;border-bottom:1px solid var(--line);
   }
   .team-row:last-child{border-bottom:0}
@@ -909,6 +923,7 @@
   <button class="tab" data-view="forecast">Reports &amp; Sales Forecast</button>
   <button class="tab mgr-only" data-view="import">Import</button>
   <button class="tab" data-view="export">Export</button>
+  <button class="tab" data-view="chat">Team Chat</button>
   <button class="tab plat-only" data-view="platform" style="margin-left:auto">Platform</button>
 </nav>
 
@@ -987,6 +1002,7 @@
 <div id="view-forecast" hidden></div>
 <div id="view-import" hidden></div>
 <div id="view-export" hidden></div>
+<div id="view-chat" hidden></div>
 <div id="view-platform" hidden></div>
 
 <div class="footer-note" id="footNote"></div>
@@ -1815,11 +1831,13 @@ function render(){
   const f=getFilters();
   const list=clients.filter(c=>matchesFilters(c,f));
   const chromeless = (currentView==="forecast" || currentView==="platform"
-                      || currentView==="dashboard" || currentView==="export" || currentView==="import");
+                      || currentView==="dashboard" || currentView==="export" || currentView==="import"
+                      || currentView==="chat");
   if(currentView==="pipeline") renderKPIs(list);
   if(currentView==="dashboard") { renderDashboard(); }
   else if(currentView==="import") { renderImport(); }
   else if(currentView==="export") { renderExport(); }
+  else if(currentView==="chat") { renderChat(); }
   else if(currentView==="platform") { renderPlatform(); }
   else if(currentView==="pipeline") renderPipeline(list);
   else if(currentView==="forecast") renderForecast(list);
@@ -1837,8 +1855,9 @@ function switchView(v){
   document.getElementById("view-forecast").hidden = v!=="forecast";
   document.getElementById("view-import").hidden = v!=="import";
   document.getElementById("view-export").hidden = v!=="export";
+  document.getElementById("view-chat").hidden = v!=="chat";
   document.getElementById("view-platform").hidden = v!=="platform";
-  const chromeless = (v==="forecast" || v==="platform" || v==="dashboard" || v==="export" || v==="import");
+  const chromeless = (v==="forecast" || v==="platform" || v==="dashboard" || v==="export" || v==="import" || v==="chat");
   document.getElementById("kpis").style.display = (v==="pipeline") ? "grid" : "none";
   document.querySelector(".toolbar").style.display = chromeless?"none":"flex";
   document.getElementById("tasksWidget").style.display = (v==="clients") ? "" : "none";
@@ -4206,6 +4225,119 @@ function renderExport(){
 }
 
 /* ============================================================
+   TEAM CHAT - one shared channel for every user on the platform,
+   across every company. Deliberately not scoped to a company -
+   this is the one place in the app where that isolation is
+   intentionally not applied. Sender identity (name + company) is
+   always stamped server-side by a trigger from the real auth
+   session, never trusted from the client, so nobody can post as
+   someone else or under a company they are not in.
+   ============================================================ */
+let CHAT_CHANNEL = null;
+let CHAT_SENDING = false;
+
+function chatTime(iso){
+  const d = new Date(iso);
+  if(isNaN(d)) return "";
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const time = d.toLocaleTimeString("en-AU", {hour:"numeric", minute:"2-digit"});
+  return sameDay ? time : d.toLocaleDateString("en-AU", {day:"numeric", month:"short"}) + ", " + time;
+}
+
+function chatMsgRow(m){
+  const mine = ME && m.sender_id === ME.id;
+  return `<div class="chat-msg${mine ? " mine" : ""}">
+    <div class="chat-msg-meta">
+      <span class="chat-msg-name">${esc(m.sender_name || "Someone")}</span>
+      ${m.company_name ? '<span class="chat-msg-company">' + esc(m.company_name) + '</span>' : ""}
+      <span class="chat-msg-time">${esc(chatTime(m.created_at))}</span>
+    </div>
+    <div class="chat-msg-body">${esc(m.body)}</div>
+  </div>`;
+}
+
+function chatScrollToBottom(){
+  const list = document.getElementById("chatList");
+  if(list) list.scrollTop = list.scrollHeight;
+}
+
+function chatSubscribe(){
+  if(CHAT_CHANNEL) return; // already listening, don't stack subscriptions
+  CHAT_CHANNEL = sb.channel("platform_messages_stream")
+    .on("postgres_changes", {event:"INSERT", schema:"public", table:"platform_messages"}, payload => {
+      const list = document.getElementById("chatList");
+      if(!list) return; // chat tab isn't open right now
+      const atBottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 40;
+      list.insertAdjacentHTML("beforeend", chatMsgRow(payload.new));
+      if(atBottom) chatScrollToBottom();
+    })
+    .subscribe();
+}
+
+async function renderChat(){
+  const host = document.getElementById("view-chat");
+  if(!ME){ host.innerHTML = ""; return; }
+  if(ME.chat_enabled === false){
+    host.innerHTML = '<div class="dash-section"><h3>Team Chat</h3>' +
+      '<p class="note">Your access to Team Chat has been turned off. Ask your manager if you think this is wrong.</p></div>';
+    return;
+  }
+
+  host.innerHTML = `
+    <div class="dash-head">
+      <div>
+        <h2>Team Chat</h2>
+        <p class="sub">Everyone on the platform, across every company &mdash; one shared channel.</p>
+      </div>
+    </div>
+    <div class="chat-wrap">
+      <div class="chat-list" id="chatList"><p class="hint">Loading messages&hellip;</p></div>
+      <div class="chat-send">
+        <textarea id="chatInput" placeholder="Message the team&hellip;" maxlength="2000" rows="1"></textarea>
+        <button class="btn btn-primary" id="chatSend">Send</button>
+      </div>
+    </div>`;
+
+  const {data, error} = await sb.from("platform_messages")
+    .select("id, sender_id, sender_name, company_name, body, created_at")
+    .order("created_at", {ascending:true})
+    .limit(200);
+
+  const list = document.getElementById("chatList");
+  if(error){
+    list.innerHTML = '<p class="hint" style="color:var(--red)">' + esc(friendlyError(error)) + '</p>';
+  }else if(!data || data.length===0){
+    list.innerHTML = '<p class="hint">No messages yet &mdash; say hello.</p>';
+  }else{
+    list.innerHTML = data.map(chatMsgRow).join("");
+  }
+  chatScrollToBottom();
+  chatSubscribe();
+
+  const input = document.getElementById("chatInput");
+  const sendBtn = document.getElementById("chatSend");
+  const send = async () => {
+    const body = input.value.trim();
+    if(!body || CHAT_SENDING) return;
+    CHAT_SENDING = true; sendBtn.disabled = true;
+    const {error:sendErr} = await sb.from("platform_messages").insert({body});
+    CHAT_SENDING = false; sendBtn.disabled = false;
+    if(sendErr){ toast(friendlyError(sendErr)); return; }
+    input.value = "";
+    input.style.height = "auto";
+  };
+  sendBtn.addEventListener("click", send);
+  input.addEventListener("keydown", e=>{
+    if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); send(); }
+  });
+  input.addEventListener("input", ()=>{
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 120) + "px";
+  });
+}
+
+/* ============================================================
    DASHBOARD - sales performance for a chosen month.
    Month figures come from recorded stage events, so a client that
    has since moved on still counts in the month it passed through.
@@ -4884,7 +5016,7 @@ async function loadMe(){
   COMPANY = co || null;
   TEAM = (team || []).map(t => ({
     id: t.user_id, full_name: t.full_name, email: t.email,
-    role: t.role, active: t.active, clients_owned: t.clients_owned
+    role: t.role, active: t.active, chat_enabled: t.chat_enabled, clients_owned: t.clients_owned
   })).sort((a,b)=> ss(a.full_name).localeCompare(ss(b.full_name)));
 
   const {data: plat} = await sb.rpc("is_platform_admin");
@@ -4924,6 +5056,7 @@ function paintIdentity(){
   document.getElementById("teamBtn").style.display = isManager() ? "" : "none";
   document.body.classList.toggle("is-manager", isManager());
   document.body.classList.toggle("is-platform", IS_PLATFORM);
+  document.querySelector('.tab[data-view="chat"]').style.display = (ME && ME.chat_enabled === false) ? "none" : "";
   populateRepFilter();
 
   // tenant branding
@@ -5039,7 +5172,8 @@ async function refreshTeam(){
     const locked = me || (!iAmOwner && p.role === "owner");
     return '<div class="team-row">' +
       '<div><div class="who">' + esc(nm) + (me ? " (you)" : "") +
-        (p.active ? "" : ' <span class="rep-chip none">no access</span>') + '</div>' +
+        (p.active ? "" : ' <span class="rep-chip none">no access</span>') +
+        (p.chat_enabled === false ? ' <span class="rep-chip none">chat off</span>' : "") + '</div>' +
       '<div class="em">' + esc(ss(p.email)) + '</div></div>' +
       '<select data-pid="' + p.id + '" class="role-sel"' + (locked ? " disabled" : "") + '>' +
         roles.map(r=>'<option value="'+r+'"'+(p.role===r?" selected":"")+'>'+r+'</option>').join("") +
@@ -5048,6 +5182,9 @@ async function refreshTeam(){
           : (p.active
               ? '<button class="btn btn-light btn-sm" data-deactivate="' + p.id + '">Remove access</button>'
               : '<button class="btn btn-primary btn-sm" data-reactivate="' + p.id + '">Restore access</button>')) +
+      (p.chat_enabled === false
+          ? '<button class="btn btn-primary btn-sm" data-chat-on="' + p.id + '">Turn chat on</button>'
+          : '<button class="btn btn-light btn-sm" data-chat-off="' + p.id + '">Turn chat off</button>') +
     '</div>';
   }).join("") || '<p style="color:var(--muted)">Just you so far.</p>';
 
@@ -5071,6 +5208,20 @@ async function refreshTeam(){
       const {error} = await sb.rpc("set_member_access", {p_user_id: btn.dataset.reactivate, p_active:true});
       if(error) toast("Could not restore access: " + friendlyError(error));
       else { toast("Access restored."); refreshTeam(); }
+    });
+  });
+  document.querySelectorAll("#teamList [data-chat-off]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const {error} = await sb.rpc("set_member_chat_access", {p_user_id: btn.dataset.chatOff, p_enabled:false});
+      if(error) toast("Could not turn off chat: " + friendlyError(error));
+      else { toast("Chat turned off for this person."); refreshTeam(); }
+    });
+  });
+  document.querySelectorAll("#teamList [data-chat-on]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const {error} = await sb.rpc("set_member_chat_access", {p_user_id: btn.dataset.chatOn, p_enabled:true});
+      if(error) toast("Could not turn on chat: " + friendlyError(error));
+      else { toast("Chat turned on for this person."); refreshTeam(); }
     });
   });
 }
