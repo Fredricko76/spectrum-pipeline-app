@@ -654,6 +654,28 @@
     background:var(--green-soft);border:1px solid #B9DFE4;color:var(--green-deep);
     border-radius:9px;padding:12px 14px;font-size:13px;margin:14px 26px 0;
   }
+  /* ---------- Dashboard name lists ---------- */
+  .name-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;padding:6px 0 4px;
+  }
+  .namebox{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:14px 16px;border-top:3px solid var(--line);
+  }
+  .namebox.amber{border-top-color:var(--amber)}
+  .namebox.teal{border-top-color:var(--teal)}
+  .namebox.won{border-top-color:var(--won)}
+  .namebox .nb-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .namebox .label{font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700}
+  .namebox .nb-count{
+    font-size:11px;font-weight:800;color:#fff;background:var(--navy-soft);border-radius:999px;
+    padding:1px 8px;line-height:1.6;
+  }
+  .namebox ul{list-style:none;margin:0;padding:0;max-height:190px;overflow-y:auto}
+  .namebox li{padding:6px 2px;border-bottom:1px dashed var(--line);font-size:13px;font-weight:600;color:var(--ink)}
+  .namebox li:last-child{border-bottom:none}
+  .namebox .nb-empty{font-size:12px;color:var(--muted);font-style:italic;padding:4px 2px}
+
   .dash-compare{
     background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
     overflow:hidden;box-shadow:var(--shadow);margin:6px 0 4px;
@@ -4589,11 +4611,23 @@ async function renderDashboard(){
   const PREV_MONTH = prevMonthOf(DASH_MONTH);
   const owner = (isManager() && DASH_OWNER) ? DASH_OWNER : null;
 
-  const [mRes, dRes, pRes] = await Promise.all([
+  const [mRes, dRes, pRes, nRes] = await Promise.all([
     sb.rpc("dashboard_months"),
     sb.rpc("dashboard_metrics", {p_month: DASH_MONTH, p_owner: owner}),
-    sb.rpc("dashboard_metrics", {p_month: PREV_MONTH, p_owner: owner})
+    sb.rpc("dashboard_metrics", {p_month: PREV_MONTH, p_owner: owner}),
+    sb.rpc("dashboard_month_names", {p_month: DASH_MONTH, p_owner: owner})
   ]);
+  // Names behind the month's figures: discovery calls, estimates presented, won
+  const monthNames = {discovery:[], estimate:[], won:[]};
+  (nRes.data || []).forEach(r => { if(monthNames[r.category]) monthNames[r.category].push(r.client_name); });
+  const nameBox = (label, cls, arr) => `
+    <div class="namebox ${cls}">
+      <div class="nb-head"><span class="label">${label}</span><span class="nb-count">${arr.length}</span></div>
+      ${nRes.error ? '<div class="nb-empty">Names could not be loaded</div>'
+        : arr.length
+        ? '<ul>' + arr.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul>'
+        : '<div class="nb-empty">None this month</div>'}
+    </div>`;
   if(dRes.error){
     host.innerHTML = '<div class="dash-section"><p class="note">' + esc(friendlyError(dRes.error)) + '</p></div>';
     return;
@@ -4688,6 +4722,11 @@ async function renderDashboard(){
             </tr>
           </tbody>
         </table>
+      </div>
+      <div class="name-grid">
+        ${nameBox("Discovery calls completed", "amber", monthNames.discovery)}
+        ${nameBox("Estimates presented", "teal", monthNames.estimate)}
+        ${nameBox("Won sales", "won", monthNames.won)}
       </div>
     </div>
 
