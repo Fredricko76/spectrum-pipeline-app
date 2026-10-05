@@ -1992,8 +1992,6 @@ function renderPipeline(listIn){
 }
 function pcardHTML(c){
   const primary=(c.dwellings&&c.dwellings[0])||{};
-  const du=daysUntil(c.nextDate);
-  const soon=(du!==null && du<=7 && c.currentStage!=="Won" && c.currentStage!=="Lost");
   const type=(c.currentStage===NEEDS_TYPE && c.currentType)?` (${esc(c.currentType)})`:"";
   return `<div class="pcard" draggable="true"
       ondragstart="pipeDrag(event,'${c.id}')" ondragend="pipeEnd(event)" onclick="pcardClick('${c.id}')">
@@ -2004,7 +2002,6 @@ function pcardHTML(c){
       ${c.forecastMonth?`<span class="pill">${monthLabel(c.forecastMonth)}</span>`:""}
     </div>
     <div class="pcard-rep mgr-only">${repChip(c.ownerId)}</div>
-    ${c.nextDate?`<div class="pcard-date ${soon?"soon":""}">Next: ${fmtDate(c.nextDate)}${c.nextStage?" · "+esc(c.nextStage):""}</div>`:""}
     ${pcardTasks(c)}
   </div>`;
 }
@@ -2059,13 +2056,13 @@ function pipeDrop(e,stage){
     const sd = STAGE_DATE_BY_STAGE[stage];
     let dated = "";
     if(sd && !c[sd.field]){ c[sd.field] = isoDate(new Date()); dated = " · " + sd.label.toLowerCase() + " set to today"; }
-    // auto-schedule follow-up 5 business days out (cleared once closed off)
-    const closed = (stage==="Won" || stage==="Lost");
-    c.nextDate = (c.nextStage && !closed) ? addBusinessDays(5) : "";
+    // no follow-up date is predetermined: the old next action date belonged to
+    // the previous stage, so it is cleared. The consultant sets a new one by
+    // opening the client if they want one.
+    c.nextDate = "";
     saveData(); render();
     toast(stage==="Won" ? `Moved to Won${dated} · next stage ${SALES_COMPLETED}`
-        : (c.nextDate ? `Moved to ${stage}${dated} · follow-up ${fmtDate(c.nextDate)}`
-                      : `Moved to ${stage}${dated}`));
+                        : `Moved to ${stage}${dated}`);
   }
   pipeId=null;
 }
