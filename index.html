@@ -1600,6 +1600,7 @@ function clientToRow(c){
 let knownClientIds = new Set();
 const dwSig = new Map();   // client id -> signature of its dwellings
 const tkSig = new Map();   // client id -> signature of its tasks
+const cRow  = new Map();   // client id -> the row as last read from / written to the database
 
 const sigDw = c => (c.dwellings||[])
   .map(d => [d.streetNumber,d.streetName,d.suburb,d.estate].map(ss).join("")).join("");
@@ -1608,8 +1609,8 @@ const sigTk = c => (c.tasks||[])
 
 function snapshotSigs(){
   knownClientIds = new Set(clients.map(c=>c.id));
-  dwSig.clear(); tkSig.clear();
-  clients.forEach(c=>{ dwSig.set(c.id, sigDw(c)); tkSig.set(c.id, sigTk(c)); });
+  dwSig.clear(); tkSig.clear(); cRow.clear();
+  clients.forEach(c=>{ dwSig.set(c.id, sigDw(c)); tkSig.set(c.id, sigTk(c)); cRow.set(c.id, clientToRow(c)); });
 }
 
 function setSync(state, text){
@@ -1621,37 +1622,116 @@ function setSync(state, text){
   tx.textContent = text || (state === "saving" ? "Saving" : state === "error" ? "Not saved" : "Saved");
 }
 
-/* ---------- load ---------- */
-async function loadData(){
-  const [cRes, dRes, tRes] = await Promise.all([
-    sb.from("clients").select("*"),
-    sb.from("dwellings").select("*").order("position", {ascending:true}),
-    sb.from("tasks").select("*")
+/* ---------- load ----------
+   The database hands back at most 1,000 rows per request, so every table is
+   read in pages - otherwise anything past row 1,000 would silently go missing. */
+const PAGE_SIZE = 1000;
+async function fetchAll(table, orderCols){
+  const out = [];
+  for(let from = 0; ; from += PAGE_SIZE){
+    let q = sb.from(table).select("*");
+    orderCols.forEach(col => { q = q.order(col, {ascending:true}); });
+    const {data, error} = await q.range(from, from + PAGE_SIZE - 1);
+    if(error) throw error;
+    out.push(...(data||[]));
+    if(!data || data.length < PAGE_SIZE) break;
+  }
+  return out;
+}
+
+async function fetchClients(){
+  const [cRows, dRows, tRows] = await Promise.all([
+    fetchAll("clients",   ["id"]),
+    fetchAll("dwellings", ["position","id"]),
+    fetchAll("tasks",     ["id"])
   ]);
-  if(cRes.error) throw cRes.error;
-  if(dRes.error) throw dRes.error;
-  if(tRes.error) throw tRes.error;
 
   const byId = new Map();
-  clients = (cRes.data||[]).map(r=>{ const c = rowToClient(r); byId.set(c.id, c); return c; });
+  const list = cRows.map(r=>{ const c = rowToClient(r); byId.set(c.id, c); return c; });
 
-  (dRes.data||[]).forEach(d=>{
+  dRows.forEach(d=>{
     const c = byId.get(d.client_id); if(!c) return;
     c.dwellings.push({
       streetNumber: ss(d.street_no), streetName: ss(d.street_name),
       suburb: ss(d.suburb), estate: ss(d.estate)
     });
   });
-  (tRes.data||[]).forEach(t=>{
+  tRows.forEach(t=>{
     const c = byId.get(t.client_id); if(!c) return;
     c.tasks.push({ id:t.id, title:ss(t.title), date:ss(t.due_date), done:!!t.done });
   });
 
-  clients.forEach(c=>{
+  list.forEach(c=>{
     if(!c.dwellings.length) c.dwellings = [{streetNumber:"",streetName:"",suburb:"",estate:""}];
   });
-  snapshotSigs();
+  return list;
 }
+
+let LAST_LOAD = 0, LOAD_GEN = 0;   // LOAD_GEN moves on with every full load (login, company switch, import)
+async function loadData(){
+  LOAD_GEN++;
+  clients = await fetchClients();
+  snapshotSigs();
+  LAST_LOAD = Date.now();
+}
+
+/* ---------- staying current ----------
+   The Clients, Pipeline and Forecast tabs work from a copy of the data held in
+   the browser. That copy used to be read once at login, so changes made by
+   anyone else (a teammate, a manager reassigning, an import, the same person
+   on their phone) stayed invisible until a reload. Now it is re-read from the
+   database whenever someone changes tab or comes back to the window.
+   It never overwrites unsaved work: any pending save is finished first, and if
+   anything is edited while the read is in flight, that read is thrown away
+   and the next one picks the changes up.                                    */
+const REFRESH_MIN_MS = 5000;              // tab clicks in quick succession share one read
+const LIVE_VIEWS = new Set(["clients","pipeline","forecast"]);
+let refreshing = null;
+
+async function refreshData(force){
+  if(!ME) return;
+  if(refreshing) return refreshing;
+  if(!force && Date.now() - LAST_LOAD < REFRESH_MIN_MS) return;
+  refreshing = (async ()=>{
+    try{
+      if(dirty || saving) await settleSave();
+      if(dirty || saving) return;                       // a failed save is still pending - keep the local copy
+      const modalOpen = () => document.getElementById("overlay").classList.contains("open");
+      if(modalOpen()) return;                           // picked up when the client form closes
+      const gen = LOAD_GEN;
+      const fresh = await fetchClients();
+      if(gen !== LOAD_GEN) return;                      // a full load (e.g. company switch) happened meanwhile
+      if(dirty || saving || pipeId || modalOpen()) return;  // edited mid-read - keep theirs
+      const changed = JSON.stringify(fresh) !== JSON.stringify(clients);
+      clients = fresh;
+      snapshotSigs();
+      LAST_LOAD = Date.now();
+      if(changed && LIVE_VIEWS.has(currentView)) render();
+    }catch(err){
+      console.warn("refresh failed", err);              // keep what is on screen; the next tab change tries again
+    }finally{
+      refreshing = null;
+    }
+  })();
+  return refreshing;
+}
+
+/* Finish any save that is waiting or in flight. Used before reading figures
+   back from the server, so the Dashboard and Reports always include the edit
+   that was made a moment ago.                                                */
+async function settleSave(){
+  clearTimeout(saveTimer);
+  for(let i = 0; i < 100 && (dirty || saving); i++){
+    if(saving){ await new Promise(r => setTimeout(r, 100)); continue; }
+    await flushSave();
+    if(dirty && !saving) break;                         // the save failed - its error is already on screen
+  }
+}
+
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState === "visible") refreshData();
+});
+window.addEventListener("focus", ()=>refreshData());
 
 /* ---------- save (debounced, reconciling) ---------- */
 let saveTimer = null, saving = false, dirty = false;
@@ -1678,11 +1758,30 @@ async function flushSave(){
       gone.forEach(id=>{ dwSig.delete(id); tkSig.delete(id); });
     }
 
-    // 2. upsert every client row
-    if(clients.length){
+    // 2. new clients are written whole; existing clients get only the
+    //    fields this person actually changed. Previously every client in the
+    //    browser's copy was written back on every save, so a copy that had
+    //    gone stale could roll back other people's work.
+    const added = clients.filter(c => !knownClientIds.has(c.id));
+    if(added.length){
       const {error} = await sb.from("clients")
-        .upsert(clients.map(clientToRow), {onConflict:"id,company_id"});
+        .upsert(added.map(clientToRow), {onConflict:"id,company_id"});
       if(error) throw error;
+    }
+    for(const c of clients){
+      if(!knownClientIds.has(c.id)) continue;
+      const before = cRow.get(c.id) || {};
+      const now = clientToRow(c);
+      const patch = {};
+      Object.keys(now).forEach(k=>{
+        if(k === "id" || k === "company_id" || k === "created_by") return;
+        if(JSON.stringify(now[k]) !== JSON.stringify(before[k])) patch[k] = now[k];
+      });
+      if(Object.keys(patch).length){
+        const {error} = await sb.from("clients").update(patch)
+          .eq("id", c.id).eq("company_id", ME.company_id);
+        if(error) throw error;
+      }
     }
 
     // 3. children, only where they actually changed
@@ -1939,7 +2038,12 @@ function switchView(v){
   document.getElementById("kpis").style.display = (v==="pipeline") ? "grid" : "none";
   document.querySelector(".toolbar").style.display = chromeless?"none":"flex";
   document.getElementById("tasksWidget").style.display = (v==="clients") ? "" : "none";
-  render();
+  // Dashboard and Reports read their figures from the server, so a save still
+  // in flight has to land first or the latest edit would be missing.
+  const serverFigures = (v==="dashboard" || v==="forecast");
+  if(serverFigures && (dirty || saving)) settleSave().then(()=>{ if(currentView===v) render(); });
+  else render();
+  refreshData();
 }
 
 /* ---------- CLIENTS (table) ---------- */
@@ -3037,7 +3141,7 @@ async function deleteDoc(docId, clientId){
    ============================================================ */
 const overlay=document.getElementById("overlay");
 function openModal(){ overlay.classList.add("open"); }
-function closeModal(){ discardSessionDocs(); overlay.classList.remove("open"); document.getElementById("clientForm").reset(); document.getElementById("dwellingList").innerHTML=""; document.getElementById("taskList").innerHTML=""; MODAL_DOC_CLIENT=null; loadStageDates(null); syncTypeWraps(); }
+function closeModal(){ discardSessionDocs(); overlay.classList.remove("open"); document.getElementById("clientForm").reset(); document.getElementById("dwellingList").innerHTML=""; document.getElementById("taskList").innerHTML=""; MODAL_DOC_CLIENT=null; loadStageDates(null); syncTypeWraps(); setTimeout(()=>refreshData(), 0); }
 
 function dwellingEditHTML(idx,d={}){
   return `
@@ -4130,9 +4234,7 @@ async function buildExportRows(){
     }
 
     case "history": {
-      let q = sb.from("client_events").select("*").order("changed_at",{ascending:false});
-      const {data, error} = await q;
-      if(error) throw error;
+      const data = (await fetchAll("client_events", ["changed_at","id"])).reverse();
       const byId = new Map(clients.map(c=>[c.id,c]));
       return (data||[])
         .filter(e => byId.has(e.client_id))
