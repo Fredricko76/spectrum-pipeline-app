@@ -1698,6 +1698,7 @@ async function refreshData(force){
       if(dirty || saving) return;                       // a failed save is still pending - keep the local copy
       const modalOpen = () => document.getElementById("overlay").classList.contains("open");
       if(modalOpen()) return;                           // picked up when the client form closes
+      await ensureCompany();
       const gen = LOAD_GEN;
       const fresh = await fetchClients();
       if(gen !== LOAD_GEN) return;                      // a full load (e.g. company switch) happened meanwhile
@@ -1714,6 +1715,34 @@ async function refreshData(force){
     }
   })();
   return refreshing;
+}
+
+/* ---------- keeping this tab on its own company ----------
+   The database remembers ONE "current company" per person, shared by every tab
+   and device they are signed in on. Switching company in one tab (or on a
+   phone) silently changed what every other open tab was shown and where its
+   saves went - lists and figures swapped to the other company or came back
+   empty, and edits made in the other tab were quietly dropped. Each tab now
+   re-asserts its own company before it reads or saves.                     */
+let companyCheck = null;   // calls made at the same moment share one check
+async function ensureCompany(){
+  if(!ME || !ME.company_id) return;
+  if(companyCheck) return companyCheck;
+  companyCheck = (async ()=>{
+    try{
+      const {data, error} = await sb.from("profiles").select("current_company_id").eq("id", ME.id).maybeSingle();
+      if(error) throw error;
+      if(data && data.current_company_id !== ME.company_id){
+        const {error:sErr} = await sb.rpc("switch_company", {p_company_id: ME.company_id});
+        if(sErr) throw sErr;
+      }
+    }catch(err){
+      console.warn("company check failed", err);
+    }finally{
+      companyCheck = null;
+    }
+  })();
+  return companyCheck;
 }
 
 /* Finish any save that is waiting or in flight. Used before reading figures
@@ -1749,6 +1778,7 @@ async function flushSave(){
   saving = true; dirty = false;
   setSync("saving");
   try{
+    await ensureCompany();
     // 1. clients that vanished from memory get deleted (children cascade)
     const live = new Set(clients.map(c=>c.id));
     const gone = [...knownClientIds].filter(id => !live.has(id));
@@ -1778,9 +1808,11 @@ async function flushSave(){
         if(JSON.stringify(now[k]) !== JSON.stringify(before[k])) patch[k] = now[k];
       });
       if(Object.keys(patch).length){
-        const {error} = await sb.from("clients").update(patch)
-          .eq("id", c.id).eq("company_id", ME.company_id);
+        const {data:upd, error} = await sb.from("clients").update(patch)
+          .eq("id", c.id).eq("company_id", ME.company_id).select("id");
         if(error) throw error;
+        if(!upd || !upd.length) throw new Error(
+          "the change to " + (c.firstName||"this client") + " was not accepted. Reload the page and try again.");
       }
     }
 
@@ -2327,6 +2359,7 @@ async function renderReports(){
     // are read by choosing a rep here; the standing by-rep table was removed
     // at Fred's request on 20/08.
     const owner = (isManager() && REP_OWNER) ? REP_OWNER : null;
+    await ensureCompany();
     const {data, error} = await sb.rpc("reports_kpis", {p_month: REP_MONTH, p_owner: owner});
     if(error) throw error;
     m = Array.isArray(data) ? data[0] : data;
@@ -4719,6 +4752,7 @@ async function renderDashboard(){
   const host = document.getElementById("view-dashboard");
   if(!ME){ host.innerHTML = ""; return; }
   if(!DASH_MONTH) DASH_MONTH = thisMonth();
+  await ensureCompany();
   const PREV_MONTH = prevMonthOf(DASH_MONTH);
   const owner = (isManager() && DASH_OWNER) ? DASH_OWNER : null;
 
