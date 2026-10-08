@@ -2490,6 +2490,21 @@ async function renderReports(){
 }
 
 /* ---------- Sales forecast: this month and the two after it ---------- */
+/* Next stage as shown in the forecast: a stage badge when it is a pipeline
+   stage, a plain pill for "Sales Completed", and the appointment date under it
+   when one is booked. Blank when no next stage has been selected.          */
+function nextStageCell(c){
+  if(!c.nextStage) return '<span style="color:var(--muted)">—</span>';
+  const badge = STAGE_CLS[c.nextStage] ? stageBadge(c.nextStage, c.nextType)
+                                       : `<span class="pill">${esc(c.nextStage)}</span>`;
+  return badge + (c.appointmentDate ? `<div class="sub-cell">${fmtDate(c.appointmentDate)}</div>` : "");
+}
+function nextStageText(c){
+  if(!c.nextStage) return "—";
+  let t = c.nextStage + (c.nextStage===NEEDS_TYPE && c.nextType ? " ("+c.nextType+")" : "");
+  if(c.appointmentDate) t += " — " + fmtDate(c.appointmentDate);
+  return t;
+}
 function renderForecastBody(list, win){
   const wrap=document.getElementById("fcSection");
   const winLabel = monthLabel(win[0]) + " to " + monthLabel(win[win.length-1]);
@@ -2514,7 +2529,7 @@ function renderForecastBody(list, win){
      than quietly understating the month.                                   */
   const money = n => "$" + Math.round(n).toLocaleString("en-AU");
   const budgetOf = c => { const n = Number(c.budget); return isNaN(n) ? 0 : n; };
-  const cols = isManager() ? 7 : 6;
+  const cols = isManager() ? 8 : 7;
 
   const clientRows = months.map(m=>{
     const it = (byMonth[m]||[]).slice().sort((a,b)=>
@@ -2542,6 +2557,7 @@ function renderForecastBody(list, win){
         <td>${c.buildType?`<span class="pill">${esc(c.buildType)}</span>`:"—"}</td>
         <td>${esc(c.buyerType)||"—"}</td>
         <td>${stageBadge(c.currentStage,c.currentType)}</td>
+        <td>${nextStageCell(c)}</td>
         ${isManager()?`<td class="nowrap">${repChip(c.ownerId)}</td>`:""}
         <td class="num">${fmtMoney(c.budget)}</td>
       </tr>`;
@@ -2552,7 +2568,7 @@ function renderForecastBody(list, win){
   const grandTotal = grandWith.reduce((n,c)=>n+budgetOf(c),0);
   const monthTable=`<table class="fc-table fc-clients">
     <thead><tr>
-      <th>Client</th><th>Build address</th><th>Build type</th><th>Buyer type</th><th>Stage</th>
+      <th>Client</th><th>Build address</th><th>Build type</th><th>Buyer type</th><th>Current stage</th><th>Next stage</th>
       ${isManager()?"<th>Assigned to</th>":""}<th class="num">Budget</th>
     </tr></thead>
     <tbody>${clientRows}
@@ -2753,13 +2769,13 @@ function buildPdfReport(rep){
 
   // ---- forecast by client
   section("Sales forecast by client");
-  const head = ["Month","Client","Build type","Buyer type","Stage"].concat(rep.manager ? ["Assigned to"] : []).concat(["Budget"]);
+  const head = ["Month","Client","Build type","Buyer type","Current stage","Next stage"].concat(rep.manager ? ["Assigned to"] : []).concat(["Budget"]);
   const clientRows = [];
   rep.fcWin.forEach(m => {
     (byMonth[m] || []).slice().sort((a,b)=>(ss(a.surname)+ss(a.firstName)).localeCompare(ss(b.surname)+ss(b.firstName)))
       .forEach(c => {
         const row = [monthLabel(m), (c.firstName+" "+c.surname).trim(), c.buildType||"—", c.buyerType||"—",
-                     c.currentStage + (c.currentType ? " ("+c.currentType+")" : "")];
+                     c.currentStage + (c.currentType ? " ("+c.currentType+")" : ""), nextStageText(c)];
         if(rep.manager) row.push(c.ownerId ? repName(c.ownerId) : "Unassigned");
         row.push(fmtMoney(c.budget));
         clientRows.push(row);
