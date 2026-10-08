@@ -1673,6 +1673,55 @@ async function loadData(){
   clients = await fetchClients();
   snapshotSigs();
   LAST_LOAD = Date.now();
+  liveSubscribe();
+}
+
+/* ---------- live updates ----------
+   The database announces every new or changed client, address and task in
+   this company. The announcement is only a nudge: the app then runs the same
+   safe reload as a menu change (pending saves land first, nothing being typed
+   is overwritten, an open client form is left alone until it closes). Bursts
+   such as an import are gathered into one reload. If the live connection
+   drops, menu changes and coming back to the window still pick changes up. */
+let LIVE_CHANNEL = null, LIVE_COMPANY = null;
+let REMOTE_SEQ = 0, REMOTE_DONE = 0, remoteTimer = null;
+
+function liveSubscribe(){
+  if(!ME || !ME.company_id || !sb.channel) return;
+  if(LIVE_CHANNEL && LIVE_COMPANY === ME.company_id) return;   // already listening
+  if(LIVE_CHANNEL){ try{ sb.removeChannel(LIVE_CHANNEL); }catch(e){} }
+  LIVE_COMPANY = ME.company_id;
+  const filter = "company_id=eq." + ME.company_id;
+  let ch = sb.channel("pipeline_live_" + ME.company_id);
+  ["clients","dwellings","tasks"].forEach(table=>{
+    ["INSERT","UPDATE"].forEach(event=>{
+      ch = ch.on("postgres_changes", {event, schema:"public", table, filter}, onRemoteChange);
+    });
+  });
+  LIVE_CHANNEL = ch.subscribe();
+}
+
+function onRemoteChange(){
+  REMOTE_SEQ++;
+  clearTimeout(remoteTimer);
+  remoteTimer = setTimeout(pullRemote, 800);   // gather a burst into one reload
+}
+
+async function pullRemote(){
+  if(REMOTE_DONE >= REMOTE_SEQ) return;
+  const wanted = REMOTE_SEQ;
+  const viewBefore = currentView;
+  const before = JSON.stringify(clients);
+  await refreshData(true);
+  // Dashboard and Reports are worked out on the server - ask again if anything moved
+  if(REMOTE_DONE >= wanted && currentView === viewBefore && JSON.stringify(clients) !== before
+     && (currentView === "dashboard" || currentView === "forecast")){
+    const y = window.scrollY;
+    render();
+    setTimeout(()=>window.scrollTo(0, y), 0);
+  }
+  // still behind (someone was mid-edit, or a form was open) - try again shortly
+  if(REMOTE_DONE < REMOTE_SEQ){ clearTimeout(remoteTimer); remoteTimer = setTimeout(pullRemote, 2000); }
 }
 
 /* ---------- staying current ----------
@@ -1693,13 +1742,18 @@ async function refreshData(force){
   if(refreshing) return refreshing;
   if(!force && Date.now() - LAST_LOAD < REFRESH_MIN_MS) return;
   refreshing = (async ()=>{
+    // Step off the current tick first. Without this, a refresh that bowed out
+    // straight away (e.g. a client form was open) cleared its "in progress"
+    // flag before the flag was even set, leaving it stuck on - and the tab
+    // never refreshed again until the page was reloaded.
+    await Promise.resolve();
     try{
       if(dirty || saving) await settleSave();
       if(dirty || saving) return;                       // a failed save is still pending - keep the local copy
       const modalOpen = () => document.getElementById("overlay").classList.contains("open");
       if(modalOpen()) return;                           // picked up when the client form closes
       await ensureCompany();
-      const gen = LOAD_GEN;
+      const gen = LOAD_GEN, seq = REMOTE_SEQ;
       const fresh = await fetchClients();
       if(gen !== LOAD_GEN) return;                      // a full load (e.g. company switch) happened meanwhile
       if(dirty || saving || pipeId || modalOpen()) return;  // edited mid-read - keep theirs
@@ -1707,6 +1761,7 @@ async function refreshData(force){
       clients = fresh;
       snapshotSigs();
       LAST_LOAD = Date.now();
+      REMOTE_DONE = Math.max(REMOTE_DONE, seq);
       if(changed && LIVE_VIEWS.has(currentView)) render();
     }catch(err){
       console.warn("refresh failed", err);              // keep what is on screen; the next tab change tries again
