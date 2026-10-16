@@ -341,6 +341,81 @@
   .rc-chip.flat{background:#eaf0f1;color:#556}
   .rc-pct{font-size:12.5px;font-weight:700;color:var(--muted)}
 
+
+  /* ---------- Sales Reports: actuals vs KPI (owner + permitted admins only) ---------- */
+  #view-salesreports{padding:18px 26px 44px}
+  .sr-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+  .sr-head h2{margin:0;font-size:22px;font-weight:800;color:var(--heading)}
+  .sr-head .sub{font-size:12.5px;color:var(--muted);margin-top:4px}
+  .sr-lock{display:inline-block;font-size:11px;font-weight:700;background:#eef3f3;color:var(--navy);border-radius:999px;padding:2px 9px;margin-right:6px;vertical-align:1px}
+  .sr-filters{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+  .sr-filters .month-pick{flex-direction:column;align-items:flex-start;gap:4px}
+  .sr-banner{display:flex;align-items:center;gap:22px;flex-wrap:wrap;padding:16px 20px;border-radius:var(--radius);border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow);margin-bottom:16px;border-left:5px solid var(--line)}
+  .sr-banner.on{border-left-color:var(--won);background:var(--won-soft)}
+  .sr-banner.risk{border-left-color:var(--amber);background:#FDF6E3}
+  .sr-banner.behind{border-left-color:var(--red);background:#FBEDEC}
+  .sr-banner .big{font-size:24px;font-weight:800;color:var(--heading)}
+  .sr-banner.on .big{color:var(--won-deep)} .sr-banner.risk .big{color:#9A6E00} .sr-banner.behind .big{color:#B3403C}
+  .sr-banner .cap{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+  .sr-banner .stat{border-left:1px solid rgba(0,0,0,.1);padding-left:18px}
+  .sr-banner .stat b{display:block;font-size:19px;color:var(--heading)}
+  .sr-banner .stat span{font-size:12px;color:var(--muted)}
+  .sr-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:16px}
+  .sr-card{cursor:pointer;text-align:left;font:inherit;color:inherit}
+  .sr-card.sel{outline:2px solid var(--navy);outline-offset:-2px}
+  .sr-card .rc-value small{font-size:14px;font-weight:600;color:var(--muted)}
+  .sr-bar{height:8px;background:#eaf0f1;border-radius:6px;overflow:hidden;margin:10px 0 9px}
+  .sr-bar i{display:block;height:100%;border-radius:6px}
+  .sr-pill{display:inline-block;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .sr-pill.on{background:var(--won-soft);color:var(--won-deep)}
+  .sr-pill.risk{background:#FDF1D2;color:#8A6200}
+  .sr-pill.behind{background:#FBE7E6;color:#B3403C}
+  .sr-pill.none{background:#eaf0f1;color:var(--muted)}
+  .sr-fill-on{background:var(--won)} .sr-fill-risk{background:var(--amber)} .sr-fill-behind{background:var(--red)} .sr-fill-none{background:#c9d4d7}
+  .sr-grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px}
+  .sr-legend{display:flex;gap:16px;font-size:12px;color:var(--muted);margin-bottom:6px}
+  .sr-legend i{display:inline-block;width:18px;height:0;vertical-align:middle;margin-right:6px;border-top:3px solid var(--won)}
+  .sr-legend i.k{border-top:2px dashed var(--navy)}
+  .sr-frow{display:grid;grid-template-columns:175px 1fr 112px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #eef2f3}
+  .sr-frow:last-child{border-bottom:0}
+  .sr-frow .nm{font-weight:700;color:var(--heading);font-size:13px}
+  .sr-frow .nm small{display:block;font-weight:400;color:var(--muted);font-size:11.5px;margin-top:2px}
+  .sr-track{position:relative;height:20px;background:#eaf0f1;border-radius:5px}
+  .sr-track i{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
+  .sr-track .tg{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--navy)}
+  .sr-frow .nums{text-align:right;font-size:12px;color:var(--muted)}
+  .sr-frow .nums b{display:block;font-size:17px;color:var(--heading)}
+  .sr-frow.overall{background:#f1f5f5;margin:8px -10px 0;padding:12px 10px;border-radius:9px;border-bottom:0}
+  .sr-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .sr-chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;color:var(--navy)}
+  .sr-chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+  .sr-table{width:100%;border-collapse:collapse;font-size:13px}
+  .sr-table th{background:#f1f5f5;color:var(--heading);font-weight:700;text-align:right;padding:9px 10px;white-space:nowrap;border-bottom:1px solid var(--line)}
+  .sr-table td{padding:8px 10px;border-bottom:1px solid #eef2f3;text-align:right;white-space:nowrap}
+  .sr-table th:first-child,.sr-table td:first-child{text-align:left}
+  .sr-table tr.future td{color:#a7b3b8}
+  .sr-table tr.mtd td{background:#FFFCF2}
+  .sr-table tr.total td{font-weight:800;background:#f1f5f5;color:var(--heading);border-top:2px solid var(--navy)}
+  .sr-table tr.click{cursor:pointer} .sr-table tr.click:hover td{background:#f7fafa}
+  .sr-pos{color:var(--won-deep);font-weight:700} .sr-neg{color:#B3403C;font-weight:700}
+  .sr-scroll{overflow-x:auto}
+  .sr-kpi input{width:62px;text-align:right;padding:5px 6px;border:1px solid #b9c7cb;border-radius:6px;font:inherit}
+  .sr-kpi input:focus{outline:2px solid var(--navy);outline-offset:0;border-color:var(--navy)}
+  .sr-kpi td{padding:6px 4px}
+  .sr-note{background:#f1f5f5;border-radius:9px;padding:12px 14px;color:var(--navy);font-size:13px}
+  .sr-urow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .sr-urow:last-child{border-bottom:0}
+  .sr-urow .who{font-weight:600} .sr-urow .em{font-size:12px;color:var(--muted)}
+  .sr-switch{position:relative;width:44px;height:24px;flex:none;display:inline-block}
+  .sr-switch input{opacity:0;width:0;height:0}
+  .sr-switch span{position:absolute;inset:0;background:#c3ccd0;border-radius:24px;cursor:pointer;transition:.2s}
+  .sr-switch span:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+  .sr-switch input:checked+span{background:var(--won)}
+  .sr-switch input:checked+span:before{transform:translateX(20px)}
+  .sr-switch input:disabled+span{opacity:.55;cursor:not-allowed}
+  @media(max-width:1100px){.sr-cards{grid-template-columns:repeat(2,1fr)}.sr-grid2{grid-template-columns:1fr}}
+  @media(max-width:600px){#view-salesreports{padding:14px 14px 40px}.sr-cards{grid-template-columns:1fr}.sr-frow{grid-template-columns:1fr;gap:6px}.sr-frow .nums{text-align:left}.sr-banner .stat{border-left:0;padding-left:0}}
+
   .task-edit{display:flex;gap:8px;align-items:center;margin-bottom:8px;background:#fafbfb;border:1px solid var(--line);border-radius:9px;padding:8px 10px}
   .task-edit .tk-done{width:16px;height:16px;accent-color:var(--green);flex:0 0 auto;cursor:pointer}
   .task-edit .tk-title{flex:1;min-width:0}
@@ -1002,6 +1077,7 @@
   <button class="tab" data-view="clients">Clients</button>
   <button class="tab" data-view="pipeline">Pipeline</button>
   <button class="tab" data-view="forecast">Reports &amp; Sales Forecast</button>
+  <button class="tab" data-view="salesreports" style="display:none">Sales Reports</button>
   <button class="tab mgr-only" data-view="import">Import</button>
   <button class="tab" data-view="export">Export</button>
   <button class="tab" data-view="chat">Team Chat<span class="tab-badge" id="chatTabBadge" hidden>0</span></button>
@@ -1093,6 +1169,7 @@
 </div>
 
 <div id="view-forecast" hidden></div>
+<div id="view-salesreports" hidden></div>
 <div id="view-import" hidden></div>
 <div id="view-export" hidden></div>
 <div id="view-chat" hidden></div>
@@ -2149,7 +2226,7 @@ let currentView = "clients";
 function render(){
   const f=getFilters();
   const list=clients.filter(c=>matchesFilters(c,f));
-  const chromeless = (currentView==="forecast" || currentView==="platform"
+  const chromeless = (currentView==="forecast" || currentView==="salesreports" || currentView==="platform"
                       || currentView==="dashboard" || currentView==="export" || currentView==="import"
                       || currentView==="chat");
   if(currentView==="pipeline") renderKPIs(list);
@@ -2160,29 +2237,33 @@ function render(){
   else if(currentView==="platform") { renderPlatform(); }
   else if(currentView==="pipeline") renderPipeline(list);
   else if(currentView==="forecast") renderForecast(list);
+  else if(currentView==="salesreports") renderSalesReports();
   else renderClients(list);
   document.getElementById("footNote").textContent =
     `${clients.length} client${clients.length!==1?"s":""} ${isManager()?"across "+(COMPANY?COMPANY.name:"your company"):"assigned to you"} \u00b7 Synced to your company workspace \u00b7 ${isManager()?"You see the whole company pipeline.":"You see only the clients assigned to you."}`;
 }
 
 function switchView(v){
+  if(v==="salesreports" && !CAN_SR) v = "dashboard";   // hidden tab, and the database refuses it anyway
   currentView=v;
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.view===v));
   document.getElementById("view-dashboard").hidden = v!=="dashboard";
   document.getElementById("view-clients").hidden = v!=="clients";
   document.getElementById("view-pipeline").hidden = v!=="pipeline";
   document.getElementById("view-forecast").hidden = v!=="forecast";
+  document.getElementById("view-salesreports").hidden = v!=="salesreports";
   document.getElementById("view-import").hidden = v!=="import";
   document.getElementById("view-export").hidden = v!=="export";
   document.getElementById("view-chat").hidden = v!=="chat";
   document.getElementById("view-platform").hidden = v!=="platform";
-  const chromeless = (v==="forecast" || v==="platform" || v==="dashboard" || v==="export" || v==="import" || v==="chat");
+  const chromeless = (v==="forecast" || v==="salesreports" || v==="platform" || v==="dashboard" || v==="export" || v==="import" || v==="chat");
   document.getElementById("kpis").style.display = (v==="pipeline") ? "grid" : "none";
   document.querySelector(".toolbar").style.display = chromeless?"none":"flex";
   document.getElementById("tasksWidget").style.display = (v==="clients") ? "" : "none";
   // Dashboard and Reports read their figures from the server, so a save still
   // in flight has to land first or the latest edit would be missing.
-  const serverFigures = (v==="dashboard" || v==="forecast");
+  const serverFigures = (v==="dashboard" || v==="forecast" || v==="salesreports");
+  if(v==="salesreports") SR.key = "";   // always fetch fresh figures on opening the tab
   if(serverFigures && (dirty || saving)) settleSave().then(()=>{ if(currentView===v) render(); });
   else render();
   refreshData();
@@ -2542,6 +2623,445 @@ async function renderReports(){
     REP_OWNER = e.target.value || "";
     render();   // forecast, appointments and the PDF snapshot follow this control too
   });
+}
+
+
+/* ================================================================
+   SALES REPORTS - actual results against KPIs, tracked through the year.
+   Admin only: owners always see it, admins only when an owner switches
+   them on (company_members.sales_reports_access), consultants never.
+   Enforced in the database - can_view_sales_reports() gates the
+   actuals RPC and every sales_kpis policy; the hidden tab is cosmetic.
+   Actuals use the same date rule as Reports: recorded stage date, else
+   the earliest stage event. Leads count on the enquiry date.
+   ================================================================ */
+let CAN_SR = false;
+const SR = { year:null, scope:"ytd", metric:"won", rep:"all", kpi:{}, act:{},
+             key:"", loading:false, err:null, company:null };
+const SR_METRICS = [
+  {k:"leads",        l:"Leads"},
+  {k:"discovery",    l:"Discovery appointments"},
+  {k:"presentation", l:"Presentations"},
+  {k:"review",       l:"Review meetings"},
+  {k:"won",          l:"Sales won"}
+];
+const SR_MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const SR_ALL = [0,1,2,3,4,5,6,7,8,9,10,11];
+
+function srZero(){ const o = {}; SR_METRICS.forEach(m => o[m.k] = Array(12).fill(0)); return o; }
+// How much of each month's KPI is "due" so far: past months in full,
+// the current month pro-rated by day, future months not at all.
+function srWeights(year){
+  const now = new Date(), y = now.getFullYear();
+  if(year < y) return Array(12).fill(1);
+  if(year > y) return Array(12).fill(0);
+  const cm = now.getMonth(), dim = new Date(y, cm + 1, 0).getDate();
+  return SR_MON.map((_, i) => i < cm ? 1 : (i === cm ? now.getDate() / dim : 0));
+}
+function srLastIdx(year){ const y = new Date().getFullYear(); return year < y ? 11 : (year > y ? -1 : new Date().getMonth()); }
+const srSum = (arr, r) => r.reduce((s, i) => s + (arr[i] || 0), 0);
+const srSumW = (arr, r, W) => r.reduce((s, i) => s + (arr[i] || 0) * W[i], 0);
+const srF = n => (Math.abs(n - Math.round(n)) < 0.05 ? String(Math.round(n)) : n.toFixed(1));
+// never round up into 100% when the target has not actually been reached
+const srPct = p => (p == null || !isFinite(p)) ? "—" : (p < 1 ? Math.min(99, Math.round(p * 100)) : Math.round(p * 100)) + "%";
+const srSigned = n => (Math.abs(n) < 0.05 ? "0" : (n > 0 ? "+" : "") + srF(n));
+function srStatus(a, t){
+  if(!(t > 0)) return {c:"none", l:"No KPI set", p:null};
+  const p = a / t;
+  // tiny tolerance: pro-rated targets are fractions, so "exactly on" can land at 0.99999
+  return p >= 0.9995 ? {c:"on", l:"On target", p} : (p >= 0.9 ? {c:"risk", l:"At risk", p} : {c:"behind", l:"Behind", p});
+}
+function srRange(){
+  const s = SR.scope;
+  if(s === "ytd") return SR_ALL.slice();
+  if(s[0] === "q"){ const q = +s.slice(1); return [q*3-3, q*3-2, q*3-1]; }
+  return [+s.slice(1) - 1];
+}
+function srScopeLabel(){
+  const s = SR.scope, y = SR.year;
+  if(s === "ytd") return y === new Date().getFullYear() ? "Year to date " + y : "Full year " + y;
+  if(s[0] === "q") return "Q" + s.slice(1) + " " + y;
+  return SR_MON[+s.slice(1) - 1] + " " + y;
+}
+function srName(id){
+  if(id === "__none") return "Unassigned";
+  const p = TEAM.find(x => x.id === id);
+  if(!p) return "Former team member";
+  return (ss(p.full_name) || ss(p.email).split("@")[0]) + (p.active ? "" : " (no access)");
+}
+function srPeople(){
+  const ids = new Set();
+  TEAM.filter(p => p.active).forEach(p => ids.add(p.id));
+  Object.keys(SR.act).concat(Object.keys(SR.kpi)).forEach(id => { if(id !== "__none") ids.add(id); });
+  return [...ids].sort((a, b) => srName(a).localeCompare(srName(b)));
+}
+function srData(rep){
+  if(rep !== "all") return {kpi: SR.kpi[rep] || srZero(), act: SR.act[rep] || srZero()};
+  const out = {kpi: srZero(), act: srZero()};
+  [["kpi", SR.kpi], ["act", SR.act]].forEach(([t, src]) =>
+    Object.values(src).forEach(d => SR_METRICS.forEach(m => d[m.k].forEach((v, i) => out[t][m.k][i] += v))));
+  return out;
+}
+
+async function srLoad(){
+  SR.loading = true; SR.err = null;
+  const key = ME.company_id + "|" + SR.year;
+  try{
+    await ensureCompany();
+    const [a, k] = await Promise.all([
+      sb.rpc("sales_report_actuals", {p_year: SR.year}),
+      sb.from("sales_kpis").select("owner_id,month,leads,discovery,presentation,review,won")
+        .eq("company_id", ME.company_id)
+        .gte("month", SR.year + "-01-01").lte("month", SR.year + "-12-01")
+    ]);
+    if(a.error) throw a.error;
+    if(k.error) throw k.error;
+    SR.act = {};
+    (a.data || []).forEach(r => {
+      const o = r.owner_id || "__none";
+      SR.act[o] = SR.act[o] || srZero();
+      SR_METRICS.forEach(m => SR.act[o][m.k][r.month - 1] += (r[m.k] || 0));
+    });
+    SR.kpi = {};
+    (k.data || []).forEach(r => {
+      const o = r.owner_id, mi = +String(r.month).slice(5, 7) - 1;
+      SR.kpi[o] = SR.kpi[o] || srZero();
+      SR_METRICS.forEach(m => SR.kpi[o][m.k][mi] = r[m.k] || 0);
+    });
+  }catch(err){ SR.err = err; }
+  SR.key = key;
+  SR.loading = false;
+}
+
+async function renderSalesReports(){
+  const host = document.getElementById("view-salesreports");
+  if(!host) return;
+  if(!CAN_SR){ host.innerHTML = ""; return; }
+  if(!SR.year) SR.year = new Date().getFullYear();
+  if(SR.company !== ME.company_id){ SR.company = ME.company_id; SR.rep = "all"; SR.key = ""; }
+  if(SR.key !== ME.company_id + "|" + SR.year){
+    if(SR.loading) return;                       // the load in flight will draw when it lands
+    host.innerHTML = '<div class="fc-card full"><h3>Sales Reports</h3><p class="hint">Loading the year\'s figures…</p></div>';
+    await srLoad();
+    if(currentView !== "salesreports") return;
+  }
+  // a live refresh must not pull a KPI cell out from under someone typing in it
+  const ae = document.activeElement;
+  if(ae && host.contains(ae) && ae.tagName === "INPUT") return;
+  srDraw();
+}
+
+function srDraw(){
+  const host = document.getElementById("view-salesreports");
+  const y = new Date().getFullYear();
+  const people = srPeople();
+  if(SR.rep !== "all" && people.indexOf(SR.rep) === -1) SR.rep = "all";
+  const years = [y - 1, y, y + 1];
+  const scopes = [["ytd", SR.year === y ? "Year to date" : "Full year"]]
+    .concat([1,2,3,4].map(q => ["q"+q, "Quarter " + q]))
+    .concat(SR_MON.map((m, i) => ["m"+(i+1), m]));
+  const iAmOwner = ME.role === "owner";
+
+  host.innerHTML = `
+    <div class="sr-head">
+      <div>
+        <h2>Sales Reports</h2>
+        <div class="sub"><span class="sr-lock">Admin only</span>Actual results against KPIs &middot; ${esc(srScopeLabel())} &middot; ${esc(COMPANY ? COMPANY.name : "")}</div>
+      </div>
+      <div class="sr-filters">
+        <div class="month-pick"><label for="srRep">Sales Consultant</label>
+          <select id="srRep"><option value="all">Whole team</option>${people.map(id =>
+            `<option value="${id}"${id === SR.rep ? " selected" : ""}>${esc(srName(id))}</option>`).join("")}</select></div>
+        <div class="month-pick"><label for="srYear">Year</label>
+          <select id="srYear">${years.map(v => `<option value="${v}"${v === SR.year ? " selected" : ""}>${v}</option>`).join("")}</select></div>
+        <div class="month-pick"><label for="srScope">Period</label>
+          <select id="srScope">${scopes.map(([v, l]) => `<option value="${v}"${v === SR.scope ? " selected" : ""}>${l}</option>`).join("")}</select></div>
+        ${iAmOwner ? '<button class="btn btn-light" id="srAccessBtn" type="button">Manage access</button>' : ""}
+      </div>
+    </div>
+    ${SR.err ? `<div class="fc-card full" style="margin-bottom:16px"><p class="hint" style="color:var(--red);margin:0">
+        Could not load the figures: ${esc(friendlyError(SR.err))} <button class="btn btn-light btn-sm" id="srRetry" type="button">Try again</button></p></div>` : ""}
+    <div id="srTop"></div>
+    <div class="fc-card full" style="margin-bottom:16px" id="srKpiCard"></div>`;
+
+  srDrawTop();
+  srDrawKpi();
+
+  document.getElementById("srRep").onchange   = e => { SR.rep = e.target.value; srDraw(); };
+  document.getElementById("srScope").onchange = e => { SR.scope = e.target.value; srDraw(); };
+  document.getElementById("srYear").onchange  = e => { SR.year = +e.target.value; SR.scope = "ytd"; SR.key = ""; renderSalesReports(); };
+  const rt = document.getElementById("srRetry");
+  if(rt) rt.onclick = () => { SR.key = ""; renderSalesReports(); };
+  const ab = document.getElementById("srAccessBtn");
+  if(ab) ab.onclick = srOpenAccess;
+}
+
+function srDrawTop(){
+  const d = srData(SR.rep), r = srRange(), W = srWeights(SR.year);
+  const top = document.getElementById("srTop");
+  const who = SR.rep === "all" ? "Whole team" : srName(SR.rep);
+
+  // ---- headline: sales won against KPI due so far
+  const a = srSum(d.act.won, r), t = srSumW(d.kpi.won, r, W), s = srStatus(a, t);
+  const annual = srSum(d.kpi.won, SR_ALL);
+  const elapsed = W.reduce((x, v) => x + v, 0);
+  const ytdA = srSum(d.act.won, SR_ALL);
+  const proj = elapsed > 0 ? ytdA / elapsed * 12 : null;
+  const gap = a - t;
+  const head = s.c === "on" ? "On target" : s.c === "risk" ? "Slightly behind" : s.c === "behind" ? "Behind target" : "No KPI set yet";
+  const future = SR.year > new Date().getFullYear();
+  const banner = `
+    <div class="sr-banner ${s.c}">
+      <div><div class="cap">Sales won &middot; ${esc(who)}</div><div class="big">${head}</div></div>
+      ${s.c === "none" ? `<div class="stat"><span>${future ? "This year hasn't started yet — set the KPIs below so tracking starts on 1 January."
+                                                       : "Set monthly KPIs below and this banner will show whether you are on target."}</span></div>` : `
+      <div class="stat"><b>${srF(a)} / ${srF(t)}</b><span>Won against KPI due so far</span></div>
+      <div class="stat"><b>${srPct(s.p)}</b><span>Of KPI achieved</span></div>
+      <div class="stat"><b class="${gap >= 0 ? "sr-pos" : "sr-neg"}">${srSigned(gap)}</b><span>${gap >= 0 ? "Ahead by" : "Sales needed to catch up"}</span></div>
+      ${proj != null ? `<div class="stat"><b>${srF(proj)} / ${annual}</b><span>${SR.year < new Date().getFullYear() ? "Year result" : "Projected year end"} vs annual KPI</span></div>` : ""}`}
+    </div>`;
+
+  // ---- five KPI cards
+  const cards = SR_METRICS.map(m => {
+    const ma = srSum(d.act[m.k], r), mt = srSumW(d.kpi[m.k], r, W), ms = srStatus(ma, mt);
+    return `<button type="button" class="rep-card sr-card${SR.metric === m.k ? " sel" : ""}" data-metric="${m.k}">
+      <div class="rc-label">${m.l}</div>
+      <div class="rc-value">${srF(ma)} <small>/ ${srF(mt)} KPI</small></div>
+      <div class="sr-bar"><i class="sr-fill-${ms.c}" style="width:${ms.p == null ? 0 : Math.min(100, ms.p * 100)}%"></i></div>
+      <span class="sr-pill ${ms.c}">${ms.l}${ms.p == null ? "" : " &middot; " + srPct(ms.p)}</span>
+    </button>`;
+  }).join("");
+
+  const metricLabel = SR_METRICS.find(m => m.k === SR.metric).l;
+  top.innerHTML = banner +
+    `<div class="sr-cards">${cards}</div>
+     <div class="sr-grid2">
+       <div class="fc-card"><h3>Running total &mdash; ${esc(metricLabel)}</h3>
+         <p class="hint">Actual against KPI, added up month by month through ${SR.year}. Click a card above to change the measure.</p>${srChart(d, W)}</div>
+       <div class="fc-card"><h3>Conversion rates</h3>
+         <p class="hint">${esc(srScopeLabel())}. The marker on each bar is the rate your KPIs assume.</p>${srFunnel(d, r, W)}</div>
+     </div>
+     <div class="fc-card full" style="margin-bottom:16px">
+       <h3>Monthly tracking &mdash; actual vs KPI</h3>
+       <p class="hint">Running totals add up from January so you can see exactly where you are ahead or behind.${SR.year === new Date().getFullYear() ? " This month's KPI is pro-rated to today." : ""}</p>
+       <div class="sr-chips">${SR_METRICS.map(m => `<button type="button" class="sr-chip${SR.metric === m.k ? " on" : ""}" data-metric="${m.k}">${m.l}</button>`).join("")}</div>
+       <div class="sr-scroll">${srMonthTable(d, r, W)}</div>
+     </div>
+     ${SR.rep === "all" ? `<div class="fc-card full" style="margin-bottom:16px"><h3>Team scoreboard</h3>
+       <p class="hint">${esc(srScopeLabel())} &middot; sales won against KPI due so far. Click a name to see their report.</p>
+       <div class="sr-scroll">${srScoreboard(r, W)}</div></div>` : ""}`;
+
+  top.querySelectorAll("[data-metric]").forEach(b => b.onclick = () => { SR.metric = b.dataset.metric; srDrawTop(); });
+  top.querySelectorAll("[data-rep]").forEach(tr => tr.onclick = () => {
+    if(tr.dataset.rep === "__none") return;
+    SR.rep = tr.dataset.rep; srDraw(); window.scrollTo(0, 0);
+  });
+}
+
+function srChart(d, W){
+  const k = SR.metric, Wd = 640, H = 250, L = 38, B = 28, T = 14, R = 14;
+  const last = srLastIdx(SR.year);
+  let ca = 0, ct = 0; const act = [], tgt = [];
+  for(let i = 0; i < 12; i++){ ct += d.kpi[k][i]; tgt.push(ct); if(i <= last){ ca += d.act[k][i]; act.push(ca); } }
+  const max = Math.max(ct, ca, 1) * 1.1;
+  const x = i => L + (Wd - L - R) * i / 11, yy = v => T + (H - T - B) * (1 - v / max);
+  const path = arr => arr.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + yy(v).toFixed(1)).join(" ");
+  let grid = "";
+  for(let g = 0; g <= 4; g++){
+    const v = max * g / 4;
+    grid += `<line x1="${L}" x2="${Wd - R}" y1="${yy(v)}" y2="${yy(v)}" stroke="#eef2f3"/>` +
+            `<text x="${L - 6}" y="${yy(v) + 4}" text-anchor="end" font-size="10" fill="#5f7078">${Math.round(v)}</text>`;
+  }
+  const xl = SR_MON.map((m, i) => `<text x="${x(i)}" y="${H - 9}" text-anchor="middle" font-size="10" fill="${i === last && SR.year === new Date().getFullYear() ? "#16292e" : "#5f7078"}" font-weight="${i === last ? 700 : 400}">${m}</text>`).join("");
+  const isNow = SR.year === new Date().getFullYear();
+  let actual = "";
+  if(act.length){
+    const area = path(act) + ` L${x(act.length - 1)} ${yy(0)} L${x(0)} ${yy(0)} Z`;
+    const dueNow = (last > 0 ? tgt[last - 1] : 0) + d.kpi[k][last] * W[last];
+    actual = `<path d="${area}" fill="var(--won)" opacity=".1"/>
+      <path d="${path(act)}" fill="none" stroke="var(--won)" stroke-width="3"/>
+      ${act.map((v, i) => `<circle cx="${x(i)}" cy="${yy(v)}" r="3.5" fill="var(--won)"><title>${SR_MON[i]}: ${v} actual, ${tgt[i]} KPI (running)</title></circle>`).join("")}
+      <text x="${Math.max(L + 90, x(act.length - 1) - 6)}" y="${Math.max(T + 22, yy(act[act.length - 1]) - 10)}" text-anchor="end" font-size="11" font-weight="700" fill="#16292e">${act[act.length - 1]} vs ${srF(dueNow)} KPI ${isNow ? "to date" : ""}</text>`;
+  }
+  return `<div class="sr-legend"><span><i></i>Actual (running total)</span><span><i class="k"></i>KPI (running total)</span></div>
+    <svg viewBox="0 0 ${Wd} ${H}" width="100%" style="display:block" role="img" aria-label="Running total of actual against KPI">${grid}${xl}
+      ${isNow ? `<line x1="${x(last)}" x2="${x(last)}" y1="${T}" y2="${H - B}" stroke="#E0A100" stroke-dasharray="3 3"/><text x="${x(last) + 4}" y="${T + 10}" font-size="10" fill="#8A6200">Today</text>` : ""}
+      ${ct > 0 ? `<path d="${path(tgt)}" fill="none" stroke="var(--navy)" stroke-width="2" stroke-dasharray="6 4"/>` : ""}
+      ${actual}
+    </svg>`;
+}
+
+function srFunnel(d, r, W){
+  const A = k => srSum(d.act[k], r), T = k => srSumW(d.kpi[k], r, W);
+  const steps = [["leads","discovery","Lead → Discovery"], ["discovery","presentation","Discovery → Presentation"],
+                 ["presentation","review","Presentation → Review"], ["review","won","Review → Won"],
+                 ["leads","won","Lead → Won (overall)"]];
+  return steps.map((st, i) => {
+    const num = A(st[1]), den = A(st[0]);
+    const conv = den > 0 ? num / den : null;
+    const tden = T(st[0]), tgt = tden > 0 ? T(st[1]) / tden : null;
+    const s = (conv == null || tgt == null) ? {c:"none"} : srStatus(conv, tgt);
+    const scale = i === 4 ? 0.25 : 1;   // overall reads on a 0-25% scale so it isn't a sliver
+    const w = v => Math.min(100, (v || 0) / scale * 100);
+    return `<div class="sr-frow${i === 4 ? " overall" : ""}">
+      <div class="nm">${st[2]}<small>${num} of ${den}</small></div>
+      <div class="sr-track"><i class="sr-fill-${s.c}" style="width:${w(conv)}%"></i>${tgt != null ? `<span class="tg" style="left:${w(tgt)}%" title="KPI ${(tgt * 100).toFixed(1)}%"></span>` : ""}</div>
+      <div class="nums"><b>${conv == null ? "—" : (conv * 100).toFixed(1) + "%"}</b>KPI ${tgt == null ? "—" : (tgt * 100).toFixed(1) + "%"}</div>
+    </div>`;
+  }).join("");
+}
+
+function srMonthTable(d, r, W){
+  const k = SR.metric, last = srLastIdx(SR.year), isNow = SR.year === new Date().getFullYear();
+  let ca = 0, ct = 0, rows = "";
+  for(let i = 0; i < 12; i++){
+    const due = d.kpi[k][i] * W[i], full = d.kpi[k][i], a = d.act[k][i];
+    if(i <= last){ ca += a; ct += due; }
+    if(r.indexOf(i) === -1) continue;
+    if(i > last){
+      rows += `<tr class="future"><td>${SR_MON[i]} ${SR.year}</td><td>${full}</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>Upcoming</td></tr>`;
+      continue;
+    }
+    const v = a - due, cv = ca - ct, s = srStatus(ca, ct), mtd = isNow && i === last;
+    rows += `<tr class="${mtd ? "mtd" : ""}"><td>${SR_MON[i]} ${SR.year}${mtd ? ' <span style="font-size:11px;color:#8A6200">(month to date)</span>' : ""}</td>
+      <td>${srF(due)}${mtd ? ` <span style="color:#a7b3b8">of ${full}</span>` : ""}</td><td>${a}</td>
+      <td class="${v >= 0 ? "sr-pos" : "sr-neg"}">${srSigned(v)}</td>
+      <td>${srF(ct)}</td><td>${ca}</td><td class="${cv >= 0 ? "sr-pos" : "sr-neg"}">${srSigned(cv)}</td>
+      <td><span class="sr-pill ${s.c}">${s.l}</span></td></tr>`;
+  }
+  const a = srSum(d.act[k], r), t = srSumW(d.kpi[k], r, W), s = srStatus(a, t);
+  rows += `<tr class="total"><td>Total &middot; ${esc(srScopeLabel())}</td><td>${srF(t)}</td><td>${a}</td>
+    <td class="${a - t >= 0 ? "sr-pos" : "sr-neg"}">${srSigned(a - t)}</td>
+    <td colspan="3" style="font-weight:600">Annual KPI: ${srSum(d.kpi[k], SR_ALL)}</td>
+    <td><span class="sr-pill ${s.c}">${s.p == null ? s.l : srPct(s.p)}</span></td></tr>`;
+  return `<table class="sr-table"><thead><tr><th>Month</th><th>KPI</th><th>Actual</th><th>Variance</th>
+    <th>Running KPI</th><th>Running actual</th><th>Running variance</th><th>Tracking</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function srScoreboard(r, W){
+  const elapsed = W.reduce((x, v) => x + v, 0);
+  const ids = srPeople().filter(id => SR.kpi[id] || SR.act[id]);
+  if(SR.act.__none) ids.push("__none");
+  if(!ids.length) return '<div class="sr-note">No sales activity or KPIs recorded for this period yet.</div>';
+  const rows = ids.map(id => {
+    const k = SR.kpi[id] || srZero(), a = SR.act[id] || srZero();
+    const won = srSum(a.won, r), due = srSumW(k.won, r, W), s = srStatus(won, due);
+    const leads = srSum(a.leads, r);
+    return {id, won, due, s, lw: leads > 0 ? srSum(a.won, r) / leads : null,
+            proj: elapsed > 0 ? srSum(a.won, SR_ALL) / elapsed * 12 : null, ann: srSum(k.won, SR_ALL)};
+  }).sort((p, q) => (q.s.p == null ? -1 : q.s.p) - (p.s.p == null ? -1 : p.s.p));
+  return `<table class="sr-table"><thead><tr><th>Sales Consultant</th><th>Won</th><th>KPI due</th><th>% of KPI</th>
+    <th>Lead → Won</th><th>Projected year end</th><th>Annual KPI</th><th>Tracking</th></tr></thead><tbody>
+    ${rows.map(x => `<tr class="${x.id === "__none" ? "" : "click"}" data-rep="${x.id}">
+      <td><strong>${esc(srName(x.id))}</strong></td><td>${x.won}</td><td>${x.id === "__none" ? "—" : srF(x.due)}</td>
+      <td>${srPct(x.s.p)}</td><td>${x.lw == null ? "—" : (x.lw * 100).toFixed(1) + "%"}</td>
+      <td>${x.proj == null ? "—" : srF(x.proj)}</td><td>${x.id === "__none" ? "—" : x.ann}</td>
+      <td>${x.id === "__none" ? '<span class="sr-pill none">No KPI</span>' : `<span class="sr-pill ${x.s.c}">${x.s.l}</span>`}</td></tr>`).join("")}
+    </tbody></table>`;
+}
+
+function srDrawKpi(){
+  const card = document.getElementById("srKpiCard");
+  if(SR.rep === "all"){
+    card.innerHTML = `<h3>KPI targets &mdash; ${SR.year}</h3>
+      <div class="sr-note">Choose a Sales Consultant at the top to set or change their monthly KPIs.
+      The whole-team KPI is the total of everyone's.</div>`;
+    return;
+  }
+  const owner = SR.rep;
+  const d = SR.kpi[owner] || srZero();
+  card.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+      <div><h3>KPI targets &mdash; ${esc(srName(owner))}, ${SR.year}</h3>
+        <p class="hint">Type a number and it saves straight away. Only owners and admins with access can see or change these.</p></div>
+      <button class="btn btn-light btn-sm" id="srCopyJan" type="button">Copy January across the year</button>
+    </div>
+    <div class="sr-scroll"><table class="sr-table sr-kpi"><thead><tr><th>Measure</th>${SR_MON.map(m => `<th>${m}</th>`).join("")}<th>Year</th></tr></thead><tbody>
+      ${SR_METRICS.map(m => `<tr><td><strong>${m.l}</strong></td>${SR_MON.map((_, i) =>
+        `<td><input type="number" min="0" step="1" inputmode="numeric" value="${d[m.k][i]}" data-k="${m.k}" data-i="${i}" aria-label="${m.l} KPI ${SR_MON[i]}"></td>`).join("")}
+        <td data-total="${m.k}"><strong>${srSum(d[m.k], SR_ALL)}</strong></td></tr>`).join("")}
+    </tbody></table></div>`;
+
+  card.querySelectorAll("input[data-k]").forEach(inp => inp.addEventListener("change", async () => {
+    const v = Math.max(0, Math.round(+inp.value || 0));
+    inp.value = v;
+    SR.kpi[owner] = SR.kpi[owner] || srZero();
+    const prev = SR.kpi[owner][inp.dataset.k][+inp.dataset.i];
+    SR.kpi[owner][inp.dataset.k][+inp.dataset.i] = v;
+    card.querySelector(`[data-total="${inp.dataset.k}"]`).innerHTML = "<strong>" + srSum(SR.kpi[owner][inp.dataset.k], SR_ALL) + "</strong>";
+    srDrawTop();
+    const ok = await srSaveKpis(owner, [+inp.dataset.i]);
+    if(!ok){ SR.kpi[owner][inp.dataset.k][+inp.dataset.i] = prev; inp.value = prev; srDrawTop(); }
+  }));
+  document.getElementById("srCopyJan").onclick = async () => {
+    if(!confirm("Copy " + srName(owner) + "'s January KPIs into every month of " + SR.year + "?\n\nThis replaces the KPIs already set for February to December.")) return;
+    SR.kpi[owner] = SR.kpi[owner] || srZero();
+    SR_METRICS.forEach(m => { for(let i = 1; i < 12; i++) SR.kpi[owner][m.k][i] = SR.kpi[owner][m.k][0]; });
+    if(await srSaveKpis(owner, SR_ALL)) toast("January KPIs copied across " + SR.year + ".");
+    srDraw();
+  };
+}
+
+async function srSaveKpis(owner, months){
+  const d = SR.kpi[owner];
+  const rows = months.map(i => {
+    const row = {company_id: ME.company_id, owner_id: owner,
+                 month: SR.year + "-" + String(i + 1).padStart(2, "0") + "-01",
+                 updated_by: ME.id, updated_at: new Date().toISOString()};
+    SR_METRICS.forEach(m => row[m.k] = d[m.k][i]);
+    return row;
+  });
+  const {error} = await sb.from("sales_kpis").upsert(rows, {onConflict: "company_id,owner_id,month"});
+  if(error){ toast("KPI not saved: " + friendlyError(error)); return false; }
+  return true;
+}
+
+/* ---- who can see the tab: owners decide, per admin ---- */
+function srEnsureAccessModal(){
+  if(document.getElementById("srAccessOverlay")) return;
+  document.body.insertAdjacentHTML("beforeend", `
+    <div class="overlay" id="srAccessOverlay">
+      <div class="modal" style="max-width:560px">
+        <div class="modal-head"><h2>Sales Reports &mdash; who can see it</h2>
+          <button class="x" id="srAccessClose" type="button">&times;</button></div>
+        <div class="modal-body">
+          <p style="margin:0 0 10px;color:var(--muted)">Sales Reports is for admins only &mdash; Sales Consultants never see it.
+          Switch it on for the admins who should have it. Owners always have access.</p>
+          <div id="srAccessList"><p class="hint">Loading…</p></div>
+        </div>
+        <div class="modal-foot" style="justify-content:flex-end">
+          <button class="btn btn-primary" id="srAccessDone" type="button">Done</button></div>
+      </div>
+    </div>`);
+  // matches every other modal: no close on outside-click or Escape
+  const close = () => document.getElementById("srAccessOverlay").classList.remove("open");
+  document.getElementById("srAccessClose").onclick = close;
+  document.getElementById("srAccessDone").onclick = close;
+}
+async function srOpenAccess(){
+  srEnsureAccessModal();
+  document.getElementById("srAccessOverlay").classList.add("open");
+  const list = document.getElementById("srAccessList");
+  list.innerHTML = '<p class="hint">Loading…</p>';
+  const {data, error} = await sb.rpc("sales_reports_access_list");
+  if(error){ list.innerHTML = '<p style="color:var(--red)">' + esc(friendlyError(error)) + '</p>'; return; }
+  const consultants = TEAM.filter(p => p.role === "consultant" && p.active).length;
+  list.innerHTML = (data || []).map(p => {
+    const nm = ss(p.full_name) || ss(p.email);
+    const owner = p.role === "owner";
+    return `<div class="sr-urow"><div><div class="who">${esc(nm)}${p.user_id === ME.id ? " (you)" : ""}${p.active ? "" : ' <span class="rep-chip none">no access</span>'}</div>
+      <div class="em">${owner ? "Owner &middot; always has access" : "Admin"} &middot; ${esc(ss(p.email))}</div></div>
+      <label class="sr-switch" title="${owner ? "Owners always have access" : "Show or hide Sales Reports for this admin"}">
+        <input type="checkbox" data-uid="${p.user_id}"${p.has_access ? " checked" : ""}${owner ? " disabled" : ""}><span></span></label></div>`;
+  }).join("") + `<div class="sr-urow"><div><div class="who">Sales Consultants (${consultants})</div>
+      <div class="em">No access &mdash; this report is admin only</div></div><span class="sr-pill none">Hidden</span></div>`;
+  list.querySelectorAll("input[data-uid]").forEach(cb => cb.addEventListener("change", async () => {
+    cb.disabled = true;
+    const {error: e} = await sb.rpc("set_sales_reports_access", {p_user_id: cb.dataset.uid, p_enabled: cb.checked});
+    cb.disabled = false;
+    if(e){ cb.checked = !cb.checked; toast("Could not change access: " + friendlyError(e)); return; }
+    toast("Sales Reports " + (cb.checked ? "switched on" : "hidden") + " for this admin.");
+  }));
 }
 
 /* ---------- Sales forecast: this month and the two after it ---------- */
@@ -5578,6 +6098,10 @@ async function loadMe(){
 
   const {data: plat} = await sb.rpc("is_platform_admin");
   IS_PLATFORM = plat === true;
+
+  // Sales Reports: owners always, admins only when an owner has switched them on
+  const {data: srOk} = await sb.rpc("can_view_sales_reports");
+  CAN_SR = srOk === true;
 }
 
 function shade(hex, pct){
@@ -5613,6 +6137,8 @@ function paintIdentity(){
   document.getElementById("teamBtn").style.display = isManager() ? "" : "none";
   document.body.classList.toggle("is-manager", isManager());
   document.body.classList.toggle("is-platform", IS_PLATFORM);
+  document.querySelector('.tab[data-view="salesreports"]').style.display = CAN_SR ? "" : "none";
+  if(!CAN_SR && currentView === "salesreports") switchView("dashboard");
   // Team Chat is temporarily hidden platform-wide (feature flag off) -
   // everything behind it (schema, RLS, RPCs) is untouched and intact,
   // this is the only line that needs to change to bring it back.
