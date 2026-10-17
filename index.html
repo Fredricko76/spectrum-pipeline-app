@@ -402,6 +402,15 @@
   .sr-kpi input{width:62px;text-align:right;padding:5px 6px;border:1px solid #b9c7cb;border-radius:6px;font:inherit}
   .sr-kpi input:focus{outline:2px solid var(--navy);outline-offset:0;border-color:var(--navy)}
   .sr-kpi td{padding:6px 4px}
+  .sr-rates{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:4px 0 14px}
+  .sr-rate{display:flex;flex-direction:column;gap:6px;background:#f7fafa;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700;color:var(--muted)}
+  .sr-rate-in{display:flex;align-items:center;gap:6px;font-size:15px;color:var(--heading)}
+  .sr-rate input{width:80px;text-align:right;padding:6px 8px;border:1px solid #b9c7cb;border-radius:6px;font:inherit;font-size:15px;font-weight:700;color:var(--heading)}
+  .sr-rate input:focus{outline:2px solid var(--navy);border-color:var(--navy)}
+  .sr-rate-total{background:#eef3f3}
+  .sr-rate-total strong{font-size:20px;color:var(--heading)}
+  .sr-won-row td{background:var(--won-soft)}
+  @media(max-width:900px){.sr-rates{grid-template-columns:repeat(2,1fr)}}
   .sr-note{background:#f1f5f5;border-radius:9px;padding:12px 14px;color:var(--navy);font-size:13px}
   .sr-urow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
   .sr-urow:last-child{border-bottom:0}
@@ -2636,7 +2645,7 @@ async function renderReports(){
    the earliest stage event. Leads count on the enquiry date.
    ================================================================ */
 let CAN_SR = false;
-const SR = { year:null, scope:"ytd", metric:"won", rep:"all", kpi:{}, act:{},
+const SR = { year:null, scope:"ytd", metric:"won", rep:"all", kpi:{}, act:{}, rates:{},
              key:"", loading:false, err:null, company:null };
 const SR_METRICS = [
   {k:"leads",        l:"Leads"},
@@ -2708,14 +2717,19 @@ async function srLoad(){
   const key = ME.company_id + "|" + SR.year;
   try{
     await ensureCompany();
-    const [a, k] = await Promise.all([
+    const [a, rr, k] = await Promise.all([
       sb.rpc("sales_report_actuals", {p_year: SR.year}),
+      sb.from("sales_kpi_rates").select("owner_id,lead_to_discovery,discovery_to_presentation,presentation_to_review,review_to_won")
+        .eq("company_id", ME.company_id).eq("year", SR.year),
       sb.from("sales_kpis").select("owner_id,month,leads,discovery,presentation,review,won")
         .eq("company_id", ME.company_id)
         .gte("month", SR.year + "-01-01").lte("month", SR.year + "-12-01")
     ]);
     if(a.error) throw a.error;
     if(k.error) throw k.error;
+    if(rr.error) throw rr.error;
+    SR.rates = {};
+    (rr.data || []).forEach(r => { SR.rates[r.owner_id] = r; });
     SR.act = {};
     (a.data || []).forEach(r => {
       const o = r.owner_id || "__none";
@@ -2899,7 +2913,14 @@ function srFunnel(d, r, W){
   return steps.map((st, i) => {
     const num = A(st[1]), den = A(st[0]);
     const conv = den > 0 ? num / den : null;
-    const tden = T(st[0]), tgt = tden > 0 ? T(st[1]) / tden : null;
+    const tden = T(st[0]);
+    let tgt = tden > 0 ? T(st[1]) / tden : null;
+    // one consultant with target rates set: the marker is the rate they were set
+    const rt = SR.rep !== "all" ? SR.rates[SR.rep] : null;
+    if(srRatesComplete(rt)){
+      tgt = i === 4 ? SR_RATES.reduce((x, s2) => x * (+rt[s2.k] / 100), 1)
+                    : +rt[SR_RATES.find(s2 => s2.from === st[0]).k] / 100;
+    }
     const s = (conv == null || tgt == null) ? {c:"none"} : srStatus(conv, tgt);
     const scale = i === 4 ? 0.25 : 1;   // overall reads on a 0-25% scale so it isn't a sliver
     const w = v => Math.min(100, (v || 0) / scale * 100);
@@ -2960,46 +2981,119 @@ function srScoreboard(r, W){
     </tbody></table>`;
 }
 
+/* KPI targets are set as Sales won per month plus four conversion rates per
+   consultant per year. The activity KPIs are worked backwards from Sales won
+   and rounded UP to whole appointments, then stored in sales_kpis so every
+   report reads the same numbers.                                          */
+const SR_RATES = [
+  {k:"review_to_won",             l:"Review → Won",             to:"won",          from:"review"},
+  {k:"presentation_to_review",    l:"Presentation → Review",    to:"review",       from:"presentation"},
+  {k:"discovery_to_presentation", l:"Discovery → Presentation", to:"presentation", from:"discovery"},
+  {k:"lead_to_discovery",         l:"Lead → Discovery",         to:"discovery",    from:"leads"}
+];
+// Work one month back from Sales won. A missing rate leaves the stages above it at 0.
+function srBackCalc(won, rt){
+  const out = {won: won, review: 0, presentation: 0, discovery: 0, leads: 0};
+  let need = won;                                   // exact (unrounded) chain
+  for(const s of SR_RATES){
+    const p = rt && +rt[s.k];
+    if(!(p > 0) || need <= 0) break;
+    need = need / (p / 100);
+    out[s.from] = Math.ceil(need - 1e-9);
+  }
+  return out;
+}
+const srRatesComplete = rt => !!rt && SR_RATES.every(s => +rt[s.k] > 0);
+
 function srDrawKpi(){
   const card = document.getElementById("srKpiCard");
   if(SR.rep === "all"){
     card.innerHTML = `<h3>KPI targets &mdash; ${SR.year}</h3>
-      <div class="sr-note">Choose a Sales Consultant at the top to set or change their monthly KPIs.
+      <div class="sr-note">Choose a Sales Consultant at the top to set or change their KPIs.
       The whole-team KPI is the total of everyone's.</div>`;
     return;
   }
   const owner = SR.rep;
-  const d = SR.kpi[owner] || srZero();
+  SR.kpi[owner] = SR.kpi[owner] || srZero();
+  const d = SR.kpi[owner];
+  const rt = SR.rates[owner] || {};
+  const done = srRatesComplete(rt);
+  const overall = done ? SR_RATES.reduce((x, s) => x * (+rt[s.k] / 100), 1) : null;
+
   card.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
       <div><h3>KPI targets &mdash; ${esc(srName(owner))}, ${SR.year}</h3>
-        <p class="hint">Type a number and it saves straight away. Only owners and admins with access can see or change these.</p></div>
-      <button class="btn btn-light btn-sm" id="srCopyJan" type="button">Copy January across the year</button>
+        <p class="hint">Enter the conversion rates and the sales target. Every other number is worked out for you and rounded up to whole appointments. Saves as you type.</p></div>
+      <button class="btn btn-light btn-sm" id="srCopyJan" type="button">Copy January's sales across the year</button>
     </div>
+    <div class="sr-rates">
+      ${SR_RATES.slice().reverse().map(s => `<label class="sr-rate"><span>${s.l}</span>
+        <span class="sr-rate-in"><input type="number" min="1" max="100" step="0.5" inputmode="decimal" data-rate="${s.k}"
+          value="${rt[s.k] != null ? +rt[s.k] : ""}" placeholder="e.g. 50" aria-label="${s.l} target %">%</span></label>`).join("")}
+      <div class="sr-rate sr-rate-total"><span>Lead → Won (overall)</span><strong>${overall == null ? "—" : (overall * 100).toFixed(1) + "%"}</strong></div>
+    </div>
+    ${'<div class="sr-note sr-rates-missing" style="margin:0 0 12px"' + (done ? " hidden" : "") + '>Fill in all four rates to work out the full set of numbers. Until then, the stages above a missing rate show 0.</div>'}
     <div class="sr-scroll"><table class="sr-table sr-kpi"><thead><tr><th>Measure</th>${SR_MON.map(m => `<th>${m}</th>`).join("")}<th>Year</th></tr></thead><tbody>
-      ${SR_METRICS.map(m => `<tr><td><strong>${m.l}</strong></td>${SR_MON.map((_, i) =>
-        `<td><input type="number" min="0" step="1" inputmode="numeric" value="${d[m.k][i]}" data-k="${m.k}" data-i="${i}" aria-label="${m.l} KPI ${SR_MON[i]}"></td>`).join("")}
-        <td data-total="${m.k}"><strong>${srSum(d[m.k], SR_ALL)}</strong></td></tr>`).join("")}
+      ${SR_METRICS.slice().reverse().map(m => m.k === "won"
+        ? `<tr class="sr-won-row"><td><strong>${m.l}</strong> <span class="sr-pill on">you set this</span></td>${SR_MON.map((_, i) =>
+            `<td><input type="number" min="0" step="1" inputmode="numeric" value="${d.won[i]}" data-i="${i}" aria-label="Sales won KPI ${SR_MON[i]}"></td>`).join("")}
+            <td data-total="won"><strong>${srSum(d.won, SR_ALL)}</strong></td></tr>`
+        : `<tr><td>${m.l} <span style="color:var(--muted);font-size:11.5px">needed</span></td>${SR_MON.map((_, i) =>
+            `<td data-cell="${m.k}-${i}">${d[m.k][i]}</td>`).join("")}<td data-total="${m.k}"><strong>${srSum(d[m.k], SR_ALL)}</strong></td></tr>`).join("")}
     </tbody></table></div>`;
 
-  card.querySelectorAll("input[data-k]").forEach(inp => inp.addEventListener("change", async () => {
-    const v = Math.max(0, Math.round(+inp.value || 0));
+  // a Sales won cell: recalc that month only
+  card.querySelectorAll("input[data-i]").forEach(inp => inp.addEventListener("change", async () => {
+    const i = +inp.dataset.i, v = Math.max(0, Math.round(+inp.value || 0));
     inp.value = v;
-    SR.kpi[owner] = SR.kpi[owner] || srZero();
-    const prev = SR.kpi[owner][inp.dataset.k][+inp.dataset.i];
-    SR.kpi[owner][inp.dataset.k][+inp.dataset.i] = v;
-    card.querySelector(`[data-total="${inp.dataset.k}"]`).innerHTML = "<strong>" + srSum(SR.kpi[owner][inp.dataset.k], SR_ALL) + "</strong>";
+    const before = SR_METRICS.map(m => d[m.k][i]);
+    const calc = srBackCalc(v, SR.rates[owner]);
+    SR_METRICS.forEach(m => d[m.k][i] = calc[m.k]);
+    srRefreshKpiCells(card, d, [i]);
     srDrawTop();
-    const ok = await srSaveKpis(owner, [+inp.dataset.i]);
-    if(!ok){ SR.kpi[owner][inp.dataset.k][+inp.dataset.i] = prev; inp.value = prev; srDrawTop(); }
+    if(!(await srSaveKpis(owner, [i]))){ SR_METRICS.forEach((m, j) => d[m.k][i] = before[j]); inp.value = before[4]; srRefreshKpiCells(card, d, [i]); srDrawTop(); }
+  }));
+  // a rate: save it, then recalc all twelve months from their Sales won
+  card.querySelectorAll("input[data-rate]").forEach(inp => inp.addEventListener("change", async () => {
+    let v = inp.value === "" ? null : Math.min(100, Math.max(0, +inp.value));
+    if(v === 0) v = null;
+    inp.value = v == null ? "" : v;
+    const prevRates = Object.assign({}, SR.rates[owner] || {});
+    SR.rates[owner] = Object.assign({}, prevRates, {[inp.dataset.rate]: v});
+    const okR = await srSaveRates(owner);
+    if(!okR){ SR.rates[owner] = prevRates; inp.value = prevRates[inp.dataset.rate] ?? ""; return; }
+    SR_ALL.forEach(i => { const c = srBackCalc(d.won[i], SR.rates[owner]); SR_METRICS.forEach(m => d[m.k][i] = c[m.k]); });
+    await srSaveKpis(owner, SR_ALL);
+    // update in place so focus can move on to the next rate box
+    srRefreshKpiCells(card, d, SR_ALL);
+    const rt2 = SR.rates[owner], ok2 = srRatesComplete(rt2);
+    card.querySelector(".sr-rate-total strong").textContent =
+      ok2 ? (SR_RATES.reduce((x, s2) => x * (+rt2[s2.k] / 100), 1) * 100).toFixed(1) + "%" : "—";
+    const note = card.querySelector(".sr-rates-missing");
+    if(note) note.hidden = ok2;
+    srDrawTop();
   }));
   document.getElementById("srCopyJan").onclick = async () => {
-    if(!confirm("Copy " + srName(owner) + "'s January KPIs into every month of " + SR.year + "?\n\nThis replaces the KPIs already set for February to December.")) return;
-    SR.kpi[owner] = SR.kpi[owner] || srZero();
-    SR_METRICS.forEach(m => { for(let i = 1; i < 12; i++) SR.kpi[owner][m.k][i] = SR.kpi[owner][m.k][0]; });
-    if(await srSaveKpis(owner, SR_ALL)) toast("January KPIs copied across " + SR.year + ".");
+    if(!confirm("Copy " + srName(owner) + "'s January sales target into every month of " + SR.year + "?\n\nThis replaces the sales targets already set for February to December.")) return;
+    SR_ALL.forEach(i => { const c = srBackCalc(d.won[0], SR.rates[owner]); SR_METRICS.forEach(m => d[m.k][i] = c[m.k]); });
+    if(await srSaveKpis(owner, SR_ALL)) toast("January's sales target copied across " + SR.year + ".");
     srDraw();
   };
+}
+function srRefreshKpiCells(card, d, months){
+  months.forEach(i => SR_METRICS.forEach(m => {
+    const c = card.querySelector(`[data-cell="${m.k}-${i}"]`);
+    if(c) c.textContent = d[m.k][i];
+  }));
+  SR_METRICS.forEach(m => { const t = card.querySelector(`[data-total="${m.k}"]`); if(t) t.innerHTML = "<strong>" + srSum(d[m.k], SR_ALL) + "</strong>"; });
+}
+async function srSaveRates(owner){
+  const rt = SR.rates[owner] || {};
+  const row = {company_id: ME.company_id, owner_id: owner, year: SR.year, updated_by: ME.id, updated_at: new Date().toISOString()};
+  SR_RATES.forEach(s => row[s.k] = rt[s.k] == null || rt[s.k] === "" ? null : +rt[s.k]);
+  const {error} = await sb.from("sales_kpi_rates").upsert(row, {onConflict: "company_id,owner_id,year"});
+  if(error){ toast("Rate not saved: " + friendlyError(error)); return false; }
+  return true;
 }
 
 async function srSaveKpis(owner, months){
