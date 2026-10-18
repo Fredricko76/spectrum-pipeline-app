@@ -2637,14 +2637,15 @@ async function renderReports(){
 
 /* ================================================================
    SALES REPORTS - actual results against KPIs, tracked through the year.
-   Admin only: owners always see it, admins only when an owner switches
-   them on (company_members.sales_reports_access), consultants never.
+   Owners always see it; anyone else only when an owner switches them on.
+   Admins switched on see the whole team; consultants switched on see only their own, read-only.
    Enforced in the database - can_view_sales_reports() gates the
    actuals RPC and every sales_kpis policy; the hidden tab is cosmetic.
    Actuals use the same date rule as Reports: recorded stage date, else
    the earliest stage event. Leads count on the enquiry date.
    ================================================================ */
 let CAN_SR = false;
+let SR_FULL = false;   // whole team + editing (owner, switched-on admin). A switched-on consultant sees only their own, read-only.
 const SR = { year:null, scope:"ytd", metric:"won", rep:"all", kpi:{}, act:{}, rates:{},
              key:"", loading:false, err:null, company:null };
 const SR_METRICS = [
@@ -2752,7 +2753,7 @@ async function renderSalesReports(){
   if(!host) return;
   if(!CAN_SR){ host.innerHTML = ""; return; }
   if(!SR.year) SR.year = new Date().getFullYear();
-  if(SR.company !== ME.company_id){ SR.company = ME.company_id; SR.rep = "all"; SR.key = ""; }
+  if(SR.company !== ME.company_id){ SR.company = ME.company_id; SR.rep = SR_FULL ? "all" : ME.id; SR.key = ""; }
   if(SR.key !== ME.company_id + "|" + SR.year){
     if(SR.loading) return;                       // the load in flight will draw when it lands
     host.innerHTML = '<div class="fc-card full"><h3>Sales Reports</h3><p class="hint">Loading the year\'s figures…</p></div>';
@@ -2769,7 +2770,8 @@ function srDraw(){
   const host = document.getElementById("view-salesreports");
   const y = new Date().getFullYear();
   const people = srPeople();
-  if(SR.rep !== "all" && people.indexOf(SR.rep) === -1) SR.rep = "all";
+  if(!SR_FULL) SR.rep = ME.id;   // a consultant only ever sees their own report
+  else if(SR.rep !== "all" && people.indexOf(SR.rep) === -1) SR.rep = "all";
   const years = [y - 1, y, y + 1];
   const scopes = [["ytd", SR.year === y ? "Year to date" : "Full year"]]
     .concat([1,2,3,4].map(q => ["q"+q, "Quarter " + q]))
@@ -2780,12 +2782,13 @@ function srDraw(){
     <div class="sr-head">
       <div>
         <h2>Sales Reports</h2>
-        <div class="sub"><span class="sr-lock">Admin only</span>Actual results against KPIs &middot; ${esc(srScopeLabel())} &middot; ${esc(COMPANY ? COMPANY.name : "")}</div>
+        <div class="sub"><span class="sr-lock">${SR_FULL ? "Restricted" : "Your figures only"}</span>Actual results against KPIs &middot; ${esc(srScopeLabel())} &middot; ${esc(COMPANY ? COMPANY.name : "")}</div>
       </div>
       <div class="sr-filters">
         <div class="month-pick"><label for="srRep">Sales Consultant</label>
-          <select id="srRep"><option value="all">Whole team</option>${people.map(id =>
-            `<option value="${id}"${id === SR.rep ? " selected" : ""}>${esc(srName(id))}</option>`).join("")}</select></div>
+          <select id="srRep"${SR_FULL ? "" : " disabled"}>${SR_FULL ? '<option value="all">Whole team</option>' + people.map(id =>
+            `<option value="${id}"${id === SR.rep ? " selected" : ""}>${esc(srName(id))}</option>`).join("")
+            : `<option value="${ME.id}" selected>${esc(srName(ME.id))}</option>`}</select></div>
         <div class="month-pick"><label for="srYear">Year</label>
           <select id="srYear">${years.map(v => `<option value="${v}"${v === SR.year ? " selected" : ""}>${v}</option>`).join("")}</select></div>
         <div class="month-pick"><label for="srScope">Period</label>
@@ -3023,20 +3026,21 @@ function srDrawKpi(){
   card.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
       <div><h3>KPI targets &mdash; ${esc(srName(owner))}, ${SR.year}</h3>
-        <p class="hint">Enter the conversion rates and the sales target. Every other number is worked out for you and rounded up to whole appointments. Saves as you type.</p></div>
-      <button class="btn btn-light btn-sm" id="srCopyJan" type="button">Copy January's sales across the year</button>
+        <p class="hint">${SR_FULL ? "Enter the conversion rates and the sales target. Every other number is worked out for you and rounded up to whole appointments. Saves as you type."
+                                   : "Your targets for the year, set by your manager. Talk to them if anything here needs changing."}</p></div>
+      ${SR_FULL ? '<button class="btn btn-light btn-sm" id="srCopyJan" type="button">Copy January\'s sales across the year</button>' : ""}
     </div>
     <div class="sr-rates">
       ${SR_RATES.slice().reverse().map(s => `<label class="sr-rate"><span>${s.l}</span>
         <span class="sr-rate-in"><input type="number" min="1" max="100" step="0.5" inputmode="decimal" data-rate="${s.k}"
-          value="${rt[s.k] != null ? +rt[s.k] : ""}" placeholder="e.g. 50" aria-label="${s.l} target %">%</span></label>`).join("")}
+          value="${rt[s.k] != null ? +rt[s.k] : ""}" placeholder="${SR_FULL ? "e.g. 50" : "—"}"${SR_FULL ? "" : " disabled"} aria-label="${s.l} target %">%</span></label>`).join("")}
       <div class="sr-rate sr-rate-total"><span>Lead → Won (overall)</span><strong>${overall == null ? "—" : (overall * 100).toFixed(1) + "%"}</strong></div>
     </div>
-    ${'<div class="sr-note sr-rates-missing" style="margin:0 0 12px"' + (done ? " hidden" : "") + '>Fill in all four rates to work out the full set of numbers. Until then, the stages above a missing rate show 0.</div>'}
+    ${'<div class="sr-note sr-rates-missing" style="margin:0 0 12px"' + (done ? " hidden" : "") + '>${SR_FULL ? "Fill in all four rates to work out the full set of numbers. Until then, the stages above a missing rate show 0." : "Your manager hasn\'t finished setting your targets yet."}</div>'}
     <div class="sr-scroll"><table class="sr-table sr-kpi"><thead><tr><th>Measure</th>${SR_MON.map(m => `<th>${m}</th>`).join("")}<th>Year</th></tr></thead><tbody>
       ${SR_METRICS.slice().reverse().map(m => m.k === "won"
-        ? `<tr class="sr-won-row"><td><strong>${m.l}</strong> <span class="sr-pill on">you set this</span></td>${SR_MON.map((_, i) =>
-            `<td><input type="number" min="0" step="1" inputmode="numeric" value="${d.won[i]}" data-i="${i}" aria-label="Sales won KPI ${SR_MON[i]}"></td>`).join("")}
+        ? `<tr class="sr-won-row"><td><strong>${m.l}</strong> ${SR_FULL ? '<span class="sr-pill on">you set this</span>' : ""}</td>${SR_MON.map((_, i) =>
+            `<td><input type="number" min="0" step="1" inputmode="numeric" value="${d.won[i]}" data-i="${i}"${SR_FULL ? "" : " disabled"} aria-label="Sales won KPI ${SR_MON[i]}"></td>`).join("")}
             <td data-total="won"><strong>${srSum(d.won, SR_ALL)}</strong></td></tr>`
         : `<tr><td>${m.l} <span style="color:var(--muted);font-size:11.5px">needed</span></td>${SR_MON.map((_, i) =>
             `<td data-cell="${m.k}-${i}">${d[m.k][i]}</td>`).join("")}<td data-total="${m.k}"><strong>${srSum(d[m.k], SR_ALL)}</strong></td></tr>`).join("")}
@@ -3073,7 +3077,8 @@ function srDrawKpi(){
     if(note) note.hidden = ok2;
     srDrawTop();
   }));
-  document.getElementById("srCopyJan").onclick = async () => {
+  const cj = document.getElementById("srCopyJan");
+  if(cj) cj.onclick = async () => {
     if(!confirm("Copy " + srName(owner) + "'s January sales target into every month of " + SR.year + "?\n\nThis replaces the sales targets already set for February to December.")) return;
     SR_ALL.forEach(i => { const c = srBackCalc(d.won[0], SR.rates[owner]); SR_METRICS.forEach(m => d[m.k][i] = c[m.k]); });
     if(await srSaveKpis(owner, SR_ALL)) toast("January's sales target copied across " + SR.year + ".");
@@ -3119,8 +3124,8 @@ function srEnsureAccessModal(){
         <div class="modal-head"><h2>Sales Reports &mdash; who can see it</h2>
           <button class="x" id="srAccessClose" type="button">&times;</button></div>
         <div class="modal-body">
-          <p style="margin:0 0 10px;color:var(--muted)">Sales Reports is for admins only &mdash; Sales Consultants never see it.
-          Switch it on for the admins who should have it. Owners always have access.</p>
+          <p style="margin:0 0 10px;color:var(--muted)">Switch Sales Reports on for anyone who should see it. Owners always have access.
+          <strong>Admins</strong> see the whole team and can set KPIs. <strong>Sales Consultants</strong> see only their own figures and targets, read-only.</p>
           <div id="srAccessList"><p class="hint">Loading…</p></div>
         </div>
         <div class="modal-foot" style="justify-content:flex-end">
@@ -3139,22 +3144,20 @@ async function srOpenAccess(){
   list.innerHTML = '<p class="hint">Loading…</p>';
   const {data, error} = await sb.rpc("sales_reports_access_list");
   if(error){ list.innerHTML = '<p style="color:var(--red)">' + esc(friendlyError(error)) + '</p>'; return; }
-  const consultants = TEAM.filter(p => p.role === "consultant" && p.active).length;
   list.innerHTML = (data || []).map(p => {
     const nm = ss(p.full_name) || ss(p.email);
     const owner = p.role === "owner";
     return `<div class="sr-urow"><div><div class="who">${esc(nm)}${p.user_id === ME.id ? " (you)" : ""}${p.active ? "" : ' <span class="rep-chip none">no access</span>'}</div>
-      <div class="em">${owner ? "Owner &middot; always has access" : "Admin"} &middot; ${esc(ss(p.email))}</div></div>
-      <label class="sr-switch" title="${owner ? "Owners always have access" : "Show or hide Sales Reports for this admin"}">
+      <div class="em">${owner ? "Owner &middot; always has access" : p.role === "admin" ? "Admin &middot; whole team" : "Sales Consultant &middot; own figures only"} &middot; ${esc(ss(p.email))}</div></div>
+      <label class="sr-switch" title="${owner ? "Owners always have access" : "Show or hide Sales Reports for this person"}">
         <input type="checkbox" data-uid="${p.user_id}"${p.has_access ? " checked" : ""}${owner ? " disabled" : ""}><span></span></label></div>`;
-  }).join("") + `<div class="sr-urow"><div><div class="who">Sales Consultants (${consultants})</div>
-      <div class="em">No access &mdash; this report is admin only</div></div><span class="sr-pill none">Hidden</span></div>`;
+  }).join("");
   list.querySelectorAll("input[data-uid]").forEach(cb => cb.addEventListener("change", async () => {
     cb.disabled = true;
     const {error: e} = await sb.rpc("set_sales_reports_access", {p_user_id: cb.dataset.uid, p_enabled: cb.checked});
     cb.disabled = false;
     if(e){ cb.checked = !cb.checked; toast("Could not change access: " + friendlyError(e)); return; }
-    toast("Sales Reports " + (cb.checked ? "switched on" : "hidden") + " for this admin.");
+    toast("Sales Reports " + (cb.checked ? "switched on" : "hidden") + " for this person. They'll see the change next time they open the app.");
   }));
 }
 
@@ -6194,8 +6197,11 @@ async function loadMe(){
   IS_PLATFORM = plat === true;
 
   // Sales Reports: owners always, admins only when an owner has switched them on
-  const {data: srOk} = await sb.rpc("can_view_sales_reports");
+  const [{data: srOk}, {data: srFull, error: srFullErr}] = await Promise.all([
+    sb.rpc("can_view_sales_reports"), sb.rpc("can_manage_sales_reports")]);
   CAN_SR = srOk === true;
+  // older database without can_manage_sales_reports: only owners/admins could see it, so that is full view
+  SR_FULL = CAN_SR && (srFullErr ? (ME.role === "owner" || ME.role === "admin") : srFull === true);
 }
 
 function shade(hex, pct){
