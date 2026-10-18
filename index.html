@@ -2366,7 +2366,7 @@ function nextStageOf(key){
   // path excludes "Lost" (an off-track outcome)
   const order=STAGES.map(s=>s.key).filter(k=>k!=="Lost");
   if(key==="Won")  return SALES_COMPLETED;   // the sale is closed off
-  if(key==="Lost") return "";
+  if(key==="Lost") return "Lost";            // closed off, nothing further
   const i=order.indexOf(key);
   return (i<0) ? "" : (order[i+1]||"");
 }
@@ -2396,9 +2396,11 @@ function pipeDrop(e,stage){
     // the previous stage, so it is cleared. The consultant sets a new one by
     // opening the client if they want one.
     c.nextDate = "";
+    if(stage === "Lost"){ c.forecastMonth = ""; c.appointmentDate = ""; }
     saveData(); render();
-    toast(stage==="Won" ? `Moved to Won${dated} · next stage ${SALES_COMPLETED}`
-                        : `Moved to ${stage}${dated}`);
+    toast(stage==="Won"  ? `Moved to Won${dated} · next stage ${SALES_COMPLETED}`
+        : stage==="Lost" ? `Moved to Lost${dated} · forecast month, next action and appointment cleared`
+                         : `Moved to ${stage}${dated}`);
   }
   pipeId=null;
 }
@@ -4222,6 +4224,13 @@ function saveClient(e){
      follow-up is cleared, because there is nothing left to chase. Neither a
      next action date nor an appointment date is required, and any appointment
      date already recorded is left alone rather than thrown away. */
+  if(data.currentStage === "Lost"){
+    data.forecastMonth   = "";
+    data.nextStage       = "Lost";
+    data.nextType        = "";
+    data.nextDate        = "";
+    data.appointmentDate = "";
+  }
   let wonMsg = false;
   if(data.currentStage === "Won"){
     data.nextStage = SALES_COMPLETED;
@@ -4316,6 +4325,18 @@ if(docDrop){
   });
 }
 document.getElementById("currentStage").addEventListener("change",syncTypeWraps);
+/* Lost closes the client off: no forecast month, next stage Lost, and no
+   next action or appointment left to chase. Applied the moment Lost is
+   picked so the consultant sees it, and again on save in case. */
+function applyLostToForm(){
+  if(document.getElementById("currentStage").value !== "Lost") return;
+  document.getElementById("forecastMonth").value   = "";
+  document.getElementById("nextStage").value       = "Lost";
+  document.getElementById("nextDate").value        = "";
+  document.getElementById("appointmentDate").value = "";
+  syncTypeWraps();
+}
+document.getElementById("currentStage").addEventListener("change", applyLostToForm);
 document.getElementById("nextStage").addEventListener("change",syncTypeWraps);
 document.getElementById("appointmentDate").addEventListener("input",updateClientEmail);
 document.getElementById("firstName").addEventListener("input",updateClientEmail);
