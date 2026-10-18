@@ -2397,8 +2397,9 @@ function pipeDrop(e,stage){
     // opening the client if they want one.
     c.nextDate = "";
     if(stage === "Lost"){ c.forecastMonth = ""; c.appointmentDate = ""; }
+    if(stage === "Won")  c.appointmentDate = "";
     saveData(); render();
-    toast(stage==="Won"  ? `Moved to Won${dated} · next stage ${SALES_COMPLETED}`
+    toast(stage==="Won"  ? `Moved to Won${dated} · next stage ${SALES_COMPLETED}, next action and appointment cleared`
         : stage==="Lost" ? `Moved to Lost${dated} · forecast month, next action and appointment cleared`
                          : `Moved to ${stage}${dated}`);
   }
@@ -4221,9 +4222,9 @@ function saveClient(e){
   if(!data.firstName||!data.surname){ toast("First name and surname are required."); return; }
 
   /* Won closes the sale off: the next stage becomes Sales Completed and the
-     follow-up is cleared, because there is nothing left to chase. Neither a
-     next action date nor an appointment date is required, and any appointment
-     date already recorded is left alone rather than thrown away. */
+     next action and appointment dates are cleared, because there is nothing
+     left to chase. The stage dates (discovery, presentation, review, won)
+     are separate and are kept for reporting. */
   if(data.currentStage === "Lost"){
     data.forecastMonth   = "";
     data.nextStage       = "Lost";
@@ -4233,9 +4234,10 @@ function saveClient(e){
   }
   let wonMsg = false;
   if(data.currentStage === "Won"){
-    data.nextStage = SALES_COMPLETED;
-    data.nextType  = "";
-    data.nextDate  = "";
+    data.nextStage       = SALES_COMPLETED;
+    data.nextType        = "";
+    data.nextDate        = "";
+    data.appointmentDate = "";
     wonMsg = true;
   }
 
@@ -4337,6 +4339,16 @@ function applyLostToForm(){
   syncTypeWraps();
 }
 document.getElementById("currentStage").addEventListener("change", applyLostToForm);
+/* Won closes the sale off the same way: next stage Sales Completed, and no
+   next action or appointment left to chase. The forecast month is kept. */
+function applyWonToForm(){
+  if(document.getElementById("currentStage").value !== "Won") return;
+  document.getElementById("nextStage").value       = SALES_COMPLETED;
+  document.getElementById("nextDate").value        = "";
+  document.getElementById("appointmentDate").value = "";
+  syncTypeWraps();
+}
+document.getElementById("currentStage").addEventListener("change", applyWonToForm);
 document.getElementById("nextStage").addEventListener("change",syncTypeWraps);
 document.getElementById("appointmentDate").addEventListener("input",updateClientEmail);
 document.getElementById("firstName").addEventListener("input",updateClientEmail);
