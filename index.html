@@ -1063,6 +1063,91 @@
   .seatbar,.invitelink,.temppw,.exp-count,.sr-note{border-radius:6px}
   .sr-chip{border-radius:4px}
   .sr-rate{border-radius:6px}
+
+  /* ============================================================
+     ADD / EDIT CLIENT FORM (Oct 2026)
+     Scoped to .client-modal. Sections sit in cards, two-column
+     grid on desktop, one column on mobile, footer pinned.
+     ============================================================ */
+  .client-modal{max-width:1040px;display:flex;flex-direction:column;max-height:calc(100vh - 68px);overflow:hidden;border-radius:10px}
+  .client-modal .modal-head{flex:none;align-items:flex-start;padding:20px 28px 18px;border-radius:10px 10px 0 0}
+  .client-modal .cm-head-text{min-width:0}
+  .client-modal .modal-head h2{font-size:19px;font-weight:700;letter-spacing:.1px;line-height:1.25}
+  .client-modal .cm-sub{margin:4px 0 0;font-size:13px;color:#c3d2e3;font-weight:400}
+  .client-modal .cm-req-key{color:#f3b4b4;font-weight:700}
+  .client-modal .modal-head .x{flex:none;margin-left:16px;font-size:20px;line-height:1}
+
+  .client-modal .modal-body{flex:1 1 auto;min-height:0;max-height:none;overflow:auto;background:var(--bg);padding:24px 28px}
+  .client-modal .cm-card{position:relative;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 1px 2px rgba(15,23,42,.04);padding:18px 20px 20px;margin-bottom:16px}
+  .client-modal .cm-card:last-child{margin-bottom:0}
+
+  /* section headings: quiet title + hairline divider */
+  .client-modal .section-title,
+  .client-modal .section-title:first-child{
+    margin:0 0 16px;padding:0 0 10px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none;box-shadow:none;
+    font-size:13px;font-weight:700;letter-spacing:.2px;text-transform:none;color:var(--navy);position:static;
+  }
+  .client-modal .section-title::before{content:none}
+  .client-modal .cm-title-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:8px}
+  .client-modal .cm-title-row .btn{font-size:12.5px}
+  .client-modal .cm-help{margin:-6px 0 14px;font-size:12.5px;line-height:1.5;color:var(--subtle)}
+  .client-modal .cm-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* grid: two columns on desktop */
+  .client-modal .grid{gap:16px 20px}
+  .client-modal .g2,.client-modal .g3,.client-modal .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .client-modal .cm-addr{grid-template-columns:minmax(0,1fr) minmax(0,3fr)}
+  .client-modal .grid > .field{grid-column:auto !important}
+  .client-modal .grid > .field.full{grid-column:1/-1 !important}
+
+  /* labels + inputs */
+  .client-modal .field{gap:6px}
+  .client-modal .field label{font-size:12.5px;font-weight:700;color:#475569;text-transform:none;letter-spacing:0}
+  .client-modal .req::after{content:" *";color:#b45353;font-weight:700}
+  .client-modal input:not([type=checkbox]):not([type=file]),
+  .client-modal select{height:40px;padding:0 12px;font-size:14px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;box-shadow:none;color:var(--ink)}
+  .client-modal textarea{padding:10px 12px;font-size:14px;line-height:1.5;border:1px solid #cbd5e1;border-radius:6px;background:#fff;box-shadow:none;min-height:88px}
+  .client-modal input:not([type=checkbox]):not([type=file]):hover,.client-modal select:hover,.client-modal textarea:hover{border-color:#94a3b8;background:#fff}
+  .client-modal input:not([type=checkbox]):not([type=file]):focus,.client-modal select:focus,.client-modal textarea:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(42,91,140,.18);outline:none}
+  .client-modal input::placeholder,.client-modal textarea::placeholder{color:#94a3b8}
+  .client-modal select{padding-right:30px}
+  .client-modal .money-input input:not([type=checkbox]){padding-left:26px}
+  .client-modal .money-input .money-prefix{left:12px;color:var(--subtle)}
+  .client-modal .btn,.client-modal button{font-family:inherit}
+
+  /* stage dates / client email inner panels */
+  .client-modal #stageDatesWrap,.client-modal #clientEmailWrap{margin-top:16px;border:1px solid var(--line);border-left:3px solid var(--primary);border-radius:6px;background:#f8fafc;padding:14px 16px}
+  .client-modal .stage-dates-head{font-size:12px;font-weight:700;color:var(--navy);letter-spacing:.6px}
+  .client-modal .stage-dates-head .sd-note{color:var(--subtle)}
+  .client-modal #stageDates .field.sd-current label{color:var(--primary)}
+  .client-modal #clientEmailWrap textarea{min-height:140px}
+
+  /* repeating rows inside cards */
+  .client-modal .task-edit,.client-modal .dwelling-edit{background:#f8fafc;border:1px solid var(--line);border-radius:6px}
+  .client-modal .task-edit input[type=text],.client-modal .task-edit input[type=date]{height:36px}
+  .client-modal .task-edit .rm,.client-modal .dwelling-edit .rm{border-radius:6px;border-color:#e9c3c3}
+  .client-modal .dwelling-edit .dw-title{font-size:13px;color:var(--navy)}
+  .client-modal .doc-drop{min-height:150px}
+
+  /* footer: pinned, Cancel + Save right-aligned */
+  .client-modal .modal-foot{flex:none;position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:14px 28px;border-radius:0 0 10px 10px;box-shadow:0 -2px 8px rgba(15,23,42,.04)}
+  .client-modal .modal-foot .btn{height:40px;padding:0 18px}
+  .client-modal #cancelBtn{background:#fff;color:#334155;border:1px solid #cbd5e1}
+  .client-modal #cancelBtn:hover{background:#f8fafc;border-color:#94a3b8}
+  .client-modal #saveBtn{background:var(--primary);border-color:var(--primary);color:#fff;min-width:120px;justify-content:center}
+  .client-modal #saveBtn:hover{background:var(--primary-deep);border-color:var(--primary-deep)}
+
+  @media (max-width:720px){
+    .overlay#overlay{padding:0}
+    .client-modal{max-height:100vh;height:100vh;border-radius:0}
+    .client-modal .modal-head{border-radius:0;padding:16px 18px}
+    .client-modal .modal-body{padding:16px}
+    .client-modal .cm-card{padding:16px}
+    .client-modal .g2,.client-modal .g3,.client-modal .g4,.client-modal .cm-addr{grid-template-columns:1fr}
+    .client-modal .modal-foot{padding:12px 16px;border-radius:0}
+    .client-modal .task-edit{flex-wrap:wrap}
+    .client-modal .task-edit .tk-title{flex:1 1 100%}
+  }
 </style>
 </head>
 <body>
@@ -1360,114 +1445,137 @@
 
 <!-- ===================== MODAL ===================== -->
 <div class="overlay" id="overlay">
-  <div class="modal">
+  <div class="modal client-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-head">
-      <h2 id="modalTitle">Add Client</h2>
-      <button class="x" id="closeModal">&times;</button>
+      <div class="cm-head-text">
+        <h2 id="modalTitle">Add Client</h2>
+        <p class="cm-sub">Client record for the sales pipeline. Fields marked <span class="cm-req-key">*</span> are required.</p>
+      </div>
+      <button class="x" id="closeModal" aria-label="Close">&times;</button>
     </div>
     <div class="modal-body">
       <form id="clientForm">
         <input type="hidden" id="clientId" />
 
-        <div class="section-title">Client details</div>
-        <div class="grid g2">
-          <div class="field"><label class="req">First name</label><input type="text" id="firstName" required /></div>
-          <div class="field"><label class="req">Surname</label><input type="text" id="surname" required /></div>
-          <div class="field"><label>Email address</label><input type="email" id="email" placeholder="name@email.com" /></div>
-          <div class="field"><label>Phone number</label><input type="tel" id="phone" placeholder="04xx xxx xxx" /></div>
-        </div>
-
-        <div class="section-title">Primary build address</div>
-        <div class="grid g4">
-          <div class="field"><label>Street no.</label><input type="text" id="streetNumber" placeholder="12" /></div>
-          <div class="field" style="grid-column:span 3"><label>Street name</label><input type="text" id="streetName" placeholder="Wattle Grove" /></div>
-          <div class="field"><label>Suburb</label><input type="text" id="suburb" placeholder="Clyde North" /></div>
-          <div class="field" style="grid-column:span 3"><label>Estate</label><input type="text" id="estate" placeholder="Meridian Estate" /></div>
-        </div>
-
-        <div class="section-title">Sales process</div>
-        <div class="grid g4">
-          <div class="field"><label>Enquiry date</label><input type="date" id="enquiryDate" /></div>
-          <div class="field"><label>Build type</label><select id="buildType"></select></div>
-          <div class="field"><label>Buyer type</label><select id="buyerType"></select></div>
-          <div class="field"><label>Lead source</label><select id="leadSource"></select></div>
-          <div class="field"><label>Forecast month</label><select id="forecastMonth"></select></div>
-          <div class="field"><label>Budget</label><div class="money-input"><span class="money-prefix">$</span><input type="text" inputmode="numeric" id="budget" placeholder="650,000" /></div></div>
-          <div class="field"><label>Timing</label><select id="timing"></select></div>
-          <div class="field" id="ownerWrap" style="display:none"><label>Assigned to</label><select id="ownerId"></select></div>
-        </div>
-
-        <div class="grid g2" style="margin-top:14px">
-          <div class="field">
-            <label>Current stage</label>
-            <select id="currentStage" data-role="stage"></select>
+        <section class="cm-card">
+          <div class="section-title">Client details</div>
+          <div class="grid g2">
+            <div class="field"><label class="req">First name</label><input type="text" id="firstName" required /></div>
+            <div class="field"><label class="req">Surname</label><input type="text" id="surname" required /></div>
           </div>
-          <div class="field stage-type-wrap" id="currentTypeWrap">
-            <label>Presenting</label>
-            <select id="currentType"><option value="">—</option><option value="Estimate">Estimate</option><option value="Plans">Plans</option></select>
+        </section>
+
+        <section class="cm-card">
+          <div class="section-title">Contact</div>
+          <div class="grid g2">
+            <div class="field"><label>Email address</label><input type="email" id="email" placeholder="name@email.com" /></div>
+            <div class="field"><label>Phone number</label><input type="tel" id="phone" placeholder="04xx xxx xxx" /></div>
           </div>
-        </div>
+        </section>
 
-        <div id="stageDatesWrap" style="display:none">
-          <div class="stage-dates-head">
-            <span>Stage dates</span>
-            <span class="sd-note" id="stageDatesNote"></span>
+        <section class="cm-card">
+          <div class="section-title">Property / build address</div>
+          <div class="grid g4 cm-addr">
+            <div class="field"><label>Street no.</label><input type="text" id="streetNumber" placeholder="12" /></div>
+            <div class="field" style="grid-column:span 3"><label>Street name</label><input type="text" id="streetName" placeholder="Wattle Grove" /></div>
+            <div class="field"><label>Suburb</label><input type="text" id="suburb" placeholder="Clyde North" /></div>
+            <div class="field" style="grid-column:span 3"><label>Estate</label><input type="text" id="estate" placeholder="Meridian Estate" /></div>
           </div>
-          <div class="grid g4" id="stageDates"></div>
-        </div>
+        </section>
 
-        <div class="grid g4" style="margin-top:14px">
-          <div class="field"><label>Next stage</label><select id="nextStage" data-role="stage"></select></div>
-          <div class="field stage-type-wrap" id="nextTypeWrap">
-            <label>Presenting</label>
-            <select id="nextType"><option value="">—</option><option value="Estimate">Estimate</option><option value="Plans">Plans</option></select>
+        <section class="cm-card">
+          <div class="section-title">Sales information</div>
+          <div class="grid g4">
+            <div class="field"><label>Enquiry date</label><input type="date" id="enquiryDate" /></div>
+            <div class="field"><label>Build type</label><select id="buildType"></select></div>
+            <div class="field"><label>Buyer type</label><select id="buyerType"></select></div>
+            <div class="field"><label>Lead source</label><select id="leadSource"></select></div>
+            <div class="field"><label>Forecast month</label><select id="forecastMonth"></select></div>
+            <div class="field"><label>Budget</label><div class="money-input"><span class="money-prefix">$</span><input type="text" inputmode="numeric" id="budget" placeholder="650,000" /></div></div>
+            <div class="field"><label>Timing</label><select id="timing"></select></div>
+            <div class="field" id="ownerWrap" style="display:none"><label>Assigned to</label><select id="ownerId"></select></div>
           </div>
-          <div class="field"><label>Next action date</label><input type="date" id="nextDate" /></div>
-          <div class="field"><label>Appointment date</label><input type="date" id="appointmentDate" /></div>
-        </div>
+        </section>
 
-        <div id="clientEmailWrap" style="display:none">
-          <div class="stage-dates-head">
-            <span>Client update email</span>
-            <span class="sd-note">Drafted from the stage dates above — edit before sending</span>
+        <section class="cm-card">
+          <div class="section-title">Stage &amp; next action</div>
+          <div class="grid g2">
+            <div class="field">
+              <label>Current stage</label>
+              <select id="currentStage" data-role="stage"></select>
+            </div>
+            <div class="field stage-type-wrap" id="currentTypeWrap">
+              <label>Presenting</label>
+              <select id="currentType"><option value="">—</option><option value="Estimate">Estimate</option><option value="Plans">Plans</option></select>
+            </div>
           </div>
-          <textarea id="clientEmailText" rows="7"></textarea>
-          <div style="margin-top:10px">
-            <button type="button" class="btn btn-light btn-sm" id="copyClientEmailBtn">Copy to clipboard</button>
+          <div id="stageDatesWrap" style="display:none">
+            <div class="stage-dates-head">
+              <span>Stage dates</span>
+              <span class="sd-note" id="stageDatesNote"></span>
+            </div>
+            <div class="grid g4" id="stageDates"></div>
           </div>
-        </div>
-
-        <div class="field full" style="margin-top:14px"><label>Notes</label><textarea id="notes" rows="3" placeholder="Site cuts, budget, competitor, follow-up context…"></textarea></div>
-
-        <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
-          <span>Tasks</span>
-          <button type="button" class="btn btn-light btn-sm" id="addTaskRow">+ Add task</button>
-        </div>
-        <p class="sub-cell" style="margin:-4px 0 10px">Add follow-up tasks with the date they need to be done. Dated tasks highlight as they approach and appear on the pipeline card and dashboard.</p>
-        <div id="taskList"></div>
-
-        <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
-          <span>Documents</span>
-          <button type="button" class="btn btn-light btn-sm" id="docUploadBtn">+ Upload</button>
-        </div>
-        <p class="sub-cell" style="margin:-4px 0 10px">Attach plans, contracts, quotes or photos for this client. PDF, images, Word and Excel, up to 20&nbsp;MB each.</p>
-        <div id="docDrop" class="doc-drop">
-          <div class="doc-drop-hint">
-            <strong>Drop files here</strong>
-            <span>or click anywhere in this box to browse</span>
+          <div class="grid g4" style="margin-top:14px">
+            <div class="field"><label>Next stage</label><select id="nextStage" data-role="stage"></select></div>
+            <div class="field stage-type-wrap" id="nextTypeWrap">
+              <label>Presenting</label>
+              <select id="nextType"><option value="">—</option><option value="Estimate">Estimate</option><option value="Plans">Plans</option></select>
+            </div>
+            <div class="field"><label>Next action date</label><input type="date" id="nextDate" /></div>
+            <div class="field"><label>Appointment date</label><input type="date" id="appointmentDate" /></div>
           </div>
-          <div id="docList"></div>
-        </div>
-        <input type="file" id="docFile" multiple style="display:none"
-               accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.doc,.docx,.xls,.xlsx,.csv,.txt" />
+          <div id="clientEmailWrap" style="display:none">
+            <div class="stage-dates-head">
+              <span>Client update email</span>
+              <span class="sd-note">Drafted from the stage dates above — edit before sending</span>
+            </div>
+            <textarea id="clientEmailText" rows="7"></textarea>
+            <div style="margin-top:10px">
+              <button type="button" class="btn btn-light btn-sm" id="copyClientEmailBtn">Copy to clipboard</button>
+            </div>
+          </div>
+        </section>
 
-        <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
-          <span>Additional dwellings</span>
-          <button type="button" class="btn btn-light btn-sm" id="addDwelling">+ Add dwelling</button>
-        </div>
-        <p class="sub-cell" style="margin:-4px 0 10px">The primary build address above is dwelling 1. Add more if this client is building/considering multiple homes or house-and-land packages.</p>
-        <div id="dwellingList"></div>
+        <section class="cm-card">
+          <div class="section-title">Notes</div>
+          <div class="field full"><label class="cm-sr">Notes</label><textarea id="notes" rows="3" placeholder="Site cuts, budget, competitor, follow-up context…"></textarea></div>
+        </section>
 
+        <section class="cm-card">
+          <div class="section-title cm-title-row">
+            <span>Tasks</span>
+            <button type="button" class="btn btn-light btn-sm" id="addTaskRow">+ Add task</button>
+          </div>
+          <p class="cm-help">Add follow-up tasks with the date they need to be done. Dated tasks highlight as they approach and appear on the pipeline card and dashboard.</p>
+          <div id="taskList"></div>
+        </section>
+
+        <section class="cm-card">
+          <div class="section-title cm-title-row">
+            <span>Documents</span>
+            <button type="button" class="btn btn-light btn-sm" id="docUploadBtn">+ Upload</button>
+          </div>
+          <p class="cm-help">Attach plans, contracts, quotes or photos for this client. PDF, images, Word and Excel, up to 20&nbsp;MB each.</p>
+          <div id="docDrop" class="doc-drop">
+            <div class="doc-drop-hint">
+              <strong>Drop files here</strong>
+              <span>or click anywhere in this box to browse</span>
+            </div>
+            <div id="docList"></div>
+          </div>
+          <input type="file" id="docFile" multiple style="display:none"
+                 accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.doc,.docx,.xls,.xlsx,.csv,.txt" />
+        </section>
+
+        <section class="cm-card">
+          <div class="section-title cm-title-row">
+            <span>Additional dwellings</span>
+            <button type="button" class="btn btn-light btn-sm" id="addDwelling">+ Add dwelling</button>
+          </div>
+          <p class="cm-help">The primary build address above is dwelling 1. Add more if this client is building/considering multiple homes or house-and-land packages.</p>
+          <div id="dwellingList"></div>
+        </section>
       </form>
     </div>
     <div class="modal-foot">
