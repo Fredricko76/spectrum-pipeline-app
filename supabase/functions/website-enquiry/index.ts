@@ -21,7 +21,15 @@ const FIELD_ALIASES: Record<string, string[]> = {
   email: ["email", "email_address"],
   phone: ["phone", "phone_number", "mobile"],
   interested_in: ["interested_in", "interest", "build_type"],
-  build_location: ["build_location", "location", "where_to_build", "suburb", "city", "postal_code", "postcode"],
+  build_location: [
+    "build_location",
+    "location",
+    "where_to_build",
+    "suburb",
+    "city",
+    "postal_code",
+    "postcode",
+  ],
   journey_stage: ["journey_stage", "stage_of_journey", "building_stage"],
   has_land: ["has_land", "land", "own_land"],
   comments: ["comments", "message", "comment", "notes"],
@@ -51,9 +59,7 @@ const json = (status: number, body: unknown) =>
   });
 
 const clean = (v: unknown, max = 500) =>
-  typeof v === "string" || typeof v === "number"
-    ? String(v).replace(/\s+/g, " ").trim().slice(0, max)
-    : "";
+  typeof v === "string" || typeof v === "number" ? String(v).replace(/\s+/g, " ").trim().slice(0, max) : "";
 
 function pick(body: Record<string, unknown>, field: string, max = 500): string {
   const lower: Record<string, unknown> = {};
@@ -235,7 +241,9 @@ Deno.serve(async (req) => {
   });
 
   if (error) {
-    if ((error as { code?: string }).code === "23505") return json(200, isGoogle ? {} : { ok: true, duplicate: true });
+    if ((error as { code?: string }).code === "23505") {
+      return json(200, isGoogle ? {} : { ok: true, duplicate: true });
+    }
     console.error("insert failed", error);
     return json(500, { ok: false, error: "Could not save enquiry" });
   }

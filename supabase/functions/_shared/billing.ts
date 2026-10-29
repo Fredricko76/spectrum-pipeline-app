@@ -4,6 +4,7 @@
 //   STRIPE_WEBHOOK_SECRET    whsec_... for the stripe-webhook endpoint
 //   APP_URL                  e.g. https://spectrumsalesonline.net (no trailing slash)
 //   STRIPE_PORTAL_CONFIG_ID  bpc_... dedicated Customer Portal configuration
+// APP_URL and STRIPE_PORTAL_CONFIG_ID fall back to TEST_PROJECT_DEFAULTS on known test projects.
 //   ALLOWED_ORIGINS          optional, comma-separated extra CORS origins (e.g. a deploy preview)
 //   SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY are injected by Supabase.
 import Stripe from "npm:stripe@23.0.1";
@@ -20,8 +21,28 @@ export type PlanKey = keyof typeof PLAN_LOOKUP_KEYS;
 
 export const TRIAL_DAYS = 14;
 
+export const PRODUCTION_PROJECT_REF = "qjkmkmmrgtoaocygymqo";
+
+/**
+ * NON-SECRET defaults for known test projects, used only when the env var is not set.
+ * Production has no defaults: every value must come from its function secrets.
+ * Never put a Stripe secret key or webhook signing secret here.
+ */
+const TEST_PROJECT_DEFAULTS: Record<string, Record<string, string>> = {
+  // Supabase development branch "billing-test" + Netlify deploy preview of PR #4 + Stripe TEST mode
+  wwdhiailerkmwpnuqpvm: {
+    APP_URL: "https://deploy-preview-4--spectrum-pipeline-app.netlify.app",
+    STRIPE_PORTAL_CONFIG_ID: "bpc_1UW23JS3hxQFvThdv3ugAPBY",
+  },
+};
+
+export function projectRef(): string {
+  const url = Deno.env.get("SUPABASE_URL") ?? "";
+  return url.match(/^https:\/\/([a-z0-9]+)\.supabase\.co/)?.[1] ?? "";
+}
+
 export function env(name: string): string {
-  const v = Deno.env.get(name);
+  const v = Deno.env.get(name) || TEST_PROJECT_DEFAULTS[projectRef()]?.[name];
   if (!v) throw new Error(`Missing env var ${name}`);
   return v;
 }
@@ -33,7 +54,12 @@ export function appUrl(): string {
 let _stripe: Stripe | null = null;
 export function stripe(): Stripe {
   if (!_stripe) {
-    _stripe = new Stripe(env("STRIPE_SECRET_KEY"), {
+    const key = env("STRIPE_SECRET_KEY");
+    // a live key may only ever be used by the production project
+    if (/^(sk|rk)_live_/.test(key) && projectRef() !== PRODUCTION_PROJECT_REF) {
+      throw new Error("Refusing to use a live Stripe key outside the production project");
+    }
+    _stripe = new Stripe(key, {
       httpClient: Stripe.createFetchHttpClient(),
       appInfo: { name: "spectrum-pipeline-billing" },
     });

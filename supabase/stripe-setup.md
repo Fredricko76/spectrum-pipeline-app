@@ -86,6 +86,14 @@ Customer Portal configuration: `bpc_1UW23JS3hxQFvThdv3ugAPBY` -> `STRIPE_PORTAL_
 It is the test-mode *default* configuration only because it is the only one there; in live mode
 the script's new configuration is not the default, and the functions always pass it explicitly.
 
-Test mode has Stripe Tax active (head office VIC) but **no AU registration yet** - add one
-(Dashboard > Tax > Registrations, Australia GST) or Checkout will charge $0 GST.
-No webhook endpoint yet: create it once `stripe-webhook` is deployed to a test Supabase project.
+AU GST registration (test): `taxreg_1UW2OeS3hxQFvThdTxit9l1t` - verified 10% GST on an exclusive price.
+Webhook endpoint (test): `we_1UW2O9S3hxQFvThdk30rk1L3` ->
+`https://wwdhiailerkmwpnuqpvm.supabase.co/functions/v1/stripe-webhook` (Supabase branch billing-test).
+Its signing secret is shown only in the Dashboard (Developers > Webhooks > endpoint > Reveal) and must be
+set as `STRIPE_WEBHOOK_SECRET` on the branch. Smart Retries / "mark unpaid" are Dashboard-only settings.
+
+## billing-test environment
+- Supabase branch `billing-test` (`wwdhiailerkmwpnuqpvm`): all 58 production migrations + `stripe_billing`,
+  fake seed data only. Function secrets needed there: `STRIPE_SECRET_KEY` (test key) and `STRIPE_WEBHOOK_SECRET`.
+  `APP_URL` and `STRIPE_PORTAL_CONFIG_ID` default from `TEST_PROJECT_DEFAULTS` in `_shared/billing.ts`.
+- Netlify deploy previews / branch deploys point at the branch (`scripts/preview-supabase.sh`).
