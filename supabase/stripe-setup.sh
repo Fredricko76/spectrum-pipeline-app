@@ -84,6 +84,7 @@ bpc=$(stripe_call POST /billing_portal/configurations \
   -d "features[subscription_update][enabled]=true" \
   -d "features[subscription_update][default_allowed_updates][]=price" \
   -d "features[subscription_update][proration_behavior]=create_prorations" \
+  -d "features[subscription_update][trial_update_behavior]=continue_trial" \
   -d "metadata[app]=spectrum-pipeline" \
   "${prod_args[@]}" \
   -H "Idempotency-Key: pipeline-portal-config-v1" | jget "d['id']")

@@ -73,3 +73,19 @@ Subscriptions (read), Prices (read), Products (read).
 | Duplicate event | Dashboard -> resend an event | `{duplicate:true}`, no change |
 | Untagged event | Create a subscription for another product | `{ignored: ...}`, no change |
 | Comped company | Any Hotondo company | No billing UI, never changed by the webhook |
+
+## Test-mode objects (created 2026-10-30, account acct_1POqw5S3hxQFvThd, livemode=false)
+
+| Plan | Product | Price (lookup key) | AUD ex GST |
+|---|---|---|---|
+| Starter (3 seats) | prod_VX6FpiNgwdnFQE | price_1UW22qS3hxQFvThdwrwY8T91 (`pipeline_starter_monthly`) | 149.00/mo |
+| Team (10 seats) | prod_VX6FXLs6MYsr7v | price_1UW22sS3hxQFvThdozmt2fl9 (`pipeline_team_monthly`) | 349.00/mo |
+| Network (25 seats) | prod_VX6FifliOhK29x | price_1UW22vS3hxQFvThdr8dmJXgN (`pipeline_network_monthly`) | 799.00/mo |
+
+Customer Portal configuration: `bpc_1UW23JS3hxQFvThdv3ugAPBY` -> `STRIPE_PORTAL_CONFIG_ID` (test).
+It is the test-mode *default* configuration only because it is the only one there; in live mode
+the script's new configuration is not the default, and the functions always pass it explicitly.
+
+Test mode has Stripe Tax active (head office VIC) but **no AU registration yet** - add one
+(Dashboard > Tax > Registrations, Australia GST) or Checkout will charge $0 GST.
+No webhook endpoint yet: create it once `stripe-webhook` is deployed to a test Supabase project.
