@@ -68,16 +68,23 @@ Deno.serve(async (req) => {
   if (!signature) return reply(400, { error: "Missing signature" });
   const raw = await req.text();
 
+  const whsec = env("STRIPE_WEBHOOK_SECRET");
+  if (!whsec.startsWith("whsec_")) {
+    console.error("STRIPE_WEBHOOK_SECRET is not a whsec_ signing secret");
+    return reply(500, { error: "Webhook not configured" });
+  }
+
   let event: Stripe.Event;
   try {
     event = await stripe().webhooks.constructEventAsync(
       raw,
       signature,
-      env("STRIPE_WEBHOOK_SECRET"),
+      whsec,
       undefined,
       cryptoProvider,
     );
   } catch (_e) {
+    console.warn("webhook signature check failed");
     return reply(400, { error: "Bad signature" });
   }
 

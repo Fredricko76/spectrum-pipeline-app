@@ -42,7 +42,7 @@ export function projectRef(): string {
 }
 
 export function env(name: string): string {
-  const v = Deno.env.get(name) || TEST_PROJECT_DEFAULTS[projectRef()]?.[name];
+  const v = Deno.env.get(name)?.trim() || TEST_PROJECT_DEFAULTS[projectRef()]?.[name];
   if (!v) throw new Error(`Missing env var ${name}`);
   return v;
 }
@@ -54,7 +54,13 @@ export function appUrl(): string {
 let _stripe: Stripe | null = null;
 export function stripe(): Stripe {
   if (!_stripe) {
-    const key = env("STRIPE_SECRET_KEY");
+    const key = env("STRIPE_SECRET_KEY").trim();
+    // catch a mis-pasted secret early, with a message that never echoes the value
+    if (!/^(sk|rk)_(test|live)_[A-Za-z0-9]{10,}$/.test(key)) {
+      throw new Error(
+        "STRIPE_SECRET_KEY is not a Stripe secret/restricted key (expected sk_test_... or rk_test_...)",
+      );
+    }
     // a live key may only ever be used by the production project
     if (/^(sk|rk)_live_/.test(key) && projectRef() !== PRODUCTION_PROJECT_REF) {
       throw new Error("Refusing to use a live Stripe key outside the production project");
