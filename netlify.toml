@@ -4,6 +4,16 @@
 [build]
 publish = "."
 
+# Production is untouched: no build command, so the repo is published exactly as
+# committed and talks to the production Supabase project. Only deploy previews and
+# branch deploys are rewritten to use the Supabase "billing-test" development branch
+# (scripts/preview-supabase.sh, which also refuses to run in any other context).
+[context.deploy-preview]
+command = "sh scripts/preview-supabase.sh"
+
+[context.branch-deploy]
+command = "sh scripts/preview-supabase.sh"
+
 [[headers]]
 for = "/*"
 [headers.values]
@@ -12,3 +22,17 @@ X-Frame-Options = "DENY"
 X-Content-Type-Options = "nosniff"
 Referrer-Policy = "strict-origin-when-cross-origin"
 Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+
+# The site publishes the repo root, so keep the Supabase sources, tests and helper
+# scripts from being served as public files.
+[[redirects]]
+from = "/supabase/*"
+to = "/404.html"
+status = 404
+force = true
+
+[[redirects]]
+from = "/scripts/*"
+to = "/404.html"
+status = 404
+force = true
