@@ -1,0 +1,15 @@
+# Supabase CLI config (used by `supabase functions deploy` / `supabase start`).
+# Only function auth settings are configured here; everything else uses CLI defaults.
+project_id = "spectrum-pipeline-app"
+
+[functions.website-enquiry]
+verify_jwt = false          # matches the live deployment (public lead intake, keyed by site key)
+
+[functions.billing-checkout]
+verify_jwt = true
+
+[functions.billing-portal]
+verify_jwt = true
+
+[functions.stripe-webhook]
+verify_jwt = false          # Stripe can't send a Supabase JWT; the Stripe signature is verified instead
