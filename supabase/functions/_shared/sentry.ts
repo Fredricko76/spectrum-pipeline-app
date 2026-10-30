@@ -54,6 +54,8 @@ function ready(): boolean {
         delete event.user;
         delete event.request;
         delete event.server_name;
+        // the edge runtime's own IP would otherwise be recorded as a "user"
+        event.sdk = { ...event.sdk, settings: { ...event.sdk?.settings, infer_ip: "never" } } as typeof event.sdk;
         if (event.message) event.message = scrub(event.message);
         scrubDeep(event.exception);
         scrubDeep(event.extra);
