@@ -38,7 +38,16 @@
   window.Sentry.init({
     dsn: "https://3595a09c8926356260472854d98dafd7@o4512347560607744.ingest.us.sentry.io/4512347564277760",
     environment: env,
-    sendDefaultPii: false,
+    sendDefaultPii: false, // pre-v11 name, kept for clarity
+    // v11 privacy switches: no IP/user inference, cookies, headers, bodies or URL query params
+    dataCollection: {
+      userInfo: false,
+      cookies: false,
+      httpHeaders: false,
+      httpBodies: [],
+      urlQueryParams: false,
+      graphQL: { document: false, variables: false }
+    },
     tracesSampleRate: 0,
     maxBreadcrumbs: 30,
     beforeBreadcrumb: function (b) {

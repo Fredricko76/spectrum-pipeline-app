@@ -41,6 +41,15 @@ function ready(): boolean {
       environment,
       defaultIntegrations: false, // no global handlers, no Deno.serve wrapping, no tracing
       tracesSampleRate: 0,
+      // no IP/user inference, cookies, headers, bodies or URL query params
+      dataCollection: {
+        userInfo: false,
+        cookies: false,
+        httpHeaders: false,
+        httpBodies: [],
+        urlQueryParams: false,
+        graphQL: { document: false, variables: false },
+      },
       beforeSend(event) {
         delete event.user;
         delete event.request;
