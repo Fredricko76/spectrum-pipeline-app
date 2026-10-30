@@ -45,14 +45,29 @@ export function projectRef(): string {
   return url.match(/^https:\/\/([a-z0-9]+)\.supabase\.co/)?.[1] ?? "";
 }
 
+/** Read an env var by exact name, else by a name that matches once stray spaces are trimmed
+ *  (a dashboard secret saved as "STRIPE_SECRET_KEY " with a trailing space). */
+function getEnv(name: string): string | undefined {
+  const exact = Deno.env.get(name);
+  if (exact) return exact;
+  const alt = Object.keys(Deno.env.toObject()).find((k) => k !== name && k.trim() === name);
+  if (!alt) return undefined;
+  console.warn(`env var ${name} found under a name with extra spaces (${JSON.stringify(alt)}); rename it to ${name}`);
+  return Deno.env.get(alt);
+}
+
+/** Log a missing env var with the NAMES (never values) of similar vars, to spot a mistyped secret name. */
+function missingEnv(name: string): never {
+  const similar = Object.keys(Deno.env.toObject())
+    .filter((k) => /APP|STRIPE|PORTAL|URL|KEY|SECRET/i.test(k) && !k.startsWith("SUPABASE_") && k !== name)
+    .map((k) => JSON.stringify(k)); // quoted so stray spaces in a name are visible
+  console.error(`Missing env var ${name}; similar names set: [${similar.join(", ")}]`);
+  throw new Error(`Missing env var ${name}`);
+}
+
 export function env(name: string): string {
-  const v = Deno.env.get(name)?.trim() || TEST_PROJECT_DEFAULTS[projectRef()]?.[name];
-  if (!v) {
-    // names only (never values): helps spot a secret saved under a slightly different name
-    const similar = Object.keys(Deno.env.toObject()).filter((k) => /APP|STRIPE|PORTAL|URL/i.test(k) && !k.startsWith("SUPABASE_"));
-    console.error(`Missing env var ${name}; similar names set: ${JSON.stringify(similar)}`);
-    throw new Error(`Missing env var ${name}`);
-  }
+  const v = getEnv(name)?.trim() || TEST_PROJECT_DEFAULTS[projectRef()]?.[name];
+  if (!v) missingEnv(name);
   return v;
 }
 
@@ -90,8 +105,8 @@ export function describeSecret(raw: string): string {
 
 /** Read a secret env var, normalise it and check its prefix; failures log safe diagnostics only. */
 export function secretEnv(name: string, prefix: RegExp, expected: string, minLength = 20): string {
-  const raw = Deno.env.get(name);
-  if (!raw) throw new Error(`Missing env var ${name}`);
+  const raw = getEnv(name);
+  if (!raw) missingEnv(name);
   const v = normaliseSecret(raw);
   if (!prefix.test(v) || v.length < minLength) {
     console.error(`${name} rejected: ${describeSecret(raw)}`);
