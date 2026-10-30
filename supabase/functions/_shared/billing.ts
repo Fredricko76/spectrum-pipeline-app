@@ -24,11 +24,15 @@ export const TRIAL_DAYS = 14;
 export const PRODUCTION_PROJECT_REF = "qjkmkmmrgtoaocygymqo";
 
 /**
- * NON-SECRET defaults for known test projects, used only when the env var is not set.
- * Production has no defaults: every value must come from its function secrets.
+ * NON-SECRET defaults per project, used only when the env var is not set (a set secret always wins).
  * Never put a Stripe secret key or webhook signing secret here.
  */
 const TEST_PROJECT_DEFAULTS: Record<string, Record<string, string>> = {
+  // Production + live Stripe (public values; secrets STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET are never defaulted)
+  [PRODUCTION_PROJECT_REF]: {
+    APP_URL: "https://spectrumsalesonline.net",
+    STRIPE_PORTAL_CONFIG_ID: "bpc_1UW5P6S3hxQFvThdwJf0hbAS",
+  },
   // Supabase development branch "billing-test" + Netlify deploy preview of PR #4 + Stripe TEST mode
   wwdhiailerkmwpnuqpvm: {
     APP_URL: "https://deploy-preview-4--spectrum-pipeline-app.netlify.app",
@@ -43,7 +47,12 @@ export function projectRef(): string {
 
 export function env(name: string): string {
   const v = Deno.env.get(name)?.trim() || TEST_PROJECT_DEFAULTS[projectRef()]?.[name];
-  if (!v) throw new Error(`Missing env var ${name}`);
+  if (!v) {
+    // names only (never values): helps spot a secret saved under a slightly different name
+    const similar = Object.keys(Deno.env.toObject()).filter((k) => /APP|STRIPE|PORTAL|URL/i.test(k) && !k.startsWith("SUPABASE_"));
+    console.error(`Missing env var ${name}; similar names set: ${JSON.stringify(similar)}`);
+    throw new Error(`Missing env var ${name}`);
+  }
   return v;
 }
 
