@@ -60,8 +60,19 @@ serve(async (req) => {
     if (error) throw new Error(`Could not save customer id: ${error.message}`);
   }
 
+  // Ask Stripe too: the webhook may not have recorded an earlier Checkout yet (or failed), and
+  // the database alone would then let the company start a second subscription and trial.
+  const existing = await s.subscriptions.list({ customer: customerId, status: "all", limit: 20 });
+  const ours = existing.data.filter((x) => x.metadata?.app === APP_TAG);
+  if (ours.some((x) => LIVE_STATUSES.has(x.status))) {
+    return json(req, 409, {
+      error: "You already have a subscription. Use Billing to change plan.",
+      portal: true,
+    });
+  }
+
   // A company gets one free trial, ever.
-  const trialEligible = !me.stripeSubscriptionId && !me.trialEndsAt;
+  const trialEligible = !me.stripeSubscriptionId && !me.trialEndsAt && ours.length === 0;
 
   const session = await s.checkout.sessions.create({
     mode: "subscription",
