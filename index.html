@@ -850,6 +850,8 @@
   .tag.ok{background:var(--green-soft);color:var(--green-deep)}
   .tag.off{background:#fdf0f0;color:#9b2c2c}
   .tag.plat{background:#eef0f7;color:#44507a}
+  .tag.warn{background:#fdf6e3;color:#8a5a00}
+  .comp-toggle{display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;white-space:nowrap}
   .seat-mini{width:58px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;font:inherit;font-size:12px}
   .danger-zone{border-left:4px solid var(--red);background:#fdf0f0;border-radius:9px;padding:12px 14px;margin-top:6px}
 
@@ -1148,6 +1150,32 @@
     .client-modal .task-edit{flex-wrap:wrap}
     .client-modal .task-edit .tk-title{flex:1 1 100%}
   }
+
+  /* ---------- billing (hidden entirely for comped companies) ---------- */
+  .billbar{display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:10px 28px;font-size:13.5px;border-bottom:1px solid var(--line);background:var(--primary-soft);color:var(--navy)}
+  .billbar[hidden]{display:none}
+  .billbar.warn{background:#fdf6e7;color:#7a5113;border-bottom-color:#f1dfb5}
+  .billbar.lock{background:#fdecea;color:#8f2b27;border-bottom-color:#f5c6c3}
+  .billbar .bb-msg strong{font-weight:700}
+  .billbar .btn{white-space:nowrap}
+  .plan-intro{color:var(--muted);font-size:14px;margin:0 0 16px}
+  .plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media (max-width:760px){.plan-grid{grid-template-columns:1fr}}
+  .plan-card{border:1px solid var(--line);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;gap:10px;background:#fff;box-shadow:var(--shadow)}
+  .plan-card.featured{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary),var(--shadow-md)}
+  .plan-card h3{margin:0;font-size:16px;color:var(--navy)}
+  .plan-card .price{font-size:26px;font-weight:700;color:var(--ink)}
+  .plan-card .price small{font-size:12.5px;font-weight:400;color:var(--muted)}
+  .plan-card ul{margin:0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.6;flex:1}
+  .plan-card .btn{justify-content:center}
+  .plan-foot{margin-top:14px;font-size:12px;color:var(--muted)}
+  .plan-err{display:none;margin:16px 0 0;padding:12px 14px;border:1px solid #f1d3d3;border-left:4px solid var(--red);
+    background:#fdf2f2;color:#7f1d1d;border-radius:8px;font-size:13.5px;line-height:1.5}
+  .plan-err.show{display:block}
+  .plan-err strong{color:var(--red)}
+  body.is-readonly #addBtn,
+  body.is-readonly .tab[data-view="import"]{display:none !important}
 </style>
 </head>
 <body>
@@ -1328,6 +1356,7 @@
       </div>
     </div>
     <button class="btn btn-ghost" id="teamBtn" style="display:none" title="Manage your team">Team</button>
+    <button class="btn btn-ghost" id="billBtn" style="display:none" title="Plan and billing">Billing</button>
     <button class="btn btn-ghost" id="signOutBtn" style="display:none">Sign out</button>
     <button class="btn btn-primary" id="addBtn">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -1335,6 +1364,11 @@
     </button>
   </div>
 </header>
+
+<div class="billbar" id="billBar" hidden role="status">
+  <span class="bb-msg" id="billMsg"></span>
+  <button class="btn btn-light btn-sm" id="billAction" style="display:none"></button>
+</div>
 
 <nav class="tabs" id="tabs">
   <button class="tab active" data-view="dashboard">Dashboard</button>
@@ -1588,6 +1622,40 @@
   </div>
 </div>
 
+<div class="overlay" id="planOverlay">
+  <div class="modal" style="max-width:920px" role="dialog" aria-modal="true" aria-labelledby="planTitle">
+    <div class="modal-head">
+      <h2 id="planTitle">Choose your plan</h2>
+      <button class="x" id="closePlan" title="Not now">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="plan-intro" id="planIntro">Start with a <strong>14-day free trial</strong>. A card is needed to start, but <strong>nothing is charged for 14 days</strong> &ndash; cancel any time before then and you pay nothing.</p>
+      <div class="plan-grid">
+        <div class="plan-card">
+          <h3>Starter</h3>
+          <div class="price">$149 <small>/ month AUD + GST</small></div>
+          <ul><li>Up to 3 users</li><li>Full pipeline, dashboard and reports</li><li>Website and lead-form enquiries</li></ul>
+          <button class="btn btn-light" data-plan="starter">Choose Starter</button>
+        </div>
+        <div class="plan-card featured">
+          <h3>Team</h3>
+          <div class="price">$349 <small>/ month AUD + GST</small></div>
+          <ul><li>Up to 10 users</li><li>Everything in Starter</li><li>Sales Reports and KPI targets per consultant</li></ul>
+          <button class="btn btn-primary" data-plan="team">Choose Team</button>
+        </div>
+        <div class="plan-card">
+          <h3>Network</h3>
+          <div class="price">$799 <small>/ month AUD + GST</small></div>
+          <ul><li>Up to 25 users</li><li>For franchise networks and multi-site builders</li><li>Need more users? Ask us for a quote</li></ul>
+          <button class="btn btn-light" data-plan="network">Choose Network</button>
+        </div>
+      </div>
+      <div class="plan-err" id="planErr" role="alert" aria-live="assertive"></div>
+      <p class="plan-foot">Prices exclude GST, which is added at checkout. Change plan or cancel any time from Billing.</p>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="teamOverlay">
   <div class="modal" style="max-width:640px">
     <div class="modal-head">
@@ -1600,9 +1668,12 @@
           <span id="seatWarn" style="color:var(--red);font-weight:600;display:none"> &mdash; no seats left</span>
         </span>
         <span style="display:flex;align-items:center;gap:8px">
+          <span id="seatEdit" style="display:flex;align-items:center;gap:8px">
           <label style="color:var(--muted);font-size:12px">Seats</label>
           <input type="number" id="seatInput" min="1" style="width:74px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;font:inherit" />
           <button class="btn btn-light btn-sm" id="saveSeats">Update</button>
+          </span>
+          <span id="seatPlanNote" style="display:none;color:var(--muted);font-size:12px">Seats come with your plan &ndash; upgrade in Billing for more</span>
           <span style="color:var(--muted);font-size:12px;margin-left:6px">Plan: <strong id="planName">solo</strong></span>
         </span>
       </div>
@@ -2209,6 +2280,11 @@ window.addEventListener("focus", ()=>refreshData());
 let saveTimer = null, saving = false, dirty = false;
 
 function saveData(){
+  if(isReadOnly()){                       // the database would refuse it anyway
+    toast(readOnlyReason());
+    refreshData(true);                    // put back what is really saved
+    return;
+  }
   dirty = true;
   setSync("saving");
   clearTimeout(saveTimer);
@@ -5739,18 +5815,33 @@ async function renderDashboard(){
    never shows another company's client records.
    ============================================================ */
 let IS_PLATFORM = false;
-let PLAT = { companies: [], people: [], orphans: [] };
+let PLAT = { companies: [], people: [], orphans: [], billing: {} };
 
 async function loadPlatform(){
-  const [co, pe, or_] = await Promise.all([
+  const [co, pe, or_, bi] = await Promise.all([
     sb.rpc("platform_companies"),
     sb.rpc("platform_people"),
-    sb.rpc("platform_orphans")
+    sb.rpc("platform_orphans"),
+    sb.rpc("platform_company_billing")   // absent before the billing migration: column just stays hidden
   ]);
   if(co.error) throw co.error;
   PLAT.companies = co.data || [];
   PLAT.people    = pe.data || [];
   PLAT.orphans   = or_.data || [];
+  PLAT.billing   = bi.error ? null : Object.fromEntries((bi.data || []).map(b => [b.company_id, b]));
+}
+
+/* Billing column of the platform Companies table */
+function platBillingCell(b, id){
+  if(!b) return '<td class="plat-sub">—</td>';
+  const label = {comped:"free", full: b.subscription_status === "trialing" ? "trial" : "paying",
+                 grace:"payment overdue", read_only:"read-only"}[b.access] || b.access;
+  const cls = {comped:"plat", full:"ok", grace:"warn", read_only:"off"}[b.access] || "off";
+  const tip = b.is_comped ? (b.comped_reason || "") : ("Stripe status: " + b.subscription_status);
+  return `<td>
+    <span class="tag ${cls}" title="${esc(tip)}">${esc(label)}</span>
+    <div><label class="comp-toggle"><input type="checkbox" data-comp="${id}" ${b.is_comped ? "checked" : ""} />
+      Complimentary (free)</label></div></td>`;
 }
 
 function fmtWhen(ts){
@@ -5795,6 +5886,7 @@ async function renderPlatform(){
       <td class="num">${c.consultants}</td>
       <td class="num">${c.suspended ? '<span class="tag off">'+c.suspended+'</span>' : '0'}</td>
       <td class="num">${c.clients}<div class="plat-sub">${c.open_clients} open</div></td>
+      ${PLAT.billing ? platBillingCell(PLAT.billing[c.company_id], c.company_id) : ''}
       <td class="nowrap">
         ${c.seats_used === 0
           ? '<button class="btn btn-primary btn-sm" data-cores="'+c.company_id+'">Restore all</button>'
@@ -5860,13 +5952,15 @@ async function renderPlatform(){
 
     <div class="plat-card">
       <h3>Companies</h3>
-      <p class="hint">Change seats inline. Suspending a company removes access for everyone in it and can be undone.</p>
+      <p class="hint">Change seats inline. Suspending a company removes access for everyone in it and can be undone.
+        ${PLAT.billing ? 'Tick <strong>Complimentary (free)</strong> to let a company use the app without paying; untick it and they need a plan to keep editing.' : ''}</p>
       <table class="plat">
         <thead><tr>
           <th>Company</th><th class="num">Seats</th><th class="num">Own</th><th class="num">Adm</th>
-          <th class="num">Cons</th><th class="num">Susp</th><th class="num">Clients</th><th></th>
+          <th class="num">Cons</th><th class="num">Susp</th><th class="num">Clients</th>
+          ${PLAT.billing ? '<th>Billing</th>' : ''}<th></th>
         </tr></thead>
-        <tbody>${coRows || '<tr><td colspan="8" class="plat-sub">No companies yet.</td></tr>'}</tbody>
+        <tbody>${coRows || '<tr><td colspan="9" class="plat-sub">No companies yet.</td></tr>'}</tbody>
       </table>
     </div>
 
@@ -5896,6 +5990,8 @@ async function renderPlatform(){
         <div class="field"><label>Seats</label>
           <input type="number" id="npSeats" min="1" value="3" /></div>
       </div>
+      ${PLAT.billing ? `<label class="comp-toggle" style="margin:4px 0 10px">
+        <input type="checkbox" id="npComp" /> Complimentary (free) &mdash; leave unticked and they pick a paid plan (with a 14-day trial) when they first sign in</label>` : ''}
       <button class="btn btn-primary btn-sm" id="npGo">Create company &amp; invite</button>
       <div class="invitelink" id="npLink"></div>
     </div>
@@ -5965,6 +6061,20 @@ function wirePlatform(){
   document.querySelectorAll("[data-seats]").forEach(inp=>{
     inp.addEventListener("change", ()=> call("platform_set_seats",
       {p_company_id: inp.dataset.seats, p_seats: parseInt(inp.value,10)||1}, "Seats updated."));
+  });
+  document.querySelectorAll("[data-comp]").forEach(cb=>{
+    cb.addEventListener("change", async ()=>{
+      const on = cb.checked;
+      let reason = null;
+      if(on){
+        reason = prompt("Make this company free? They get full access and are never billed.\n\nReason (optional, only you see it):", "");
+        if(reason === null){ cb.checked = false; return; }
+      } else if(!confirm("Stop this company being free? Unless they start a paid plan they become read-only straight away (their data is kept).")){
+        cb.checked = true; return;
+      }
+      if(!await call("platform_set_company_comped", {p_company_id: cb.dataset.comp, p_comped: on, p_reason: reason}))
+        cb.checked = !on;
+    });
   });
   document.querySelectorAll("[data-cosus]").forEach(b=>{
     b.addEventListener("click", ()=>{
@@ -6064,19 +6174,28 @@ function wirePlatform(){
       {p_company: company, p_email: email, p_seats: seats});
     if(error){ toast(friendlyError(error)); return; }
     const row = Array.isArray(data) ? data[0] : data;
+    const comp = document.getElementById("npComp");
+    let compNote = "";
+    if(comp && comp.checked){
+      const r = await sb.rpc("platform_set_company_comped",
+        {p_company_id: row.company_id, p_comped: true, p_reason: "Complimentary - set up by platform admin"});
+      compNote = r.error ? " <em>Could not mark it free: " + esc(friendlyError(r.error)) + " - use the Billing tick box below.</em>"
+                         : " It is complimentary (free).";
+      comp.checked = false;
+    }
     const el = document.getElementById("npLink");
     el.className = "invitelink show";
 
     if(row.added_directly){
       // that email already has a login, so the company was simply added to it
-      el.innerHTML = "<strong>" + esc(row.company_name) + " created.</strong><br>" +
+      el.innerHTML = "<strong>" + esc(row.company_name) + " created.</strong>" + compNote + "<br>" +
         esc(row.invite_email) + " already has a login, so " + esc(row.company_name) +
         " was added to it as " + esc(row.invite_role) + ". No invitation is needed - " +
         "sign in as usual and use the company switcher in the top right to move between them.";
       await renderPlatform();
     } else {
       const link = location.origin + location.pathname + "?invite=" + row.invite_token;
-      el.innerHTML = "<strong>" + esc(row.company_name) + " created.</strong> Owner invite for " +
+      el.innerHTML = "<strong>" + esc(row.company_name) + " created.</strong>" + compNote + " Owner invite for " +
         esc(row.invite_email) + ":<br>" + esc(link) +
         '<br><button class="btn btn-light btn-sm" style="margin-top:8px" id="npCopy">Copy link</button>';
       document.getElementById("npCopy").addEventListener("click", ()=>
@@ -6277,6 +6396,8 @@ async function loadMe(){
   CAN_SR = srOk === true;
   // older database without can_manage_sales_reports: only owners/admins could see it, so that is full view
   SR_FULL = CAN_SR && (srFullErr ? (ME.role === "owner" || ME.role === "admin") : srFull === true);
+
+  await loadBilling();
 }
 
 function shade(hex, pct){
@@ -6315,6 +6436,7 @@ function paintIdentity(){
   document.querySelector('.tab[data-view="salesreports"]').style.display = CAN_SR ? "" : "none";
   if(!CAN_SR && currentView === "salesreports") switchView("dashboard");
   populateRepFilter();
+  paintBilling();
 
   // tenant branding
   const c = COMPANY && COMPANY.brand_colour;
@@ -6405,6 +6527,11 @@ async function refreshTeam(){
   document.getElementById("coName").value   = COMPANY ? COMPANY.name : "";
   document.getElementById("coColour").value = (COMPANY && COMPANY.brand_colour) || "#1E3A8A";
   document.getElementById("planName").textContent = COMPANY ? COMPANY.plan : "solo";
+  // paid companies: seats come from the Stripe plan, so the editor is hidden
+  const paid = billingOn();
+  document.getElementById("seatEdit").style.display     = paid ? "none" : "flex";
+  document.getElementById("seatPlanNote").style.display = paid ? "" : "none";
+  if(paid) document.getElementById("planName").textContent = planLabel(COMPANY && COMPANY.plan);
 
   const {data:usage} = await sb.rpc("company_seat_usage");
   const u = Array.isArray(usage) ? usage[0] : usage;
@@ -6524,6 +6651,183 @@ function wireTeam(){
   });
 }
 
+
+/* ============================================================
+   BILLING (Stripe). Comped companies, and a database without the
+   billing migration, see none of this: the app behaves as before.
+   ============================================================ */
+let BILLING = null;        // row from my_billing(), or null
+const PLAN_NAMES = {starter:"Starter", team:"Team", network:"Network", solo:"Solo", enterprise:"Enterprise"};
+const planLabel = p => PLAN_NAMES[p] || ss(p);
+
+async function loadBilling(){
+  BILLING = null;
+  if(!sb) return;
+  const {data, error} = await sb.rpc("my_billing");
+  if(error) return;                       // migration not applied: no billing anywhere
+  BILLING = (Array.isArray(data) ? data[0] : data) || null;
+}
+function billingOn(){ return !!BILLING && !BILLING.is_comped; }
+function isReadOnly(){ return billingOn() && BILLING.access === "read_only" && !IS_PLATFORM; }
+function readOnlyReason(){
+  if(!billingOn()) return "";
+  const who = isManager() ? "" : " Ask your owner or admin to sort out billing.";
+  if(BILLING.subscription_status === "none")
+    return "Choose a plan to start your free trial - until then this workspace is read-only." + who;
+  if(BILLING.subscription_status === "past_due" || BILLING.subscription_status === "unpaid")
+    return "Payment is overdue, so this workspace is read-only. Your data is safe." + who;
+  return "Your subscription has ended, so this workspace is read-only. Your data is safe." + who;
+}
+function daysLeft(ts){
+  if(!ts) return null;
+  return Math.max(0, Math.ceil((new Date(ts).getTime() - Date.now()) / 86400000));
+}
+function fmtDate(ts){
+  return ts ? new Date(ts).toLocaleDateString("en-AU", {day:"numeric", month:"short", year:"numeric"}) : "";
+}
+
+function paintBilling(){
+  const on  = billingOn();
+  const bar = document.getElementById("billBar");
+  const msg = document.getElementById("billMsg");
+  const act = document.getElementById("billAction");
+  document.getElementById("billBtn").style.display = (on && isManager()) ? "" : "none";
+  document.body.classList.toggle("is-readonly", isReadOnly());
+  if(!on){ bar.hidden = true; return; }
+
+  const b = BILLING, mgr = isManager();
+  let cls = "", text = "", btn = "", fn = null;
+  if(b.access === "read_only"){
+    cls = "lock"; text = "<strong>Read-only.</strong> " + esc(readOnlyReason());
+    if(mgr){
+      const fixCard = (b.subscription_status === "past_due" || b.subscription_status === "unpaid") && b.has_customer;
+      btn = fixCard ? "Update card" : "Choose a plan";
+      fn  = fixCard ? openBillingPortal : openPlanPicker;
+    }
+  }else if(b.subscription_status === "trialing"){
+    const d = daysLeft(b.trial_ends_at);
+    text = "<strong>Free trial</strong> on the " + esc(planLabel(b.plan)) + " plan &ndash; " +
+           (d === null ? "" : d + (d === 1 ? " day" : " days") + " left") +
+           (mgr ? ". Your first payment is taken on " + esc(fmtDate(b.trial_ends_at)) + " unless you cancel before then." : ".");
+    if(mgr){ btn = "Manage billing"; fn = openBillingPortal; }
+  }else if(b.access === "grace"){
+    cls = "warn";
+    text = "<strong>Payment failed.</strong> " + (mgr ? "Update your card" : "Ask your owner or admin to update the card") +
+           " by " + esc(fmtDate(b.grace_ends_at)) + " to avoid the workspace becoming read-only.";
+    if(mgr){ btn = "Update card"; fn = openBillingPortal; }
+  }else if(b.cancel_at_period_end && b.current_period_end){
+    cls = "warn";
+    text = "Your subscription ends on <strong>" + esc(fmtDate(b.current_period_end)) + "</strong>. After that the workspace becomes read-only.";
+    if(mgr){ btn = "Keep my subscription"; fn = openBillingPortal; }
+  }else{
+    bar.hidden = true; return;            // active and healthy: no banner
+  }
+  bar.className = "billbar" + (cls ? " " + cls : "");
+  msg.innerHTML = text;
+  act.style.display = btn ? "" : "none";
+  act.textContent = btn;
+  act.onclick = fn;
+  bar.hidden = false;
+}
+
+function openPlanPicker(){
+  if(!billingOn() || !isManager()) return;
+  const fresh = BILLING.subscription_status === "none" && !BILLING.has_customer;
+  document.getElementById("planIntro").innerHTML = fresh
+    ? "Start with a <strong>14-day free trial</strong>. A card is needed to start, but <strong>nothing is charged for 14 days</strong> &ndash; cancel any time before then and you pay nothing."
+    : "Pick a plan to reactivate your workspace. Your clients and history are all still here.";
+  document.getElementById("planOverlay").classList.add("open");
+}
+function closePlanPicker(){ planError(""); document.getElementById("planOverlay").classList.remove("open"); }
+
+async function callBilling(fnName, body){
+  const {data, error} = await sb.functions.invoke(fnName, {body: body || {}});
+  if(error){
+    let detail = null;
+    try{ detail = error.context && typeof error.context.json === "function" ? await error.context.json() : null; }catch(_){ }
+    const status = error.context && error.context.status;
+    return {error: (detail && detail.error) || error.message || "Billing is unavailable right now.", detail, status};
+  }
+  return {data};
+}
+
+function planError(html){
+  const el = document.getElementById("planErr");
+  if(!el) return;
+  el.innerHTML = html || "";
+  el.classList.toggle("show", !!html);
+}
+
+async function startCheckout(plan, btn){
+  const btns = [...document.querySelectorAll("#planOverlay [data-plan]")];
+  const label = btn ? btn.textContent : "";
+  planError("");
+  btns.forEach(b => b.disabled = true);
+  if(btn) btn.textContent = "Starting checkout\u2026";
+  let leaving = false;
+  try{
+    const r = await callBilling("billing-checkout", {plan});
+    if(r.detail && r.detail.portal){ leaving = true; return openBillingPortal(); }
+    if(r.error || !r.data || !r.data.url){
+      // 4xx answers carry a message written for the user; anything else gets the generic one
+      const userMsg = r.status >= 400 && r.status < 500 && r.detail && r.detail.error;
+      planError(userMsg
+        ? "<strong>Checkout couldn't start.</strong> " + esc(userMsg)
+        : "<strong>Checkout couldn't start.</strong> Please try again in a minute. If it keeps happening, " +
+          "contact Spectrum Coach and we'll sort it out - your workspace and data are safe.");
+      return;
+    }
+    leaving = true;
+    location.href = r.data.url;
+  }catch(_){
+    planError("<strong>Checkout couldn't start.</strong> Check your internet connection and try again.");
+  }finally{
+    if(!leaving){ btns.forEach(b => b.disabled = false); if(btn) btn.textContent = label; }
+  }
+}
+
+async function openBillingPortal(){
+  if(!billingOn()) return;
+  if(!BILLING.has_customer){ openPlanPicker(); return; }
+  const r = await callBilling("billing-portal");
+  if(r.error){ toast(r.error); return; }
+  location.href = r.data.url;
+}
+
+/* back from Stripe Checkout / Portal: the webhook may land a moment after us */
+async function handleBillingReturn(){
+  const q = new URLSearchParams(location.search);
+  const state = q.get("billing");
+  if(state){
+    history.replaceState(null, "", location.pathname);
+    if(state === "success"){
+      toast("Thanks - setting up your subscription...");
+      for(let i = 0; i < 10 && billingOn() && BILLING.subscription_status === "none"; i++){
+        await new Promise(r => setTimeout(r, 1500));
+        await loadBilling();
+      }
+      paintBilling();
+      toast(billingOn() && BILLING.access !== "read_only"
+        ? "You're all set - enjoy your trial." : "Payment received. It can take a minute to show - reload if the banner stays.");
+    }else if(state === "portal"){
+      await loadBilling(); paintBilling();
+    }
+    return;
+  }
+  // a brand-new self-serve company lands on the plan picker
+  if(billingOn() && isManager() && BILLING.subscription_status === "none" && !BILLING.has_customer) openPlanPicker();
+}
+
+function wireBilling(){
+  document.getElementById("billBtn").addEventListener("click", ()=>{
+    if(BILLING && BILLING.has_customer && BILLING.subscription_status !== "none") openBillingPortal();
+    else openPlanPicker();
+  });
+  document.getElementById("closePlan").addEventListener("click", closePlanPicker);
+  document.querySelectorAll("#planOverlay [data-plan]").forEach(b =>
+    b.addEventListener("click", ()=> startCheckout(b.dataset.plan, b)));
+}
+
 /* ============================================================
    BOOT
    ============================================================ */
@@ -6534,6 +6838,7 @@ async function enterApp(){
     document.getElementById("authWrap").hidden = true;
     paintIdentity();
     switchView("dashboard");
+    await handleBillingReturn();
   }catch(err){
     console.error(err);
     showAuth();
@@ -6587,6 +6892,7 @@ async function boot(){
   initOptions();
   wireAuth();
   wireTeam();
+  wireBilling();
   await checkInvite();
   await handleRecovery();
   const {data:{session}} = await sb.auth.getSession();
