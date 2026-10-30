@@ -21,6 +21,8 @@ revoke update (name, abn, address, phone, email, website, logo_url, brand_colour
   on public.companies from authenticated;
 grant update on public.companies to anon, authenticated;
 
+drop function if exists public.platform_set_company_comped(uuid, boolean, text);
+drop function if exists public.platform_company_billing();
 drop function if exists public.my_billing();
 drop function if exists public.company_can_write(uuid);
 drop function if exists public.company_access(uuid);

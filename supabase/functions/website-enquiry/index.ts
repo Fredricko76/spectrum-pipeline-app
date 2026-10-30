@@ -4,6 +4,14 @@
 //
 // Endpoint: POST https://qjkmkmmrgtoaocygymqo.supabase.co/functions/v1/website-enquiry?key=<site_key>
 // Key can also be sent as an "x-site-key" header, or (Google) as "google_key" in the body.
+//
+// Billing: a company whose access is read_only (no plan, trial over, cancelled, or more than
+// 7 days overdue) gets no new leads and no repeat-enquiry notes. The request is still accepted
+// with 200 so website / Google / Meta / Zapier forms never show an error or retry; the skip
+// is logged (no personal details). Comped, trialing, active and past-due-within-grace
+// companies get leads as before. If company_access() is missing (database without the
+// billing migration) or errors, the lead is saved as before (fail open: never lose a lead
+// because of a billing check).
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -183,6 +191,21 @@ Deno.serve(async (req) => {
     land && `Has land: ${land}`,
     comments && `Comments: ${comments}`,
   ].filter(Boolean).join("\n");
+
+  const { data: access, error: accessErr } = await supabase.rpc("company_access", {
+    p_company: source.company_id,
+  });
+  if (accessErr) {
+    console.warn("company_access check failed; saving lead anyway", accessErr.code ?? accessErr.message);
+  } else if (access === "read_only") {
+    console.warn(JSON.stringify({
+      event: "enquiry_skipped_read_only",
+      company_id: source.company_id,
+      lead_source_id: source.id,
+      channel,
+    }));
+    return json(200, isGoogle ? {} : { ok: true, saved: false });
+  }
 
   if (leadId) {
     const { data: seen } = await supabase

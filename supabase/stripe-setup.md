@@ -77,6 +77,9 @@ Subscriptions (read), Prices (read), Products (read).
 | Duplicate event | Dashboard -> resend an event | `{duplicate:true}`, no change |
 | Untagged event | Create a subscription for another product | `{ignored: ...}`, no change |
 | Comped company | Any Hotondo company | No billing UI, never changed by the webhook |
+| Admin-created company | Platform panel › Set up a new company (box unticked) | Starts read-only with the plan picker, like a sign-up |
+| Comp toggle | Platform panel › Companies › Billing › tick Complimentary (free) | Full access, no billing UI; refused while a Stripe subscription is live (cancel it first) |
+| Enquiry to read-only company | POST website-enquiry with that company's site key | HTTP 200 `{"ok":true,"saved":false}`, no lead, log line `enquiry_skipped_read_only` |
 
 ## Test-mode objects (created 2026-10-30, account acct_1POqw5S3hxQFvThd, livemode=false)
 
@@ -115,3 +118,11 @@ set as `STRIPE_WEBHOOK_SECRET` on the branch. Smart Retries / "mark unpaid" are 
   returns true and `has_table_privilege('anon', ...)` / `('authenticated', ...)` return false.
 - Every other object the functions use (`companies`, `company_access`, `company_can_write`, `my_billing`)
   already had the needed grants on the branch.
+- **Free (comped) companies are a deliberate choice.** Only the 5 existing companies are comped by the migration.
+  Companies Fred creates in the platform panel start with no plan (read-only) unless he ticks
+  *Complimentary (free)* there (`platform_set_company_comped`, platform admins only, audit-logged).
+- **website-enquiry must be deployed to production at go-live, after the migration.** The new version skips leads
+  for read-only companies (200 `{"ok":true,"saved":false}`, logged). Until then production keeps the old function.
+  The new code is safe either way: if `company_access()` doesn't exist it saves the lead as before.
+  Before go-live, check that every company with an active `lead_sources` row is comped or on a plan, or its
+  leads will stop being saved.

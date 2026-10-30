@@ -850,6 +850,8 @@
   .tag.ok{background:var(--green-soft);color:var(--green-deep)}
   .tag.off{background:#fdf0f0;color:#9b2c2c}
   .tag.plat{background:#eef0f7;color:#44507a}
+  .tag.warn{background:#fdf6e3;color:#8a5a00}
+  .comp-toggle{display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;white-space:nowrap}
   .seat-mini{width:58px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;font:inherit;font-size:12px}
   .danger-zone{border-left:4px solid var(--red);background:#fdf0f0;border-radius:9px;padding:12px 14px;margin-top:6px}
 
@@ -5813,18 +5815,33 @@ async function renderDashboard(){
    never shows another company's client records.
    ============================================================ */
 let IS_PLATFORM = false;
-let PLAT = { companies: [], people: [], orphans: [] };
+let PLAT = { companies: [], people: [], orphans: [], billing: {} };
 
 async function loadPlatform(){
-  const [co, pe, or_] = await Promise.all([
+  const [co, pe, or_, bi] = await Promise.all([
     sb.rpc("platform_companies"),
     sb.rpc("platform_people"),
-    sb.rpc("platform_orphans")
+    sb.rpc("platform_orphans"),
+    sb.rpc("platform_company_billing")   // absent before the billing migration: column just stays hidden
   ]);
   if(co.error) throw co.error;
   PLAT.companies = co.data || [];
   PLAT.people    = pe.data || [];
   PLAT.orphans   = or_.data || [];
+  PLAT.billing   = bi.error ? null : Object.fromEntries((bi.data || []).map(b => [b.company_id, b]));
+}
+
+/* Billing column of the platform Companies table */
+function platBillingCell(b, id){
+  if(!b) return '<td class="plat-sub">—</td>';
+  const label = {comped:"free", full: b.subscription_status === "trialing" ? "trial" : "paying",
+                 grace:"payment overdue", read_only:"read-only"}[b.access] || b.access;
+  const cls = {comped:"plat", full:"ok", grace:"warn", read_only:"off"}[b.access] || "off";
+  const tip = b.is_comped ? (b.comped_reason || "") : ("Stripe status: " + b.subscription_status);
+  return `<td>
+    <span class="tag ${cls}" title="${esc(tip)}">${esc(label)}</span>
+    <div><label class="comp-toggle"><input type="checkbox" data-comp="${id}" ${b.is_comped ? "checked" : ""} />
+      Complimentary (free)</label></div></td>`;
 }
 
 function fmtWhen(ts){
@@ -5869,6 +5886,7 @@ async function renderPlatform(){
       <td class="num">${c.consultants}</td>
       <td class="num">${c.suspended ? '<span class="tag off">'+c.suspended+'</span>' : '0'}</td>
       <td class="num">${c.clients}<div class="plat-sub">${c.open_clients} open</div></td>
+      ${PLAT.billing ? platBillingCell(PLAT.billing[c.company_id], c.company_id) : ''}
       <td class="nowrap">
         ${c.seats_used === 0
           ? '<button class="btn btn-primary btn-sm" data-cores="'+c.company_id+'">Restore all</button>'
@@ -5934,13 +5952,15 @@ async function renderPlatform(){
 
     <div class="plat-card">
       <h3>Companies</h3>
-      <p class="hint">Change seats inline. Suspending a company removes access for everyone in it and can be undone.</p>
+      <p class="hint">Change seats inline. Suspending a company removes access for everyone in it and can be undone.
+        ${PLAT.billing ? 'Tick <strong>Complimentary (free)</strong> to let a company use the app without paying; untick it and they need a plan to keep editing.' : ''}</p>
       <table class="plat">
         <thead><tr>
           <th>Company</th><th class="num">Seats</th><th class="num">Own</th><th class="num">Adm</th>
-          <th class="num">Cons</th><th class="num">Susp</th><th class="num">Clients</th><th></th>
+          <th class="num">Cons</th><th class="num">Susp</th><th class="num">Clients</th>
+          ${PLAT.billing ? '<th>Billing</th>' : ''}<th></th>
         </tr></thead>
-        <tbody>${coRows || '<tr><td colspan="8" class="plat-sub">No companies yet.</td></tr>'}</tbody>
+        <tbody>${coRows || '<tr><td colspan="9" class="plat-sub">No companies yet.</td></tr>'}</tbody>
       </table>
     </div>
 
@@ -5970,6 +5990,8 @@ async function renderPlatform(){
         <div class="field"><label>Seats</label>
           <input type="number" id="npSeats" min="1" value="3" /></div>
       </div>
+      ${PLAT.billing ? `<label class="comp-toggle" style="margin:4px 0 10px">
+        <input type="checkbox" id="npComp" /> Complimentary (free) &mdash; leave unticked and they pick a paid plan (with a 14-day trial) when they first sign in</label>` : ''}
       <button class="btn btn-primary btn-sm" id="npGo">Create company &amp; invite</button>
       <div class="invitelink" id="npLink"></div>
     </div>
@@ -6039,6 +6061,20 @@ function wirePlatform(){
   document.querySelectorAll("[data-seats]").forEach(inp=>{
     inp.addEventListener("change", ()=> call("platform_set_seats",
       {p_company_id: inp.dataset.seats, p_seats: parseInt(inp.value,10)||1}, "Seats updated."));
+  });
+  document.querySelectorAll("[data-comp]").forEach(cb=>{
+    cb.addEventListener("change", async ()=>{
+      const on = cb.checked;
+      let reason = null;
+      if(on){
+        reason = prompt("Make this company free? They get full access and are never billed.\n\nReason (optional, only you see it):", "");
+        if(reason === null){ cb.checked = false; return; }
+      } else if(!confirm("Stop this company being free? Unless they start a paid plan they become read-only straight away (their data is kept).")){
+        cb.checked = true; return;
+      }
+      if(!await call("platform_set_company_comped", {p_company_id: cb.dataset.comp, p_comped: on, p_reason: reason}))
+        cb.checked = !on;
+    });
   });
   document.querySelectorAll("[data-cosus]").forEach(b=>{
     b.addEventListener("click", ()=>{
@@ -6138,19 +6174,28 @@ function wirePlatform(){
       {p_company: company, p_email: email, p_seats: seats});
     if(error){ toast(friendlyError(error)); return; }
     const row = Array.isArray(data) ? data[0] : data;
+    const comp = document.getElementById("npComp");
+    let compNote = "";
+    if(comp && comp.checked){
+      const r = await sb.rpc("platform_set_company_comped",
+        {p_company_id: row.company_id, p_comped: true, p_reason: "Complimentary - set up by platform admin"});
+      compNote = r.error ? " <em>Could not mark it free: " + esc(friendlyError(r.error)) + " - use the Billing tick box below.</em>"
+                         : " It is complimentary (free).";
+      comp.checked = false;
+    }
     const el = document.getElementById("npLink");
     el.className = "invitelink show";
 
     if(row.added_directly){
       // that email already has a login, so the company was simply added to it
-      el.innerHTML = "<strong>" + esc(row.company_name) + " created.</strong><br>" +
+      el.innerHTML = "<strong>" + esc(row.company_name) + " created.</strong>" + compNote + "<br>" +
         esc(row.invite_email) + " already has a login, so " + esc(row.company_name) +
         " was added to it as " + esc(row.invite_role) + ". No invitation is needed - " +
         "sign in as usual and use the company switcher in the top right to move between them.";
       await renderPlatform();
     } else {
       const link = location.origin + location.pathname + "?invite=" + row.invite_token;
-      el.innerHTML = "<strong>" + esc(row.company_name) + " created.</strong> Owner invite for " +
+      el.innerHTML = "<strong>" + esc(row.company_name) + " created.</strong>" + compNote + " Owner invite for " +
         esc(row.invite_email) + ":<br>" + esc(link) +
         '<br><button class="btn btn-light btn-sm" style="margin-top:8px" id="npCopy">Copy link</button>';
       document.getElementById("npCopy").addEventListener("click", ()=>

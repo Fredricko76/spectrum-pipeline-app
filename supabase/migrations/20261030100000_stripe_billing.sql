@@ -18,7 +18,10 @@
 --   (service role).
 -- * New non-invite sign-ups start with subscription_status 'none' (read-only until
 --   they start a trial through Stripe Checkout).
--- * Companies created by the platform admin (provision_company) are comped by default.
+-- * Companies created by the platform admin (provision_company) also start with status
+--   'none' and is_comped = false. Making a company free is a deliberate choice:
+--   platform_set_company_comped() (platform admins only; the 'Complimentary (free)'
+--   toggle in the platform panel).
 -- =============================================================================
 
 begin;
@@ -237,7 +240,7 @@ begin
 end;
 $function$;
 
--- 8. Companies the platform admin creates by hand are comped (Fred bills them himself)
+-- 8. Companies the platform admin creates by hand start unpaid, like a sign-up (comp them explicitly)
 CREATE OR REPLACE FUNCTION public.provision_company(p_company text, p_email text, p_seats integer DEFAULT 3, p_role user_role DEFAULT 'owner'::user_role, p_plan text DEFAULT 'team'::text)
  RETURNS TABLE(company_id uuid, company_name text, invite_email text, invite_role text, seats integer, invite_token uuid, added_directly boolean)
  LANGUAGE plpgsql
@@ -255,8 +258,8 @@ begin
   if exists (select 1 from public.companies c where lower(c.name) = lower(v_name)) then
     raise exception 'A company called "%" already exists.', v_name; end if;
 
-  insert into public.companies (name, seat_limit, plan, is_comped, comped_reason)
-  values (v_name, p_seats, p_plan, true, 'Provisioned by platform admin')
+  insert into public.companies (name, seat_limit, plan, subscription_status, is_comped)
+  values (v_name, p_seats, p_plan, 'none', false)
   returning id into v_company;
 
   select u.id into v_uid from auth.users u where lower(u.email) = v_email;
@@ -282,5 +285,50 @@ begin
   return query select v_company, v_name, v_email, p_role::text, p_seats, v_token, false;
 end;
 $function$;
+
+-- 9. Platform admin: see billing state, and choose to comp a company --------------
+create or replace function public.platform_company_billing()
+returns table(company_id uuid, is_comped boolean, comped_reason text, subscription_status text,
+              access text, trial_ends_at timestamptz, has_subscription boolean)
+language sql stable security definer
+set search_path to 'public'
+as $$
+  select c.id, c.is_comped, c.comped_reason, c.subscription_status, public.company_access(c.id),
+         c.trial_ends_at, c.stripe_subscription_id is not null
+    from public.companies c
+   where (select public.is_platform_admin());
+$$;
+
+create or replace function public.platform_set_company_comped(p_company_id uuid, p_comped boolean,
+                                                              p_reason text default null)
+returns text
+language plpgsql security definer
+set search_path to 'public'
+as $$
+declare v_name text; v_status text; v_reason text := nullif(trim(p_reason), '');
+begin
+  perform public.require_platform_admin();
+  select c.name, c.subscription_status into v_name, v_status from public.companies c where c.id = p_company_id;
+  if v_name is null then raise exception 'No such company.'; end if;
+  -- the webhook ignores comped companies, so comping a live subscription would keep billing them
+  if p_comped and v_status in ('trialing','active','past_due','unpaid','paused') then
+    raise exception '% has a Stripe subscription (%). Cancel it in Stripe first so they are not charged, then mark the company free.',
+      v_name, v_status using errcode = '22023';
+  end if;
+  update public.companies
+     set is_comped = p_comped,
+         comped_reason = case when p_comped then coalesce(v_reason, 'Complimentary - set by platform admin') end
+   where id = p_company_id;
+  perform public.platform_log(case when p_comped then 'company.comp' else 'company.uncomp' end,
+                              v_name, jsonb_build_object('reason', v_reason));
+  return v_name || case when p_comped then ' is now complimentary (free).'
+                        else ' is no longer free - they need a plan to keep editing.' end;
+end;
+$$;
+
+revoke execute on function public.platform_company_billing()                          from public, anon;
+revoke execute on function public.platform_set_company_comped(uuid, boolean, text)     from public, anon;
+grant  execute on function public.platform_company_billing(),
+                           public.platform_set_company_comped(uuid, boolean, text)     to authenticated;
 
 commit;

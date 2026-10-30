@@ -148,12 +148,47 @@ select pg_temp.ok((select subscription_status = 'none' and not is_comped and com
   'non-invite sign-up -> status none, not comped, read_only');
 select pg_temp.ok((select m.role = 'owner' from company_members m join companies c on c.id = m.company_id where c.name = 'New Homes Co'), 'sign-up user is owner');
 
--- ---------------------------------------------------------------- provision_company (platform admin) is comped
+-- ---------------------------------------------------------------- provision_company starts unpaid; comping is explicit
 set local role authenticated;
 set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000f00d';
 select * from provision_company('Manual Builder', 'boss@manual.test', 4) \g /dev/null
 reset role;
-select pg_temp.ok((select is_comped and seat_limit = 4 from companies where name = 'Manual Builder'), 'provision_company creates a comped company');
+select pg_temp.ok((select not is_comped and subscription_status = 'none' and seat_limit = 4
+                     and company_access(id) = 'read_only' from companies where name = 'Manual Builder'),
+  'provision_company creates an unpaid (none, not comped, read_only) company');
+select id as mb from companies where name = 'Manual Builder' \gset
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000f00d';
+select pg_temp.ok((select count(*) >= 5 from platform_company_billing()), 'platform admin sees billing for every company');
+select pg_temp.ok(platform_set_company_comped(:'mb', true, 'Mate rates')
+                  like '%complimentary%', 'platform admin can comp a company');
+reset role;
+select pg_temp.ok((select is_comped and comped_reason = 'Mate rates' and company_access(id) = 'comped'
+                     from companies where name = 'Manual Builder'), 'comped: access=comped, reason saved');
+select pg_temp.ok((select count(*) = 1 from platform_audit where action = 'company.comp' and target = 'Manual Builder'), 'comp is audit-logged');
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000f00d';
+select platform_set_company_comped(:'mb', false) \g /dev/null
+reset role;
+select pg_temp.ok((select not is_comped and comped_reason is null and company_access(id) = 'read_only'
+                     from companies where name = 'Manual Builder'), 'un-comp: back to read_only');
+-- live subscription (b1 is 'active' from the invite tests) cannot be comped: Stripe would keep billing
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000f00d';
+select pg_temp.fails($$select platform_set_company_comped('00000000-0000-0000-0000-0000000000b1', true)$$,
+  'Cancel it in Stripe first', 'cannot comp a company with a live subscription');
+reset role;
+-- not a platform admin
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+select pg_temp.fails($$select platform_set_company_comped(auth_company_id(), true)$$,
+  'Platform administrator access required', 'owner cannot comp their own company');
+select pg_temp.ok((select count(*) = 0 from platform_company_billing()), 'non-admin sees no platform billing rows');
+reset role;
+set local role anon;
+select pg_temp.fails($$select platform_set_company_comped('00000000-0000-0000-0000-0000000000b1', true)$$,
+  'permission denied', 'anon cannot call platform_set_company_comped');
+reset role;
 
 rollback;
 \echo ALL BILLING TESTS PASSED
