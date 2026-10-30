@@ -8,6 +8,65 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet" />
+<!-- Error monitoring (Sentry, errors only: no tracing, no session replay, no PII). See privacy.html section 7. -->
+<script src="https://browser.sentry-cdn.com/11.10.0/bundle.min.js" integrity="sha384-O/8YQaGGVy/n9jIUzcOiaiJVm4t5+JMNiK/zOa0fWvlSld+FquXemEcwJxQ3x/Lr" crossorigin="anonymous"></script>
+<script>
+(function () {
+  if (!window.Sentry) return; // blocked or offline: the app works without it
+  var host = location.hostname;
+  var env = (host === "spectrumsalesonline.net" || host === "www.spectrumsalesonline.net") ? "production"
+    : /^deploy-preview-\d+--/.test(host) ? "preview"
+    : /--/.test(host) ? "branch"
+    : "development";
+  var EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
+  var SECRET_PARAM = /([?&#](?:invite|token|access_token|refresh_token|provider_token|code|type|key|apikey|email|error_description)=)[^&#\s"'<>]*/gi;
+  var JWT = /eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g;
+  function scrubStr(s) {
+    return typeof s !== "string" ? s
+      : s.replace(EMAIL, "[email]").replace(SECRET_PARAM, "$1[filtered]").replace(JWT, "[jwt]");
+  }
+  function bareUrl(u) { return typeof u === "string" ? u.split(/[?#]/)[0] : u; }
+  function scrubDeep(v, depth) {
+    if (depth > 6 || v == null) return v;
+    if (typeof v === "string") return scrubStr(v);
+    if (Array.isArray(v)) return v.map(function (x) { return scrubDeep(x, depth + 1); });
+    if (typeof v === "object") {
+      for (var k in v) if (Object.prototype.hasOwnProperty.call(v, k)) v[k] = scrubDeep(v[k], depth + 1);
+    }
+    return v;
+  }
+  window.Sentry.init({
+    dsn: "https://3595a09c8926356260472854d98dafd7@o4512347560607744.ingest.us.sentry.io/4512347564277760",
+    environment: env,
+    sendDefaultPii: false,
+    tracesSampleRate: 0,
+    maxBreadcrumbs: 30,
+    beforeBreadcrumb: function (b) {
+      if (b.data) {
+        ["url", "from", "to"].forEach(function (k) { if (b.data[k]) b.data[k] = bareUrl(b.data[k]); });
+      }
+      if (b.message) b.message = scrubStr(b.message);
+      return b;
+    },
+    beforeSend: function (event) {
+      delete event.user;
+      if (event.request) {
+        if (event.request.url) event.request.url = bareUrl(event.request.url);
+        delete event.request.query_string;
+        delete event.request.cookies;
+        delete event.request.data;
+        if (event.request.headers) event.request.headers = { "User-Agent": event.request.headers["User-Agent"] };
+      }
+      if (event.message) event.message = scrubStr(event.message);
+      if (event.exception) scrubDeep(event.exception, 0);
+      if (event.extra) scrubDeep(event.extra, 0);
+      if (event.contexts) scrubDeep(event.contexts, 0);
+      if (event.breadcrumbs) scrubDeep(event.breadcrumbs, 0);
+      return event;
+    }
+  });
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
