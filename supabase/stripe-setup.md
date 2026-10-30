@@ -28,6 +28,9 @@ Custom Network quotes: create an extra price on the Network product in the Dashb
 
 ## 2. Dashboard settings (sandbox)
 
+- **Trial policy**: Checkout always collects a card (`payment_method_collection: always`). A company's
+  first subscription gets a 14-day free trial; the card is charged when the trial ends unless the
+  subscription is cancelled first. A failed first charge follows the normal past_due / 7-day grace path.
 - **Tax**: Stripe Tax on, AU registration (the live account already has both). Checkout uses
   `automatic_tax` and collects the ABN (`tax_id_collection`).
 - **Billing -> Revenue recovery -> Retries**: Smart Retries; after all retries fail,
@@ -61,9 +64,10 @@ Subscriptions (read), Prices (read), Products (read).
 
 | Scenario | How | Expected in app |
 |---|---|---|
-| Trial without card | Sign up -> Choose plan -> Checkout, skip card | `trialing`, banner "14 days left", full access |
-| Trial ends, no card | Test clock: advance 15 days | Subscription `canceled` -> read-only, data visible |
-| Trial ends, card added | Portal -> add `4242 4242 4242 4242`, advance clock | `active`, banner gone |
+| Trial (card required) | Sign up -> Choose plan -> Checkout with `4242 4242 4242 4242` | `trialing`, banner "14 days left", full access, A$0 charged today |
+| Trial ends | Test clock: advance 15 days | First invoice paid -> `active`, banner gone |
+| Trial ends, card fails | Checkout with `4000 0000 0000 0341`, advance 15 days | `past_due`, "update card" banner, 7 days' grace, then read-only |
+| Cancel during trial | Portal -> cancel | Nothing charged; `canceled` at trial end -> read-only |
 | Renewal fails | Card `4000 0000 0000 0341`, advance past period end | `past_due`, "update card" banner, full access for 7 days, then read-only |
 | Recovery | Portal -> update card to 4242 | `invoice.paid` -> `active`, grace cleared |
 | 3-D Secure | `4000 0025 0000 3155` | Checkout completes after challenge |

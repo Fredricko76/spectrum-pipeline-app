@@ -1,7 +1,9 @@
 // POST /functions/v1/billing-checkout   body: { "plan": "starter" | "team" | "network" }
 // Returns { url } for a Stripe Checkout Session (subscription mode).
-// First subscription for a company: 14-day trial, no card required
-// (payment_method_collection 'if_required'; the trial cancels at day 14 if no card is on file).
+// A card is always required (payment_method_collection 'always').
+// First subscription for a company: 14-day free trial - the card is saved but not charged until the
+// trial ends. Stripe's default trial end behaviour then invoices the saved card; if that payment fails
+// the subscription goes past_due and the normal 7-day grace period applies.
 import "jsr:@supabase/functions-js@2/edge-runtime.d.ts";
 import {
   adminClient,
@@ -67,15 +69,10 @@ serve(async (req) => {
     client_reference_id: me.companyId,
     metadata: meta,
     line_items: [{ price: price.id, quantity: 1 }],
-    payment_method_collection: trialEligible ? "if_required" : "always",
+    payment_method_collection: "always",
     subscription_data: {
       metadata: meta,
-      ...(trialEligible
-        ? {
-          trial_period_days: TRIAL_DAYS,
-          trial_settings: { end_behavior: { missing_payment_method: "cancel" } },
-        }
-        : {}),
+      ...(trialEligible ? { trial_period_days: TRIAL_DAYS } : {}),
     },
     automatic_tax: { enabled: true },
     tax_id_collection: { enabled: true }, // ABN

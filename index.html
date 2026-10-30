@@ -1627,7 +1627,7 @@
       <button class="x" id="closePlan" title="Not now">&times;</button>
     </div>
     <div class="modal-body">
-      <p class="plan-intro" id="planIntro">Start with a <strong>14-day free trial</strong>. No card needed to start &ndash; add one any time before the trial ends.</p>
+      <p class="plan-intro" id="planIntro">Start with a <strong>14-day free trial</strong>. A card is needed to start, but <strong>nothing is charged for 14 days</strong> &ndash; cancel any time before then and you pay nothing.</p>
       <div class="plan-grid">
         <div class="plan-card">
           <h3>Starter</h3>
@@ -6663,8 +6663,8 @@ function paintBilling(){
     const d = daysLeft(b.trial_ends_at);
     text = "<strong>Free trial</strong> on the " + esc(planLabel(b.plan)) + " plan &ndash; " +
            (d === null ? "" : d + (d === 1 ? " day" : " days") + " left") +
-           (mgr ? ". Add a card before " + esc(fmtDate(b.trial_ends_at)) + " to keep going." : ".");
-    if(mgr){ btn = "Add payment details"; fn = openBillingPortal; }
+           (mgr ? ". Your first payment is taken on " + esc(fmtDate(b.trial_ends_at)) + " unless you cancel before then." : ".");
+    if(mgr){ btn = "Manage billing"; fn = openBillingPortal; }
   }else if(b.access === "grace"){
     cls = "warn";
     text = "<strong>Payment failed.</strong> " + (mgr ? "Update your card" : "Ask your owner or admin to update the card") +
@@ -6689,7 +6689,7 @@ function openPlanPicker(){
   if(!billingOn() || !isManager()) return;
   const fresh = BILLING.subscription_status === "none" && !BILLING.has_customer;
   document.getElementById("planIntro").innerHTML = fresh
-    ? "Start with a <strong>14-day free trial</strong>. No card needed to start &ndash; add one any time before the trial ends."
+    ? "Start with a <strong>14-day free trial</strong>. A card is needed to start, but <strong>nothing is charged for 14 days</strong> &ndash; cancel any time before then and you pay nothing."
     : "Pick a plan to reactivate your workspace. Your clients and history are all still here.";
   document.getElementById("planOverlay").classList.add("open");
 }
