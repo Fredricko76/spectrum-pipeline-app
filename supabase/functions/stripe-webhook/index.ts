@@ -116,6 +116,7 @@ Deno.serve(async (req) => {
   if (!prior) {
     const { error: insErr } = await db.from("stripe_events")
       .insert({ id: event.id, type: event.type, company_id: companyId });
+    if (insErr?.code === "23503") return reply(200, { ignored: "unknown company" }); // company deleted
     if (insErr && insErr.code !== "23505") { // 23505: a parallel delivery got there first
       console.error("stripe_events insert failed", event.id, insErr.message);
       return reply(500, { error: "retry" });
