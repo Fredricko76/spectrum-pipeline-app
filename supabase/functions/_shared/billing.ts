@@ -6,9 +6,11 @@
 //   STRIPE_PORTAL_CONFIG_ID  bpc_... dedicated Customer Portal configuration
 // APP_URL and STRIPE_PORTAL_CONFIG_ID fall back to TEST_PROJECT_DEFAULTS on known test projects.
 //   ALLOWED_ORIGINS          optional, comma-separated extra CORS origins (e.g. a deploy preview)
+//   SENTRY_DSN               optional; enables error reports (see _shared/sentry.ts)
 //   SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY are injected by Supabase.
 import Stripe from "npm:stripe@23.0.1";
 import { createClient, type SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import { reportError } from "./sentry.ts";
 
 export const APP_TAG = "spectrum-pipeline";
 
@@ -241,6 +243,7 @@ export function serve(handler: (req: Request) => Promise<Response>) {
     } catch (e) {
       if (e instanceof HttpError) return json(req, e.status, { error: e.message });
       console.error("billing error", e instanceof Error ? e.message : e);
+      await reportError(new URL(req.url).pathname.split("/").pop() || "billing", e);
       return json(req, 500, { error: "Billing is unavailable right now. Please try again." });
     }
   });

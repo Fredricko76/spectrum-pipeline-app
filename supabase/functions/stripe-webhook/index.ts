@@ -10,6 +10,7 @@
 import "jsr:@supabase/functions-js@2/edge-runtime.d.ts";
 import Stripe from "npm:stripe@23.0.1";
 import { adminClient, APP_TAG, secretEnv, stripe } from "../_shared/billing.ts";
+import { reportError } from "../_shared/sentry.ts";
 
 const HANDLED = new Set([
   "checkout.session.completed",
@@ -101,6 +102,7 @@ Deno.serve(async (req) => {
     sub = await s.subscriptions.retrieve(subId, { expand: ["items.data.price.product"] });
   } catch (e) {
     console.error("subscription fetch failed", event.id, e instanceof Error ? e.message : e);
+    await reportError("stripe-webhook", e, { step: "subscription fetch", event_id: event.id, event_type: event.type });
     return reply(500, { error: "retry" });
   }
   const subMeta = sub.metadata as Meta;
@@ -119,6 +121,7 @@ Deno.serve(async (req) => {
     if (insErr?.code === "23503") return reply(200, { ignored: "unknown company" }); // company deleted
     if (insErr && insErr.code !== "23505") { // 23505: a parallel delivery got there first
       console.error("stripe_events insert failed", event.id, insErr.message);
+      await reportError("stripe-webhook", insErr, { step: "stripe_events insert", event_id: event.id, code: insErr.code });
       return reply(500, { error: "retry" });
     }
     if (insErr) return reply(200, { duplicate: true });
@@ -182,6 +185,7 @@ Deno.serve(async (req) => {
   );
   if (upErr) {
     console.error("company update failed", event.id, upErr.message);
+    await reportError("stripe-webhook", upErr, { step: "company update", event_id: event.id, code: upErr.code });
     return reply(500, { error: "retry" });
   }
   return done({ ok: true, status: sub.status });

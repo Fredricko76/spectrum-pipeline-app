@@ -15,6 +15,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { reportError } from "../_shared/sentry.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -241,6 +242,7 @@ Deno.serve(async (req) => {
         .eq("company_id", source.company_id);
       if (error) {
         console.error("update failed", error);
+        await reportError("website-enquiry", { message: error.message }, { step: "repeat note update", code: error.code });
         return json(500, { ok: false, error: "Could not save enquiry" });
       }
       return json(200, isGoogle ? {} : { ok: true, duplicate: true });
@@ -268,6 +270,7 @@ Deno.serve(async (req) => {
       return json(200, isGoogle ? {} : { ok: true, duplicate: true });
     }
     console.error("insert failed", error);
+    await reportError("website-enquiry", { message: error.message }, { step: "client insert", code: (error as { code?: string }).code });
     return json(500, { ok: false, error: "Could not save enquiry" });
   }
   return json(200, isGoogle ? {} : { ok: true });
