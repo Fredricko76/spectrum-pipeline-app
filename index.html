@@ -1255,6 +1255,56 @@
   .plan-err strong{color:var(--red)}
   body.is-readonly #addBtn,
   body.is-readonly .tab[data-view="import"]{display:none !important}
+
+  /* ---------- Getting started guide + new-company checklist ---------- */
+  #view-help{padding:20px 26px 48px}
+  .gs-wrap{max-width:980px;margin:0 auto}
+  .gs-head h2{margin:0 0 4px;font-size:22px;color:var(--navy)}
+  .gs-head .sub{margin:0 0 14px;color:var(--muted);font-size:13.5px;line-height:1.5}
+  .gs-toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+  .gs-toc a{display:inline-block;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card);
+    color:var(--navy);font-size:12.5px;font-weight:600;text-decoration:none}
+  .gs-toc a:hover{border-color:var(--green);background:var(--green-soft)}
+  .gs-sec{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:18px 22px;margin-bottom:16px;scroll-margin-top:12px}
+  .gs-sec h3{display:flex;align-items:center;gap:10px;margin:0 0 6px;font-size:17px;font-weight:700;color:var(--navy)}
+  .gs-num{flex:none;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;
+    background:var(--green);color:#fff;font-size:14px;font-weight:700}
+  .gs-sec .lead{margin:0 0 12px;color:var(--muted);font-size:13.5px;line-height:1.5}
+  .gs-sec h4{margin:14px 0 6px;font-size:14px;color:var(--heading)}
+  .gs-sec ol,.gs-sec ul{margin:0 0 6px;padding-left:22px;font-size:13.5px;line-height:1.6;color:var(--heading)}
+  .gs-sec li{margin:2px 0}
+  .gs-sec p{font-size:13.5px;line-height:1.55;margin:6px 0}
+  .gs-ui{font-weight:700;color:var(--navy);white-space:nowrap}
+  .gs-who{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:var(--green-soft);
+    color:var(--navy);font-size:11px;font-weight:600;vertical-align:middle}
+  .gs-tip{margin:10px 0 0;padding:10px 12px;border-left:3px solid var(--green);background:var(--green-soft);
+    border-radius:0 6px 6px 0;font-size:13px;line-height:1.5;color:var(--heading)}
+  .gs-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .gs-table{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0 4px}
+  .gs-table th,.gs-table td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+  .gs-table th{color:var(--muted);font-weight:600;font-size:12px}
+  .gs-stages{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
+  body:not(.is-manager) .gs-mgr{display:none !important}
+
+  #gsChecklist{padding:16px 26px 0}
+  #gsChecklist[hidden]{display:none}
+  .gsc{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 20px}
+  .gsc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .gsc-top h3{margin:0;font-size:16px;color:var(--navy)}
+  .gsc-top .sub{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+  .gsc-bar{height:6px;border-radius:999px;background:var(--line);margin:12px 0 10px;overflow:hidden}
+  .gsc-bar i{display:block;height:100%;background:var(--green);border-radius:999px}
+  .gsc-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+  .gsc-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px}
+  .gsc-item.done{background:var(--green-soft)}
+  .gsc-item.done .gsc-t{color:var(--muted);text-decoration:line-through}
+  .gsc-tick{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:inline-flex;
+    align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:700}
+  .gsc-item.done .gsc-tick{background:var(--green);border-color:var(--green)}
+  .gsc-t{flex:1;color:var(--heading);font-weight:600}
+  .gsc-item .btn{padding:4px 10px;font-size:12px}
+  @media(max-width:600px){#view-help{padding:14px 14px 40px}#gsChecklist{padding:12px 14px 0}.gs-sec{padding:16px}}
 </style>
 </head>
 <body>
@@ -1468,9 +1518,11 @@
   <button class="tab" data-view="salesreports" style="display:none">Sales Reports</button>
   <button class="tab mgr-only" data-view="import">Import</button>
   <button class="tab" data-view="export">Export</button>
+  <button class="tab" data-view="help" title="How to set up and use the app">Getting started</button>
   <button class="tab plat-only" data-view="platform" style="margin-left:auto">Platform</button>
 </nav>
 
+<div id="gsChecklist" hidden></div>
 <div id="view-dashboard"></div>
 
 <section class="kpis" id="kpis"></section>
@@ -1564,6 +1616,7 @@
 <div id="view-import" hidden></div>
 <div id="view-export" hidden></div>
 <div id="view-platform" hidden></div>
+<div id="view-help" hidden></div>
 
 <div class="footer-note" id="footNote"></div>
 <div class="app-legal" id="appLegal">
@@ -2689,9 +2742,10 @@ function render(){
   const f=getFilters();
   const list=clients.filter(c=>matchesFilters(c,f));
   const chromeless = (currentView==="forecast" || currentView==="salesreports" || currentView==="platform"
-                      || currentView==="dashboard" || currentView==="export" || currentView==="import");
+                      || currentView==="dashboard" || currentView==="export" || currentView==="import" || currentView==="help");
   if(currentView==="pipeline") renderKPIs(list);
-  if(currentView==="dashboard") { renderDashboard(); }
+  if(currentView==="dashboard") { renderDashboard(); renderChecklist(); }
+  else if(currentView==="help") { renderHelp(); }
   else if(currentView==="import") { renderImport(); }
   else if(currentView==="export") { renderExport(); }
   else if(currentView==="platform") { renderPlatform(); }
@@ -2715,7 +2769,9 @@ function switchView(v){
   document.getElementById("view-import").hidden = v!=="import";
   document.getElementById("view-export").hidden = v!=="export";
   document.getElementById("view-platform").hidden = v!=="platform";
-  const chromeless = (v==="forecast" || v==="salesreports" || v==="platform" || v==="dashboard" || v==="export" || v==="import");
+  document.getElementById("view-help").hidden = v!=="help";
+  if(v!=="dashboard") document.getElementById("gsChecklist").hidden = true;
+  const chromeless = (v==="forecast" || v==="salesreports" || v==="platform" || v==="dashboard" || v==="export" || v==="import" || v==="help");
   document.getElementById("kpis").style.display = (v==="pipeline") ? "grid" : "none";
   document.querySelector(".toolbar").style.display = chromeless?"none":"flex";
   document.getElementById("tasksWidget").style.display = (v==="clients") ? "" : "none";
@@ -6726,6 +6782,7 @@ function wireTeam(){
       .update({name, brand_colour: colour}).eq("id", ME.company_id);
     if(error){ toast("Could not save: " + error.message); return; }
     await loadMe(); paintIdentity(); toast("Company saved.");
+    gsMark("company"); if(currentView==="dashboard") renderChecklist();
   });
 
   document.getElementById("sendInvite").addEventListener("click", async ()=>{
@@ -6934,6 +6991,236 @@ function wireBilling(){
   document.getElementById("closePlan").addEventListener("click", closePlanPicker);
   document.querySelectorAll("#planOverlay [data-plan]").forEach(b =>
     b.addEventListener("click", ()=> startCheckout(b.dataset.plan, b)));
+}
+
+/* ============================================================
+   GETTING STARTED: the in-app guide (Getting started tab) and a
+   dismissible checklist on the Dashboard for owners and admins of a
+   new company. Nothing here touches the database except one
+   read-only count of KPI rows; progress and "hide" live in this
+   browser's localStorage, per company.
+   ============================================================ */
+function gsKey(name){ return "spa.gs." + name + "." + (ME ? ME.company_id : ""); }
+function gsGet(name){ try{ return localStorage.getItem(gsKey(name)) === "1"; }catch(_){ return false; } }
+function gsMark(name){ try{ localStorage.setItem(gsKey(name), "1"); }catch(_){ } }
+
+/* KPI targets set? One head-only count, re-checked at most once a minute while it is still "no". */
+let GS_KPI = {cid:null, set:false, at:0, busy:false};
+async function gsCheckKpis(){
+  if(!sb || !ME || !SR_FULL) return;
+  const now = Date.now();
+  if(GS_KPI.cid === ME.company_id && (GS_KPI.set || GS_KPI.busy || now - GS_KPI.at < 60000)) return;
+  if(GS_KPI.cid !== ME.company_id) GS_KPI = {cid:ME.company_id, set:false, at:0, busy:false};
+  GS_KPI.busy = true; GS_KPI.at = now;
+  try{
+    const {count, error} = await sb.from("sales_kpis").select("owner_id", {count:"exact", head:true})
+      .eq("company_id", ME.company_id).gt("won", 0);
+    if(!error && count > 0){ GS_KPI.set = true; if(currentView === "dashboard") renderChecklist(); }
+  }catch(_){ /* the checklist simply stays unticked */ }
+  finally{ GS_KPI.busy = false; }
+}
+
+function gsItems(){
+  const ro = isReadOnly();
+  const items = [];
+  if(billingOn()) items.push({k:"plan", t:"Choose your plan and start the free trial",
+    done: BILLING.subscription_status !== "none", btn:"Choose a plan", act:"plan"});
+  items.push({k:"company", t:"Check your company name and brand colour",
+    done: gsGet("company") || !!(COMPANY && COMPANY.brand_colour && COMPANY.brand_colour.toLowerCase() !== "#1e3a8a"),
+    btn:"Open Team", act:"team"});
+  items.push({k:"team", t:"Invite your sales team", done: TEAM.length > 1, btn:"Invite", act:"team"});
+  if(SR_FULL) items.push({k:"kpis", t:"Set KPI targets for each consultant", done: GS_KPI.cid === ME.company_id && GS_KPI.set,
+    btn:"Set KPIs", act:"salesreports"});
+  items.push({k:"client", t:"Add your first client", done: clients.length > 0, btn:"Add Client", act:"add", off: ro});
+  return items;
+}
+
+function renderChecklist(){
+  const host = document.getElementById("gsChecklist");
+  if(!host) return;
+  if(!ME || !isManager() || currentView !== "dashboard" || gsGet("hidden")){ host.hidden = true; host.innerHTML = ""; return; }
+  gsCheckKpis();
+  const items = gsItems();
+  const done = items.filter(i => i.done).length;
+  if(done === items.length){ host.hidden = true; host.innerHTML = ""; return; }
+  host.innerHTML = `<div class="gsc" role="region" aria-label="Getting started checklist">
+    <div class="gsc-top">
+      <div><h3>Get your team started</h3>
+        <p class="sub">${done} of ${items.length} done. Work through these and your team will be ready to go. The full guide is under <strong>Getting started</strong>.</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-light btn-sm" type="button" data-gs-act="help">Open the guide</button>
+        <button class="btn btn-light btn-sm" type="button" id="gsHide">Hide checklist</button>
+      </div>
+    </div>
+    <div class="gsc-bar"><i style="width:${Math.round(done / items.length * 100)}%"></i></div>
+    <ul class="gsc-list">${items.map(i => `<li class="gsc-item${i.done ? " done" : ""}">
+      <span class="gsc-tick" aria-hidden="true">${i.done ? "&#10003;" : ""}</span>
+      <span class="gsc-t">${esc(i.t)}${i.done ? '<span class="cm-sr"> (done)</span>' : ""}</span>
+      ${i.done ? "" : `<button class="btn btn-light btn-sm" type="button" data-gs-act="${i.act}"${i.off ? ' disabled title="Choose a plan first"' : ""}>${esc(i.btn)}</button>`}
+    </li>`).join("")}</ul>
+  </div>`;
+  host.hidden = false;
+  gsWireActions(host);
+  document.getElementById("gsHide").onclick = () => {
+    gsMark("hidden"); renderChecklist();
+    toast("Checklist hidden. The guide is always under Getting started.");
+  };
+}
+
+function gsWireActions(root){
+  root.querySelectorAll("[data-gs-act]").forEach(b => b.addEventListener("click", () => {
+    const a = b.dataset.gsAct;
+    if(a === "plan") openPlanPicker();
+    else if(a === "billing") document.getElementById("billBtn").click();
+    else if(a === "team") openTeam();
+    else if(a === "add"){ if(!isReadOnly()) newClient(); }
+    else switchView(a);
+  }));
+}
+
+/* Plans as shown in the Choose your plan window, so prices live in one place. */
+function gsPlansHTML(){
+  const cards = [...document.querySelectorAll("#planOverlay .plan-card")];
+  if(!cards.length) return "";
+  return '<table class="gs-table"><thead><tr><th>Plan</th><th>Price</th><th>Users</th></tr></thead><tbody>' +
+    cards.map(c => {
+      const nm = c.querySelector("h3"), pr = c.querySelector(".price"), li = c.querySelector("li");
+      return "<tr><td><strong>" + esc(nm ? nm.textContent : "") + "</strong></td><td>" +
+        esc(pr ? pr.textContent.replace(/\s+/g, " ").trim() : "") + "</td><td>" + esc(li ? li.textContent : "") + "</td></tr>";
+    }).join("") + "</tbody></table>";
+}
+
+function renderHelp(){
+  const host = document.getElementById("view-help");
+  if(!host) return;
+  const mgr = isManager();
+  const ui = t => '<span class="gs-ui">' + t + '</span>';
+  const who = t => '<span class="gs-who">' + t + '</span>';
+  const btn = (act, label, primary) =>
+    `<button class="btn ${primary ? "btn-primary" : "btn-light"} btn-sm" type="button" data-gs-act="${act}">${label}</button>`;
+  const billingBtn = (billingOn() && mgr) ? btn("billing", "Open Billing") : "";
+  const co = COMPANY ? esc(COMPANY.name) : "your company";
+
+  host.innerHTML = `<div class="gs-wrap">
+  <div class="gs-head">
+    <h2>Getting started</h2>
+    <p class="sub">A quick guide to setting up ${co} and running your sales pipeline, from your first login to tracking every client from enquiry to Won.
+    ${mgr ? "" : " Some steps are for owners and admins only &ndash; they are marked."}</p>
+  </div>
+  <nav class="gs-toc" aria-label="Guide sections">
+    <a href="#gs-1">1. Set up your company</a><a href="#gs-2">2. Invite your team</a><a href="#gs-3">3. Set KPIs</a>
+    <a href="#gs-4">4. Add clients</a><a href="#gs-5">5. Day to day</a><a href="#gs-6">6. Billing and help</a>
+  </nav>
+
+  <section class="gs-sec" id="gs-1">
+    <h3><span class="gs-num">1</span>Set up your company ${who("Owners and admins")}</h3>
+    <p class="lead">Whoever creates the account becomes the company's owner.</p>
+    <ol>
+      <li>On the sign-in screen choose ${ui("Create account")}, then enter ${ui("Your name")}, ${ui("Company name")}, ${ui("Email")} and a ${ui("Password")} of at least 8 characters. Tick the box to agree to the Terms of Service and Privacy Policy, then press ${ui("Create account")}.</li>
+      <li>If you're asked to confirm your email, click the link in that email, then sign in.</li>
+      <li>The ${ui("Choose your plan")} window opens. Every plan starts with a <strong>14-day free trial</strong>. A card is needed to start, but nothing is charged for 14 days.</li>
+    </ol>
+    ${gsPlansHTML()}
+    <ol start="4">
+      <li>Choose a plan and complete checkout. You'll come straight back to the app.</li>
+      <li>Click ${ui("Team")} (top right). Under ${ui("Company")}, check the ${ui("Company name")}, pick your ${ui("Brand colour")} and press ${ui("Save company")}. The colour is applied across the app for everyone in your company.</li>
+    </ol>
+    <p class="gs-tip">Until a plan is chosen the workspace is read-only, so you can look around but can't add clients. You can reopen the plans at any time with ${ui("Billing")}.</p>
+    <div class="gs-actions gs-mgr">${billingOn() && BILLING.subscription_status === "none" ? btn("plan", "Choose a plan", true) : ""}${btn("team", "Open Team")}</div>
+  </section>
+
+  <section class="gs-sec" id="gs-2">
+    <h3><span class="gs-num">2</span>Invite your team ${who("Owners and admins")}</h3>
+    <p class="lead">Invites are links, not emails. You create the link and send it to the person yourself.</p>
+    <ol>
+      <li>Click ${ui("Team")}. Under ${ui("Invite someone")}, enter their email address and choose a ${ui("Role")}.</li>
+      <li>Press ${ui("Create invite")}, then ${ui("Copy link")}, and send the link by email or text.</li>
+      <li>They open the link, and their email is already filled in. They add their name and a password, tick the agreement and press ${ui("Join " + co)}.</li>
+    </ol>
+    <table class="gs-table"><thead><tr><th>Role</th><th>What they can do</th></tr></thead><tbody>
+      <tr><td><strong>Consultant</strong></td><td>Sees and works only the clients assigned to them.</td></tr>
+      <tr><td><strong>Admin</strong></td><td>Sees the whole company pipeline, assigns clients, invites people, imports data and manages billing.</td></tr>
+      <tr><td><strong>Owner</strong></td><td>Everything an admin can do, plus giving or removing the owner role and choosing who sees Sales Reports.</td></tr>
+    </tbody></table>
+    <ul>
+      <li>The top of the Team window shows how many seats are used. Your plan sets the number of seats. If you need more, upgrade your plan in ${ui("Billing")}.</li>
+      <li>To change someone's role, use the drop-down next to their name under ${ui("Members")}.</li>
+      <li>When someone leaves, press ${ui("Remove access")}. Their clients stay where they are and their seat is freed. ${ui("Restore access")} brings them back.</li>
+      <li>Invite links expire after 14 days. If a link has expired, create a new one.</li>
+    </ul>
+    <div class="gs-actions gs-mgr">${btn("team", "Open Team")}</div>
+  </section>
+
+  <section class="gs-sec" id="gs-3">
+    <h3><span class="gs-num">3</span>Set KPIs ${who("Owners, and admins given access")}</h3>
+    <p class="lead">KPI targets are set for each Sales Consultant in the ${ui("Sales Reports")} tab. You set the sales target and the app works out the activity needed to hit it.</p>
+    <ol>
+      <li>Open ${ui("Sales Reports")}. Owners always see this tab. To share it, an owner presses ${ui("Manage access")} and switches it on for each person. Admins with access see the whole team and can set KPIs. Consultants with access see only their own figures and targets.</li>
+      <li>Choose a person in ${ui("Sales Consultant")} and choose the ${ui("Year")}. (${ui("Whole team")} shows everyone's KPIs added together.)</li>
+      <li>Under ${ui("KPI targets")}, enter the four conversion rates as percentages: ${ui("Lead → Discovery")}, ${ui("Discovery → Presentation")}, ${ui("Presentation → Review")} and ${ui("Review → Won")}.</li>
+      <li>Enter the ${ui("Sales won")} target for each month, or enter January and press ${ui("Copy January's sales across the year")}.</li>
+    </ol>
+    <p>The leads, discovery appointments, presentations and review meetings needed are worked out for you and rounded up. Changes save as you type. The banner at the top then shows whether each person is on target, slightly behind or behind.</p>
+    <div class="gs-actions">${CAN_SR ? btn("salesreports", "Open Sales Reports") : ""}</div>
+  </section>
+
+  <section class="gs-sec" id="gs-4">
+    <h3><span class="gs-num">4</span>Add clients</h3>
+    <h4>One at a time</h4>
+    <ol>
+      <li>Click ${ui("Add Client")} (top right). Only ${ui("First name")} and ${ui("Surname")} are required.</li>
+      <li>Fill in as much as you know: contact details, build address and estate, and the ${ui("Sales information")} fields (${ui("Enquiry date")}, ${ui("Build type")}, ${ui("Buyer type")}, ${ui("Lead source")}, ${ui("Forecast month")}, ${ui("Budget")}, ${ui("Timing")}). Owners and admins also choose who the client is ${ui("Assigned to")}.</li>
+      <li>Set the ${ui("Current stage")}. Stages from Discovery Appointment onwards need the date it happened.</li>
+      <li>Press ${ui("Save client")}. To attach plans, quotes or contracts, reopen the client and use ${ui("+ Upload")} under ${ui("Documents")}.</li>
+    </ol>
+    <p>For a quick add, go to ${ui("Pipeline")}, type the client's name in the box at the top of the New Enquiry column and press Enter.</p>
+    <h4 class="gs-mgr">Bring in your existing clients ${who("Owners and admins")}</h4>
+    <ol class="gs-mgr">
+      <li>Open the ${ui("Import")} tab and choose an Excel (.xlsx) or CSV file. Dates are read day first, Australian style.</li>
+      <li>In ${ui("Check the columns")}, check how the columns have been matched. Then, under ${ui("Assign these clients to")}, pick the consultant.</li>
+      <li>Press ${ui("Preview the import")} and check the rows flagged as errors or possible duplicates. Nothing is saved until you press the ${ui("Import")} button.</li>
+    </ol>
+    <h4>Website and lead-form enquiries</h4>
+    <p>Enquiries from your website, Meta or Google lead forms can come straight in as New Enquiry clients, with the lead source filled in. To have your forms connected, contact Spectrum Coach (details below).</p>
+    <div class="gs-actions">${isReadOnly() ? "" : btn("add", "Add Client", true)}${btn("pipeline", "Open Pipeline")}<span class="gs-mgr" style="display:inline-flex">${isReadOnly() ? "" : btn("import", "Open Import")}</span></div>
+  </section>
+
+  <section class="gs-sec" id="gs-5">
+    <h3><span class="gs-num">5</span>Work the pipeline day to day</h3>
+    <p class="lead">Every client moves through the same stages:</p>
+    <div class="gs-stages">${STAGES.map(s => stageBadge(s.key)).join("")}</div>
+    <ul>
+      <li><strong>Move clients along.</strong> On ${ui("Pipeline")}, drag a card to its new stage. The stage date is set to today, so open the client if it happened on a different day. Moving a card clears the old next action date.</li>
+      <li><strong>Plan the next step.</strong> In each client, set the ${ui("Next stage")}, the ${ui("Next action date")} and any ${ui("Appointment date")}. For a Presentation Appointment, also choose whether you're presenting an Estimate or Plans.</li>
+      <li><strong>Keep on top of follow-ups.</strong> Add follow-ups with ${ui("+ Add task")} and a due date. Tasks due today show on the ${ui("Dashboard")} and the ${ui("Clients")} list, and dated tasks also show on the pipeline card.</li>
+      <li><strong>Keep the client in the loop.</strong> When the current stage has its date filled in, the client shows a draft ${ui("Client update email")}. Edit it, press ${ui("Copy to clipboard")} and send it from your own email.</li>
+      <li><strong>Check the numbers.</strong> ${ui("Dashboard")} counts leads, discovery appointments, estimates presented, review meetings and wins for each month. ${ui("Reports & Sales Forecast")} shows the next three months of forecast sales, based on each client's ${ui("Forecast month")}, plus appointments in the next 14 days. Keep the forecast month up to date.</li>
+      <li><strong>Find anyone fast.</strong> On ${ui("Clients")}, search by name, email, suburb, estate or address, or filter by stage, build type, buyer type and lead source. Press ${ui("Clear filters")} to reset.</li>
+      <li><strong>Take a copy.</strong> Download your clients as Excel or CSV from ${ui("Export")}.</li>
+    </ul>
+    <div class="gs-actions">${btn("pipeline", "Open Pipeline")}${btn("dashboard", "Open Dashboard")}${btn("forecast", "Open Reports & Sales Forecast")}</div>
+  </section>
+
+  <section class="gs-sec" id="gs-6">
+    <h3><span class="gs-num">6</span>Billing and help</h3>
+    <ul>
+      <li class="gs-mgr">${ui("Billing")} (top right, owners and admins) opens your billing page. From there you can update your card, change plan or cancel.</li>
+      <li class="gs-mgr">During the trial, a bar at the top shows the days left and the date of your first payment. If you cancel before that date, you pay nothing.</li>
+      <li>If a payment fails, a bar asks an owner or admin to ${ui("Update card")}. If it isn't fixed by the date shown, the workspace becomes read-only until it is. Your data is kept safe.</li>
+      <li class="gs-mgr">To change your password, open ${ui("Team")} and press ${ui("Change my password")}.</li>
+      <li>Forgotten your password? On the sign-in screen, enter your email and choose ${ui("Forgotten your password?")}.</li>
+      <li>If you belong to more than one company, switch between them using the company name under your name (top right).</li>
+    </ul>
+    <p class="gs-tip">Need a hand? Email Spectrum Coach at <a href="mailto:fred@spectrumcoach.com.au">fred@spectrumcoach.com.au</a>. The Privacy Policy, Terms of Service and Data Processing Agreement are linked at the bottom of every page.</p>
+    <div class="gs-actions">${billingBtn}</div>
+  </section>
+  </div>`;
+  gsWireActions(host);
+  host.querySelectorAll('.gs-toc a').forEach(a => a.addEventListener("click", e => {
+    e.preventDefault();
+    const t = document.getElementById(a.getAttribute("href").slice(1));
+    if(t) t.scrollIntoView({behavior:"smooth", block:"start"});
+  }));
 }
 
 /* ============================================================
