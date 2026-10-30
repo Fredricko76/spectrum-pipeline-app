@@ -792,6 +792,17 @@
   }
   .link-btn:hover{color:var(--green)}
   .authfoot{margin-top:14px;text-align:center}
+  /* Legal: sign-up agreement tick box + footer links (auth card and app) */
+  .authcard .agree{display:flex;gap:9px;align-items:flex-start;margin:4px 0 6px;font-size:13px;
+    font-weight:400;color:var(--ink);line-height:1.45;text-transform:none;letter-spacing:0;cursor:pointer}
+  .authcard .agree input{width:16px;height:16px;flex:0 0 auto;margin:2px 0 0;padding:0;
+    accent-color:var(--primary);cursor:pointer;box-shadow:none}
+  .authcard .agree a,.authlegal a,.app-legal a{color:var(--primary);text-decoration:underline}
+  .authlegal{margin:16px 0 0;padding-top:12px;border-top:1px solid var(--line);text-align:center;
+    font-size:12px;color:var(--subtle)}
+  .authlegal a{color:var(--subtle)}
+  .app-legal{padding:0 26px 30px;margin-top:-18px;text-align:center;font-size:12px;color:var(--subtle)}
+  .app-legal a{color:var(--subtle)}
   .temppw{
     background:var(--bg);border:1px dashed var(--line);border-radius:9px;padding:12px 14px;
     margin-top:10px;font-size:13px;
@@ -1328,12 +1339,23 @@
         <label>Password</label>
         <input type="password" id="auPass" required minlength="8" autocomplete="current-password" />
       </div>
+      <div class="field" id="fldAgree" style="display:none">
+        <label class="agree" for="auAgree">
+          <input type="checkbox" id="auAgree" />
+          <span>I agree to the <a href="/terms.html" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a></span>
+        </label>
+      </div>
       <button class="go" id="auGo" type="submit">Sign in</button>
       <div class="authmsg" id="auMsg"></div>
       <div class="authfoot" id="authFoot">
         <button type="button" class="link-btn" id="forgotBtn">Forgotten your password?</button>
       </div>
     </form>
+    <div class="authlegal" id="authLegal">
+      <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a> &middot;
+      <a href="/terms.html" target="_blank" rel="noopener">Terms of Service</a> &middot;
+      <a href="/dpa.html" target="_blank" rel="noopener">Data Processing Agreement</a>
+    </div>
   </div>
 </div>
 
@@ -1476,6 +1498,12 @@
 <div id="view-platform" hidden></div>
 
 <div class="footer-note" id="footNote"></div>
+<div class="app-legal" id="appLegal">
+  &copy; Spectrum Coach &middot;
+  <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a> &middot;
+  <a href="/terms.html" target="_blank" rel="noopener">Terms of Service</a> &middot;
+  <a href="/dpa.html" target="_blank" rel="noopener">Data Processing Agreement</a>
+</div>
 
 <!-- ===================== MODAL ===================== -->
 <div class="overlay" id="overlay">
@@ -6246,12 +6274,17 @@ function clearAuthMsg(){
   el.textContent = "";
 }
 
+// Bump when the Terms of Service / Privacy Policy change materially.
+const TERMS_VERSION = "2026-10-30";
+
 function setAuthMode(mode){
   AUTH_MODE = mode;
   document.querySelectorAll("#authTabs button").forEach(b=>
     b.classList.toggle("on", b.dataset.mode === mode));
   const signup = mode === "signup";
   document.getElementById("fldName").style.display    = signup ? "" : "none";
+  document.getElementById("fldAgree").style.display   = signup ? "" : "none";
+  document.getElementById("auAgree").required         = signup;
   // an invited user joins an existing company, so no company name field
   document.getElementById("fldCompany").style.display = (signup && !INVITE) ? "" : "none";
   document.getElementById("auGo").textContent = signup
@@ -6311,9 +6344,16 @@ function wireAuth(){
         if(error) throw error;
         await enterApp();
       }else{
+        if(!document.getElementById("auAgree").checked){
+          authMsg("err", "Please tick the box to agree to the Terms of Service and Privacy Policy.");
+          return;
+        }
         const meta = {
           full_name: document.getElementById("auName").value.trim(),
-          company_name: document.getElementById("auCompany").value.trim()
+          company_name: document.getElementById("auCompany").value.trim(),
+          // Record of acceptance; also kept on the account (auth user metadata).
+          terms_version: TERMS_VERSION,
+          terms_accepted_at: new Date().toISOString()
         };
         if(INVITE) meta.invite_token = INVITE.token;
         const {data, error} = await sb.auth.signUp({email, password: pass, options:{data: meta}});
