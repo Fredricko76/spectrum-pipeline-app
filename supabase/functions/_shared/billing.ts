@@ -24,11 +24,15 @@ export const TRIAL_DAYS = 14;
 export const PRODUCTION_PROJECT_REF = "qjkmkmmrgtoaocygymqo";
 
 /**
- * NON-SECRET defaults for known test projects, used only when the env var is not set.
- * Production has no defaults: every value must come from its function secrets.
+ * NON-SECRET defaults per project, used only when the env var is not set (a set secret always wins).
  * Never put a Stripe secret key or webhook signing secret here.
  */
 const TEST_PROJECT_DEFAULTS: Record<string, Record<string, string>> = {
+  // Production + live Stripe (public values; secrets STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET are never defaulted)
+  [PRODUCTION_PROJECT_REF]: {
+    APP_URL: "https://spectrumsalesonline.net",
+    STRIPE_PORTAL_CONFIG_ID: "bpc_1UW5P6S3hxQFvThdwJf0hbAS",
+  },
   // Supabase development branch "billing-test" + Netlify deploy preview of PR #4 + Stripe TEST mode
   wwdhiailerkmwpnuqpvm: {
     APP_URL: "https://deploy-preview-4--spectrum-pipeline-app.netlify.app",
@@ -41,9 +45,29 @@ export function projectRef(): string {
   return url.match(/^https:\/\/([a-z0-9]+)\.supabase\.co/)?.[1] ?? "";
 }
 
+/** Read an env var by exact name, else by a name that matches once stray spaces are trimmed
+ *  (a dashboard secret saved as "STRIPE_SECRET_KEY " with a trailing space). */
+function getEnv(name: string): string | undefined {
+  const exact = Deno.env.get(name);
+  if (exact) return exact;
+  const alt = Object.keys(Deno.env.toObject()).find((k) => k !== name && k.trim() === name);
+  if (!alt) return undefined;
+  console.warn(`env var ${name} found under a name with extra spaces (${JSON.stringify(alt)}); rename it to ${name}`);
+  return Deno.env.get(alt);
+}
+
+/** Log a missing env var with the NAMES (never values) of similar vars, to spot a mistyped secret name. */
+function missingEnv(name: string): never {
+  const similar = Object.keys(Deno.env.toObject())
+    .filter((k) => /APP|STRIPE|PORTAL|URL|KEY|SECRET/i.test(k) && !k.startsWith("SUPABASE_") && k !== name)
+    .map((k) => JSON.stringify(k)); // quoted so stray spaces in a name are visible
+  console.error(`Missing env var ${name}; similar names set: [${similar.join(", ")}]`);
+  throw new Error(`Missing env var ${name}`);
+}
+
 export function env(name: string): string {
-  const v = Deno.env.get(name)?.trim() || TEST_PROJECT_DEFAULTS[projectRef()]?.[name];
-  if (!v) throw new Error(`Missing env var ${name}`);
+  const v = getEnv(name)?.trim() || TEST_PROJECT_DEFAULTS[projectRef()]?.[name];
+  if (!v) missingEnv(name);
   return v;
 }
 
@@ -81,8 +105,8 @@ export function describeSecret(raw: string): string {
 
 /** Read a secret env var, normalise it and check its prefix; failures log safe diagnostics only. */
 export function secretEnv(name: string, prefix: RegExp, expected: string, minLength = 20): string {
-  const raw = Deno.env.get(name);
-  if (!raw) throw new Error(`Missing env var ${name}`);
+  const raw = getEnv(name);
+  if (!raw) missingEnv(name);
   const v = normaliseSecret(raw);
   if (!prefix.test(v) || v.length < minLength) {
     console.error(`${name} rejected: ${describeSecret(raw)}`);
