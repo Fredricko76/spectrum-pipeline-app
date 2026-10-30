@@ -1168,6 +1168,10 @@
   .plan-card ul{margin:0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.6;flex:1}
   .plan-card .btn{justify-content:center}
   .plan-foot{margin-top:14px;font-size:12px;color:var(--muted)}
+  .plan-err{display:none;margin:16px 0 0;padding:12px 14px;border:1px solid #f1d3d3;border-left:4px solid var(--red);
+    background:#fdf2f2;color:#7f1d1d;border-radius:8px;font-size:13.5px;line-height:1.5}
+  .plan-err.show{display:block}
+  .plan-err strong{color:var(--red)}
   body.is-readonly #addBtn,
   body.is-readonly .tab[data-view="import"]{display:none !important}
 </style>
@@ -1644,6 +1648,7 @@
           <button class="btn btn-light" data-plan="network">Choose Network</button>
         </div>
       </div>
+      <div class="plan-err" id="planErr" role="alert" aria-live="assertive"></div>
       <p class="plan-foot">Prices exclude GST, which is added at checkout. Change plan or cancel any time from Billing.</p>
     </div>
   </div>
@@ -6688,26 +6693,52 @@ function openPlanPicker(){
     : "Pick a plan to reactivate your workspace. Your clients and history are all still here.";
   document.getElementById("planOverlay").classList.add("open");
 }
-function closePlanPicker(){ document.getElementById("planOverlay").classList.remove("open"); }
+function closePlanPicker(){ planError(""); document.getElementById("planOverlay").classList.remove("open"); }
 
 async function callBilling(fnName, body){
   const {data, error} = await sb.functions.invoke(fnName, {body: body || {}});
   if(error){
     let detail = null;
     try{ detail = error.context && typeof error.context.json === "function" ? await error.context.json() : null; }catch(_){ }
-    return {error: (detail && detail.error) || error.message || "Billing is unavailable right now.", detail};
+    const status = error.context && error.context.status;
+    return {error: (detail && detail.error) || error.message || "Billing is unavailable right now.", detail, status};
   }
   return {data};
 }
 
+function planError(html){
+  const el = document.getElementById("planErr");
+  if(!el) return;
+  el.innerHTML = html || "";
+  el.classList.toggle("show", !!html);
+}
+
 async function startCheckout(plan, btn){
-  if(btn) btn.disabled = true;
+  const btns = [...document.querySelectorAll("#planOverlay [data-plan]")];
+  const label = btn ? btn.textContent : "";
+  planError("");
+  btns.forEach(b => b.disabled = true);
+  if(btn) btn.textContent = "Starting checkout\u2026";
+  let leaving = false;
   try{
     const r = await callBilling("billing-checkout", {plan});
-    if(r.detail && r.detail.portal) return openBillingPortal();
-    if(r.error){ toast(r.error); return; }
+    if(r.detail && r.detail.portal){ leaving = true; return openBillingPortal(); }
+    if(r.error || !r.data || !r.data.url){
+      // 4xx answers carry a message written for the user; anything else gets the generic one
+      const userMsg = r.status >= 400 && r.status < 500 && r.detail && r.detail.error;
+      planError(userMsg
+        ? "<strong>Checkout couldn't start.</strong> " + esc(userMsg)
+        : "<strong>Checkout couldn't start.</strong> Please try again in a minute. If it keeps happening, " +
+          "contact Spectrum Coach and we'll sort it out - your workspace and data are safe.");
+      return;
+    }
+    leaving = true;
     location.href = r.data.url;
-  }finally{ if(btn) btn.disabled = false; }
+  }catch(_){
+    planError("<strong>Checkout couldn't start.</strong> Check your internet connection and try again.");
+  }finally{
+    if(!leaving){ btns.forEach(b => b.disabled = false); if(btn) btn.textContent = label; }
+  }
 }
 
 async function openBillingPortal(){
