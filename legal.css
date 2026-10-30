@@ -1,0 +1,45 @@
+/* Spectrum Sales Pipeline - public legal pages (privacy, terms, DPA).
+   Same palette as the app: navy/blue on white, green only as a small accent. */
+:root{
+  --navy:#1d3b5c; --navy-deep:#152c46; --primary:#2a5b8c; --primary-deep:#214a73;
+  --primary-soft:#eaf1f8; --accent:#2f855a; --accent-soft:#e6f4ec;
+  --ink:#1f2937; --muted:#475569; --line:#e2e8f0; --bg:#f5f7fa; --card:#fff;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Lato",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:16px;line-height:1.65}
+a{color:var(--primary)} a:hover{color:var(--primary-deep)}
+.lg-top{background:linear-gradient(140deg,var(--navy-deep),var(--navy) 60%,#24496f);color:#fff;
+  border-bottom:3px solid var(--accent)}
+.lg-top .in{max-width:860px;margin:0 auto;padding:22px 24px;display:flex;align-items:center;
+  justify-content:space-between;gap:16px;flex-wrap:wrap}
+.lg-brand{color:#fff;text-decoration:none;font-weight:900;font-size:18px;letter-spacing:.2px}
+.lg-brand span{font-weight:400;opacity:.8}
+.lg-nav{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}
+.lg-nav a{color:#dbe7f3;text-decoration:none}
+.lg-nav a:hover,.lg-nav a[aria-current="page"]{color:#fff;text-decoration:underline}
+main{max-width:860px;margin:28px auto 40px;padding:0 16px}
+.lg-card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 4px 18px rgba(15,23,42,.06);padding:34px 38px}
+h1{margin:0 0 6px;font-size:30px;line-height:1.25;color:var(--navy)}
+.lg-updated{margin:0 0 22px;color:var(--muted);font-size:14px}
+.lg-updated::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:var(--accent);margin-right:8px;vertical-align:middle}
+h2{margin:32px 0 8px;font-size:20px;color:var(--navy);padding-top:8px;border-top:1px solid var(--line)}
+h3{margin:20px 0 6px;font-size:16px;color:var(--ink)}
+p,li{color:var(--ink)} ul,ol{padding-left:22px} li{margin:4px 0}
+.lg-summary{background:var(--primary-soft);border-left:4px solid var(--primary);border-radius:8px;
+  padding:14px 18px;margin:0 0 8px}
+.lg-summary p{margin:4px 0}
+.lg-toc{font-size:14px;columns:2;column-gap:28px;margin:10px 0 0}
+@media (max-width:640px){.lg-toc{columns:1}.lg-card{padding:24px 20px}h1{font-size:25px}}
+table{width:100%;border-collapse:collapse;margin:10px 0 6px;font-size:14px}
+th,td{text-align:left;vertical-align:top;border:1px solid var(--line);padding:8px 10px}
+th{background:var(--primary-soft);color:var(--navy)}
+.lg-ph{background:#fff7e0;border:1px dashed #b7791f;color:#7a4f0e;border-radius:4px;padding:0 4px;
+  font-weight:700;font-size:.92em}
+.lg-foot{max-width:860px;margin:0 auto 40px;padding:0 24px;color:var(--muted);font-size:13px;text-align:center}
+.lg-foot a{color:var(--muted)}
+@media print{.lg-top,.lg-foot{display:none}.lg-card{border:0;box-shadow:none;padding:0}body{background:#fff}}
