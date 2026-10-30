@@ -99,6 +99,29 @@ Webhook endpoint (test): `we_1UW2O9S3hxQFvThdk30rk1L3` ->
 Its signing secret is shown only in the Dashboard (Developers > Webhooks > endpoint > Reveal) and must be
 set as `STRIPE_WEBHOOK_SECRET` on the branch. Smart Retries / "mark unpaid" are Dashboard-only settings.
 
+## Live-mode objects (created 2026-10-30 13:18 AEDT, account acct_1POqw5S3hxQFvThd, livemode=true)
+
+| Plan | Product | Price (lookup key) | AUD ex GST |
+|---|---|---|---|
+| Starter (3 seats) | prod_VX9hz12C7NwYO6 | price_1UW5OcS3hxQFvThdTFx4eGjK (`pipeline_starter_monthly`) | 149.00/mo |
+| Team (10 seats) | prod_VX9idq4ECEx10V | price_1UW5OnS3hxQFvThdMedjTkc7 (`pipeline_team_monthly`) | 349.00/mo |
+| Network (25 seats) | prod_VX9iYZGTG1enLj | price_1UW5OqS3hxQFvThdxUIkWDrN (`pipeline_network_monthly`) | 799.00/mo |
+
+Same metadata, tax code (`txcd_10103001`) and `tax_behavior=exclusive` as test.
+Customer Portal configuration (live, not the default): `bpc_1UW5P6S3hxQFvThdwJf0hbAS` -> `STRIPE_PORTAL_CONFIG_ID`
+on production. Same settings as the test configuration (only these 3 prices, trial continues on plan change).
+AU GST registration (live, pre-existing): `taxreg_1QUfkJS3hxQFvThdqlgofZyr`.
+Webhook endpoint (live): `we_1UW5PLS3hxQFvThd2cTiRQtC` ->
+`https://qjkmkmmrgtoaocygymqo.supabase.co/functions/v1/stripe-webhook` (production), same 9 events as test.
+Signing secret: https://dashboard.stripe.com/webhooks/we_1UW5PLS3hxQFvThd2cTiRQtC -> Reveal -> production
+`STRIPE_WEBHOOK_SECRET`. The pre-existing course-portal live webhook `we_1UTCnNS3hxQFvThd5kcmfByf` is unchanged.
+
+Production function secrets (https://supabase.com/dashboard/project/qjkmkmmrgtoaocygymqo/functions/secrets):
+`APP_URL=https://spectrumsalesonline.net`, `STRIPE_PORTAL_CONFIG_ID=bpc_1UW5P6S3hxQFvThdwJf0hbAS`,
+`STRIPE_SECRET_KEY` (live, from https://dashboard.stripe.com/apikeys), `STRIPE_WEBHOOK_SECRET` (above).
+billing-checkout, billing-portal (verify_jwt on) and stripe-webhook (verify_jwt off) were deployed to production
+as v1 on 2026-10-30; the migration and the new website-enquiry are not yet applied.
+
 ## billing-test environment
 - Supabase branch `billing-test` (`wwdhiailerkmwpnuqpvm`): all 58 production migrations + `stripe_billing`,
   fake seed data only. Function secrets needed there: `STRIPE_SECRET_KEY` (test key) and `STRIPE_WEBHOOK_SECRET`.
