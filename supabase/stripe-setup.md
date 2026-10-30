@@ -101,3 +101,17 @@ set as `STRIPE_WEBHOOK_SECRET` on the branch. Smart Retries / "mark unpaid" are 
   fake seed data only. Function secrets needed there: `STRIPE_SECRET_KEY` (test key) and `STRIPE_WEBHOOK_SECRET`.
   `APP_URL` and `STRIPE_PORTAL_CONFIG_ID` default from `TEST_PROJECT_DEFAULTS` in `_shared/billing.ts`.
 - Netlify deploy previews / branch deploys point at the branch (`scripts/preview-supabase.sh`).
+
+## Go-live checks (before applying the migration to production)
+
+- **service_role grant on `stripe_events`.** The migration now grants `select, insert, update, delete` to
+  `service_role` explicitly (the undo revokes it). Why: on the billing-test branch the default privileges for
+  tables created by `postgres` give `service_role` no table rights, so the webhook failed with
+  `permission denied for table stripe_events` (2026-10-30 12:31 AEDT). Read-only check of production
+  (qjkmkmmrgtoaocygymqo, 2026-10-30 12:40 AEDT): its default privileges for `postgres` tables do grant
+  `service_role` (and anon/authenticated, which the migration revokes) full rights, and no existing public
+  table is missing service_role rights - so production would have worked, and the explicit grant makes it
+  certain. After go-live, confirm: `select has_table_privilege('service_role','public.stripe_events','select,insert,update,delete');`
+  returns true and `has_table_privilege('anon', ...)` / `('authenticated', ...)` return false.
+- Every other object the functions use (`companies`, `company_access`, `company_can_write`, `my_billing`)
+  already had the needed grants on the branch.

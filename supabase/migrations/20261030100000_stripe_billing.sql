@@ -58,6 +58,9 @@ create table public.stripe_events (
 );
 alter table public.stripe_events enable row level security;   -- no policies: clients see nothing
 revoke all on public.stripe_events from anon, authenticated;
+-- Explicit, because default privileges differ between projects: the billing-test branch's
+-- defaults give service_role no table rights (webhook failed: permission denied for table stripe_events).
+grant select, insert, update, delete on public.stripe_events to service_role;
 
 -- 3. Comp the 5 existing companies (ids read from the live project 2026-10-30) ---
 update public.companies

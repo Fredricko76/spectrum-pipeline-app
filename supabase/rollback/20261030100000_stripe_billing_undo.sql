@@ -24,6 +24,11 @@ grant update on public.companies to anon, authenticated;
 drop function if exists public.my_billing();
 drop function if exists public.company_can_write(uuid);
 drop function if exists public.company_access(uuid);
+do $$ begin  -- undo the explicit grant (the drop below removes it too; kept explicit for clarity)
+  if to_regclass('public.stripe_events') is not null then
+    revoke select, insert, update, delete on public.stripe_events from service_role;
+  end if;
+end $$;
 drop table if exists public.stripe_events;
 
 -- original function bodies (verbatim from baseline/schema.sql)
