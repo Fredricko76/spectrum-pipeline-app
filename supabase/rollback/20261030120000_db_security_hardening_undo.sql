@@ -50,7 +50,6 @@ drop policy if exists server_only_deny_all on public.stripe_events;
 grant all on table public.platform_admins to anon, authenticated;
 grant all on table public.platform_audit  to anon, authenticated;
 
-comment on table public.lead_sources      is null;
 comment on table public.platform_admins   is null;
 comment on table public.platform_audit    is null;
 comment on table public.platform_messages is null;

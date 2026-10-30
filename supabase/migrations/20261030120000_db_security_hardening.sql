@@ -66,7 +66,7 @@ as $$
              then 'All seats for this company are in use. Ask the owner to add a seat, then try again.'
            else null
          end,
-         case when v.ok then true end
+         coalesce(v.ok, false)
     from v;
 $$;
 revoke execute on function public.invitation_preview(uuid) from public;
@@ -84,7 +84,7 @@ create policy server_only_deny_all on public.platform_audit    as restrictive fo
 create policy server_only_deny_all on public.platform_messages as restrictive for all to anon, authenticated using (false) with check (false);
 create policy server_only_deny_all on public.stripe_events     as restrictive for all to anon, authenticated using (false) with check (false);
 
-comment on table public.lead_sources      is 'Server-only: read by the website-enquiry edge function (service_role).';
+-- lead_sources already has a comment saying it is service-role only; left unchanged.
 comment on table public.platform_admins   is 'Server-only: read via is_platform_admin()/require_platform_admin() (SECURITY DEFINER).';
 comment on table public.platform_audit    is 'Server-only: written by platform_log() (SECURITY DEFINER).';
 comment on table public.platform_messages is 'Server-only: chat is disabled; only SECURITY DEFINER functions touch it.';
