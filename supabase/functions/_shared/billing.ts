@@ -51,16 +51,54 @@ export function appUrl(): string {
   return env("APP_URL").replace(/\/+$/, "");
 }
 
+// Prefixes that are safe to log: they are fixed labels, not part of the secret itself.
+const KNOWN_PREFIXES = ["sk_test_", "rk_test_", "sk_live_", "rk_live_", "pk_test_", "pk_live_", "whsec_"];
+
+/** Undo common paste damage: surrounding quotes, any whitespace/newlines, zero-width characters. */
+export function normaliseSecret(raw: string): string {
+  let v = raw.replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+  while (v.length >= 2 && /^["'`]/.test(v) && v.at(-1) === v[0]) v = v.slice(1, -1).trim();
+  return v.replace(/\s+/g, "");
+}
+
+/** Safe description of a bad secret: a known prefix label, lengths and flags only - never other characters. */
+export function describeSecret(raw: string): string {
+  const v = normaliseSecret(raw);
+  const prefix = KNOWN_PREFIXES.find((p) => v.startsWith(p)) ?? "unrecognised prefix";
+  const flags = {
+    raw_length: raw.length,
+    normalised_length: v.length,
+    whitespace: /\s/.test(raw),
+    newline: /[\r\n]/.test(raw),
+    quotes: /["'`]/.test(raw),
+    zero_width: /[\u200B-\u200D\uFEFF]/.test(raw),
+    contains_equals: raw.includes("="),
+    known_prefix_later_in_value: prefix === "unrecognised prefix" &&
+      KNOWN_PREFIXES.some((p) => v.includes(p)),
+  };
+  return `prefix=${prefix} ${JSON.stringify(flags)}`;
+}
+
+/** Read a secret env var, normalise it and check its prefix; failures log safe diagnostics only. */
+export function secretEnv(name: string, prefix: RegExp, expected: string, minLength = 20): string {
+  const raw = Deno.env.get(name);
+  if (!raw) throw new Error(`Missing env var ${name}`);
+  const v = normaliseSecret(raw);
+  if (!prefix.test(v) || v.length < minLength) {
+    console.error(`${name} rejected: ${describeSecret(raw)}`);
+    throw new Error(`${name} is not a valid value (expected ${expected})`);
+  }
+  return v;
+}
+
 let _stripe: Stripe | null = null;
 export function stripe(): Stripe {
   if (!_stripe) {
-    const key = env("STRIPE_SECRET_KEY").trim();
-    // catch a mis-pasted secret early, with a message that never echoes the value
-    if (!/^(sk|rk)_(test|live)_[A-Za-z0-9]{10,}$/.test(key)) {
-      throw new Error(
-        "STRIPE_SECRET_KEY is not a Stripe secret/restricted key (expected sk_test_... or rk_test_...)",
-      );
-    }
+    const key = secretEnv(
+      "STRIPE_SECRET_KEY",
+      /^(sk|rk)_(test|live)_/,
+      "sk_test_... or rk_test_...",
+    );
     // a live key may only ever be used by the production project
     if (/^(sk|rk)_live_/.test(key) && projectRef() !== PRODUCTION_PROJECT_REF) {
       throw new Error("Refusing to use a live Stripe key outside the production project");

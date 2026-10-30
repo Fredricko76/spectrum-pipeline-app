@@ -9,7 +9,7 @@
 //  * comped companies are never touched
 import "jsr:@supabase/functions-js@2/edge-runtime.d.ts";
 import Stripe from "npm:stripe@23.0.1";
-import { adminClient, APP_TAG, env, stripe } from "../_shared/billing.ts";
+import { adminClient, APP_TAG, secretEnv, stripe } from "../_shared/billing.ts";
 
 const HANDLED = new Set([
   "checkout.session.completed",
@@ -68,10 +68,11 @@ Deno.serve(async (req) => {
   if (!signature) return reply(400, { error: "Missing signature" });
   const raw = await req.text();
 
-  const whsec = env("STRIPE_WEBHOOK_SECRET");
-  if (!whsec.startsWith("whsec_")) {
-    console.error("STRIPE_WEBHOOK_SECRET is not a whsec_ signing secret");
-    return reply(500, { error: "Webhook not configured" });
+  let whsec: string;
+  try {
+    whsec = secretEnv("STRIPE_WEBHOOK_SECRET", /^whsec_/, "whsec_...");
+  } catch (_e) {
+    return reply(500, { error: "Webhook not configured" }); // safe diagnostics already logged
   }
 
   let event: Stripe.Event;
