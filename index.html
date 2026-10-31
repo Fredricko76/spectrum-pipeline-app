@@ -767,6 +767,20 @@
     font-size:12px;word-break:break-all;margin-top:10px;display:none;
   }
   .invitelink.show{display:block}
+  .invitelink.warn{background:#FFF7E6;border-color:#F3D19C}
+  .invite-row{
+    display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
+    padding:9px 0;border-bottom:1px solid var(--line);
+  }
+  .invite-row:last-child{border-bottom:0}
+  .invite-row .who{font-weight:600;word-break:break-all}
+  .invite-row .em{font-size:12px;color:var(--muted)}
+  .invite-row .em.expired{color:var(--red);font-weight:600}
+  .invite-row .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .pw-msg{margin-top:10px;padding:9px 11px;border-radius:8px;font-size:13px;display:none}
+  .pw-msg.show{display:block}
+  .pw-msg.err{background:#fdf0f0;color:#9b2c2c;border:1px solid #f1d3d3}
+  .pw-msg.ok{background:var(--green-soft);color:var(--green-deep);border:1px solid #c9d9ea}
 
   /* ---------- Company switcher ---------- */
   .co-switch{
@@ -1447,6 +1461,7 @@
     </div>
     <button class="btn btn-ghost" id="teamBtn" style="display:none" title="Manage your team">Team</button>
     <button class="btn btn-ghost" id="billBtn" style="display:none" title="Plan and billing">Billing</button>
+    <button class="btn btn-ghost" id="acctBtn" style="display:none" title="Your account and password">Account</button>
     <button class="btn btn-ghost" id="signOutBtn" style="display:none">Sign out</button>
     <button class="btn btn-primary" id="addBtn">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -1780,7 +1795,7 @@
         <div class="field"><label>Brand colour</label><input type="color" id="coColour" style="height:40px;padding:4px" /></div>
       </div>
       <button class="btn btn-light btn-sm" id="saveCompany">Save company</button>
-      <button class="btn btn-light btn-sm" id="myPassword" style="margin-left:8px">Change my password</button>
+      <button class="btn btn-light btn-sm" id="myPassword" style="margin-left:8px">My account &amp; password</button>
 
       <div class="section-title" style="margin-top:22px">Members</div>
       <div id="teamList"></div>
@@ -1796,14 +1811,48 @@
           </select>
         </div>
         <div class="field" style="display:flex;align-items:flex-end">
-          <button class="btn btn-primary btn-sm" id="sendInvite" style="width:100%">Create invite</button>
+          <button class="btn btn-primary btn-sm" id="sendInvite" style="width:100%">Email invite</button>
         </div>
       </div>
       <div class="invitelink" id="inviteLink"></div>
       <p style="color:var(--muted);font-size:12px;margin-top:10px">
-        Invites are links, not emails &mdash; copy the link and send it however you like.
-        A consultant sees only the clients assigned to them. Admins and owners see the whole company pipeline.
+        We email the invite link to the person straight away. You can also copy the link and send it yourself.
+        Invites last 14 days. A consultant sees only the clients assigned to them. Admins and owners see the whole company pipeline.
       </p>
+
+      <div class="section-title" style="margin-top:22px">Pending invites</div>
+      <div id="pendingList"><p style="color:var(--muted)">No pending invites.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="acctOverlay">
+  <div class="modal" style="max-width:480px" role="dialog" aria-modal="true" aria-labelledby="acctTitle">
+    <div class="modal-head">
+      <h2 id="acctTitle">Your account</h2>
+      <button class="x" id="closeAcct" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p id="acctIntro" style="margin:0 0 6px;color:var(--muted);font-size:13px">
+        Signed in as <strong id="acctEmail"></strong>
+      </p>
+      <form id="pwForm" autocomplete="on">
+        <input type="email" id="pwUser" autocomplete="username" style="display:none" tabindex="-1" aria-hidden="true" />
+        <div class="section-title" id="pwHeading" style="margin-top:14px">Change your password</div>
+        <div class="field"><label for="pwNew">New password</label>
+          <input type="password" id="pwNew" minlength="8" required autocomplete="new-password" placeholder="At least 8 characters" /></div>
+        <div class="field"><label for="pwNew2">Confirm new password</label>
+          <input type="password" id="pwNew2" minlength="8" required autocomplete="new-password" /></div>
+        <button class="btn btn-primary btn-sm" id="pwSave" type="submit">Update password</button>
+        <div class="pw-msg" id="pwMsg" role="status"></div>
+      </form>
+      <div id="pwResetBlock">
+        <div class="section-title" style="margin-top:22px">Prefer a reset email?</div>
+        <p style="margin:0 0 8px;color:var(--muted);font-size:13px">
+          We will email a link to <strong id="pwResetEmail"></strong>. Open it on any device to choose a new password.
+        </p>
+        <button class="btn btn-light btn-sm" id="pwResetSend" type="button">Email me a reset link</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2065,6 +2114,9 @@ ${consultant}`
 const SUPABASE_URL = "https://qjkmkmmrgtoaocygymqo.supabase.co";
 const SUPABASE_KEY = "sb_publishable_4Jim3KNPeBOh5kkdYr-RLw_lWrCOaAg";
 const SB_READY = !!(window.supabase && window.supabase.createClient);
+// supabase-js reads (and then clears) the #access_token / #error fragment of an emailed
+// link as soon as the client is created, so keep a copy for handleRecovery().
+const BOOT_URL = {hash: location.hash || "", search: location.search || ""};
 const sb = SB_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 let clients   = [];
@@ -6134,7 +6186,7 @@ function showTempPassword(email, temp){
   const box = document.createElement("div");
   box.className = "plat-card";
   box.innerHTML = '<h3>Temporary password for ' + esc(email) + '</h3>' +
-    '<p class="hint">Shown once. Send it to them directly, and ask them to change it from Team &rarr; Change my password after signing in.</p>' +
+    '<p class="hint">Shown once. Send it to them directly, and ask them to change it from Account (top right) after signing in.</p>' +
     '<div class="temppw"><code id="tempPwVal">' + esc(temp) + '</code><br>' +
     '<button class="btn btn-light btn-sm" id="copyTempPw">Copy password</button></div>';
   host.prepend(box);
@@ -6313,7 +6365,13 @@ function friendlyError(err){
   const raw = (err && (err.message || err.error_description)) || String(err || "");
   const m = raw.toLowerCase();
   if(m.includes("email rate limit") || m.includes("over_email_send_rate_limit"))
-    return "The sign-up email service has hit its hourly limit. Wait an hour and try again, or ask your administrator to switch off email confirmation.";
+    return "Too many emails have been sent in the last hour. Wait a little while and try again.";
+  if(m.includes("should be different from the old password") || m.includes("same_password"))
+    return "That is already your password. Choose a different one.";
+  if(m.includes("reauthentication") || m.includes("reauthentication_needed"))
+    return "For security, sign out and back in (or use \"Email me a reset link\") before changing your password.";
+  if(m.includes("auth session missing"))
+    return "Your sign-in has expired. Sign in again, or ask for a new reset link.";
   if(m.includes("already registered") || m.includes("already been registered"))
     return "There is already an account for that email address. Try signing in instead.";
   if(m.includes("invalid login credentials"))
@@ -6444,9 +6502,7 @@ function wireAuth(){
     const email = document.getElementById("auEmail").value.trim();
     if(!email){ authMsg("err", "Enter your email address above first, then choose this again."); return; }
     clearAuthMsg();
-    const {error} = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: location.origin + location.pathname + "?recovery=1"
-    });
+    const {error} = await sb.auth.resetPasswordForEmail(email, {redirectTo: resetRedirectUrl()});
     if(error){ authMsg("err", friendlyError(error)); return; }
     authMsg("ok", "If an account exists for " + email + ", a reset link is on its way. Check your inbox, and your junk folder.");
   });
@@ -6538,6 +6594,7 @@ function paintIdentity(){
   }
   document.getElementById("whoami").style.display = "";
   document.getElementById("signOutBtn").style.display = "";
+  document.getElementById("acctBtn").style.display = "";
   document.getElementById("teamBtn").style.display = isManager() ? "" : "none";
   document.body.classList.toggle("is-manager", isManager());
   document.body.classList.toggle("is-platform", IS_PLATFORM);
@@ -6698,6 +6755,119 @@ async function refreshTeam(){
       else { toast("Access restored."); refreshTeam(); }
     });
   });
+  await refreshInvites();
+}
+
+/* ---------- invites: emailed via the team-invite edge function, link as fallback ---------- */
+let INVITES = [];   // pending invitations for the current company (managers only, via RLS)
+const INVITE_DAYS = 14;
+
+function inviteLinkFor(token){ return location.origin + location.pathname + "?invite=" + token; }
+
+// Ask the team-invite edge function to email an existing pending invite.
+// Never throws: returns {sent:true} or {sent:false, reason, error}.
+async function emailInvite(invitationId){
+  try{
+    const {data, error} = await sb.functions.invoke("team-invite", {body: {invitation_id: invitationId}});
+    if(!error) return data || {sent:false, reason:"send_failed"};
+    let detail = null;
+    try{ detail = error.context && typeof error.context.json === "function" ? await error.context.json() : null; }catch(_){ }
+    const status = error.context && error.context.status;
+    // 404 / network error = the function is not deployed yet: same as "email not switched on"
+    if(!detail && (status === 404 || !status)) return {sent:false, reason:"email_not_configured"};
+    return {sent:false, reason:(detail && detail.reason) || "send_failed", error:(detail && detail.error) || error.message};
+  }catch(err){
+    return {sent:false, reason:"send_failed", error: friendlyError(err)};
+  }
+}
+
+function inviteOutcomeText(email, res){
+  if(res.sent) return {ok:true, text:"Invite emailed to " + email + "."};
+  if(res.reason === "email_not_configured")
+    return {ok:false, text:"Invite emails are not switched on yet, so nothing was emailed to " + email + ". Copy the link and send it to them."};
+  return {ok:false, text:(res.error || "The invite email could not be sent.") + " Copy the link and send it to " + email + "."};
+}
+
+function showInviteResult(email, link, res){
+  const out = inviteOutcomeText(email, res);
+  const el = document.getElementById("inviteLink");
+  el.className = "invitelink show" + (out.ok ? "" : " warn");
+  el.innerHTML = "<strong>" + esc(out.text) + "</strong><br>" +
+    (out.ok ? "If it does not arrive, they can use this link: " : "") + esc(link) +
+    '<br><button class="btn btn-light btn-sm" style="margin-top:8px" id="copyInvite">Copy link</button>';
+  document.getElementById("copyInvite").addEventListener("click", ()=> copyText(link));
+}
+
+function copyText(text){
+  navigator.clipboard.writeText(text).then(()=>toast("Link copied."), ()=>toast("Copy failed - select it manually."));
+}
+
+function fmtDay(iso){
+  return new Date(iso).toLocaleDateString("en-AU", {day:"numeric", month:"short"});
+}
+
+async function refreshInvites(){
+  const box = document.getElementById("pendingList");
+  if(!box || !ME) return;
+  const {data, error} = await sb.from("invitations").select("*")
+    .eq("company_id", ME.company_id).eq("status", "pending")
+    .order("created_at", {ascending:false});
+  if(error){ box.innerHTML = '<p style="color:var(--muted)">Could not load pending invites.</p>'; return; }
+  INVITES = data || [];
+  if(!INVITES.length){ box.innerHTML = '<p style="color:var(--muted)">No pending invites.</p>'; return; }
+  const now = Date.now();
+  box.innerHTML = INVITES.map(i=>{
+    const expired = new Date(i.expires_at).getTime() <= now;
+    const sent = i.last_emailed_at ? " &middot; emailed " + esc(fmtDay(i.last_emailed_at)) : "";
+    return '<div class="invite-row">' +
+      '<div><div class="who">' + esc(i.email) + '</div>' +
+      '<div class="em' + (expired ? ' expired' : '') + '">' + esc(i.role) + ' &middot; ' +
+        (expired ? "Expired " : "Expires ") + esc(fmtDay(i.expires_at)) + sent + '</div></div>' +
+      '<div class="acts">' +
+        '<button class="btn btn-light btn-sm" data-inv-resend="' + i.id + '" title="' +
+          (expired ? 'Renew for ' + INVITE_DAYS + ' days and email again' : 'Email the invite again') + '">' +
+          (expired ? 'Renew &amp; resend' : 'Resend') + '</button>' +
+        '<button class="btn btn-light btn-sm" data-inv-copy="' + i.id + '">Copy link</button>' +
+        '<button class="btn btn-light btn-sm" data-inv-cancel="' + i.id + '">Cancel</button>' +
+      '</div></div>';
+  }).join("");
+  box.querySelectorAll("[data-inv-resend]").forEach(b=> b.addEventListener("click", ()=> resendInvite(b.dataset.invResend, b)));
+  box.querySelectorAll("[data-inv-copy]").forEach(b=> b.addEventListener("click", ()=>{
+    const inv = INVITES.find(x=> x.id === b.dataset.invCopy);
+    if(inv) copyText(inviteLinkFor(inv.token));
+  }));
+  box.querySelectorAll("[data-inv-cancel]").forEach(b=> b.addEventListener("click", ()=> cancelInvite(b.dataset.invCancel)));
+}
+
+async function resendInvite(id, btn){
+  const inv = INVITES.find(x=> x.id === id);
+  if(!inv) return;
+  if(btn) btn.disabled = true;
+  try{
+    if(new Date(inv.expires_at).getTime() <= Date.now()){
+      const expires_at = new Date(Date.now() + INVITE_DAYS*864e5).toISOString();
+      const {error} = await sb.from("invitations").update({expires_at}).eq("id", id);
+      if(error){ toast("Could not renew the invite: " + friendlyError(error)); return; }
+    }
+    const res = await emailInvite(id);
+    const out = inviteOutcomeText(inv.email, res);
+    toast(out.text);
+    if(!res.sent) showInviteResult(inv.email, inviteLinkFor(inv.token), res);
+  }finally{
+    if(btn) btn.disabled = false;
+    refreshInvites();
+  }
+}
+
+async function cancelInvite(id){
+  const inv = INVITES.find(x=> x.id === id);
+  if(!inv) return;
+  if(!confirm("Cancel the invite for " + inv.email + "?\n\nThe link stops working straight away. You can invite them again later.")) return;
+  const {error} = await sb.from("invitations").update({status:"revoked"}).eq("id", id);
+  if(error){ toast("Could not cancel the invite: " + friendlyError(error)); return; }
+  toast("Invite cancelled.");
+  document.getElementById("inviteLink").className = "invitelink";
+  refreshInvites();
 }
 
 function wireTeam(){
@@ -6707,7 +6877,7 @@ function wireTeam(){
 
   document.getElementById("coSwitch").addEventListener("change", e => switchCompany(e.target.value));
 
-  document.getElementById("myPassword").addEventListener("click", changeOwnPassword);
+  document.getElementById("myPassword").addEventListener("click", ()=> openAccount("change"));
 
   document.getElementById("saveSeats").addEventListener("click", async ()=>{
     const n = parseInt(document.getElementById("seatInput").value,10);
@@ -6742,19 +6912,30 @@ function wireTeam(){
       toast("All " + cap + " seats are in use - raise the seat limit first, or the invite cannot be accepted.");
       return;
     }
-    const {data, error} = await sb.from("invitations")
-      .insert({company_id: ME.company_id, email, role, invited_by: ME.id})
-      .select("token").single();
-    if(error){ toast("Could not create invite: " + error.message); return; }
-    const link = location.origin + location.pathname + "?invite=" + data.token;
-    const el = document.getElementById("inviteLink");
-    el.className = "invitelink show";
-    el.innerHTML = "<strong>Invite link for " + esc(email) + "</strong><br>" + esc(link) +
-      '<br><button class="btn btn-light btn-sm" style="margin-top:8px" id="copyInvite">Copy link</button>';
-    document.getElementById("copyInvite").addEventListener("click", ()=>{
-      navigator.clipboard.writeText(link).then(()=>toast("Link copied."), ()=>toast("Copy failed - select it manually."));
-    });
-    document.getElementById("invEmail").value = "";
+    // an invite for this address is already waiting: send that one again instead of a duplicate
+    const existing = INVITES.find(i=> (i.email||"").toLowerCase() === email.toLowerCase() &&
+                                       new Date(i.expires_at).getTime() > Date.now());
+    if(existing){
+      if(confirm("There is already a pending invite for " + existing.email + ".\n\nEmail it to them again?")){
+        document.getElementById("invEmail").value = "";
+        await resendInvite(existing.id);
+      }
+      return;
+    }
+    const btn = document.getElementById("sendInvite");
+    btn.disabled = true;
+    try{
+      const {data, error} = await sb.from("invitations")
+        .insert({company_id: ME.company_id, email, role, invited_by: ME.id})
+        .select("id, token").single();
+      if(error){ toast("Could not create invite: " + error.message); return; }
+      const res = await emailInvite(data.id);
+      showInviteResult(email, inviteLinkFor(data.token), res);
+      toast(inviteOutcomeText(email, res).text);
+      document.getElementById("invEmail").value = "";
+    }finally{
+      btn.disabled = false;
+    }
     refreshTeam();
   });
 }
@@ -6947,6 +7128,7 @@ async function enterApp(){
     paintIdentity();
     switchView("dashboard");
     await handleBillingReturn();
+    PW_APP_ENTERED = true;
   }catch(err){
     console.error(err);
     showAuth();
@@ -6954,39 +7136,104 @@ async function enterApp(){
   }
 }
 
-async function promptNewPassword(reason){
-  const pw1 = prompt((reason || "Set a new password.") + "\n\nAt least 8 characters:");
-  if(pw1 === null) return null;
-  if(pw1.length < 8){ toast("That is shorter than 8 characters."); return null; }
-  const pw2 = prompt("Type it once more to confirm:");
-  if(pw2 === null) return null;
-  if(pw1 !== pw2){ toast("Those did not match. Nothing was changed."); return null; }
-  return pw1;
+/* ---------- account & password (every signed-in user, any role) ---------- */
+let PW_MODE = "change";        // "change" (from the Account button) or "recovery" (emailed reset link)
+let PW_APP_ENTERED = false;
+
+function resetRedirectUrl(){ return location.origin + location.pathname + "?recovery=1"; }
+
+function pwMsg(kind, text){
+  const el = document.getElementById("pwMsg");
+  el.className = "pw-msg" + (text ? " show " + kind : "");
+  el.textContent = text || "";
 }
 
-async function changeOwnPassword(){
-  const pw = await promptNewPassword("Change your password.");
-  if(!pw) return;
-  const {error} = await sb.auth.updateUser({password: pw});
-  if(error){ toast(friendlyError(error)); return; }
-  toast("Password changed.");
-}
-
-async function handleRecovery(){
-  // Supabase returns to the app with a recovery token in the URL fragment
-  const hash = location.hash || "";
-  const isRecovery = hash.includes("type=recovery") ||
-                     new URLSearchParams(location.search).get("recovery") === "1";
-  if(!isRecovery) return false;
+async function openAccount(mode){
+  PW_MODE = mode === "recovery" ? "recovery" : "change";
+  const rec = PW_MODE === "recovery";
   const {data:{session}} = await sb.auth.getSession();
-  if(!session) return false;
-  const pw = await promptNewPassword("Choose a new password for your account.");
-  if(pw){
-    const {error} = await sb.auth.updateUser({password: pw});
-    if(error) toast(friendlyError(error)); else toast("Password updated. You are signed in.");
-  }
-  history.replaceState(null, "", location.pathname);
-  return true;
+  const email = (session && session.user && session.user.email) || "";
+  if(!session){ toast("Sign in first."); return; }
+  document.getElementById("acctTitle").textContent = rec ? "Choose a new password" : "Your account";
+  document.getElementById("acctIntro").innerHTML = rec
+    ? "You opened a password reset link for <strong>" + esc(email) + "</strong>. Choose a new password to finish."
+    : "Signed in as <strong>" + esc(email) + "</strong>";
+  document.getElementById("pwHeading").textContent = rec ? "New password" : "Change your password";
+  document.getElementById("pwSave").textContent = rec ? "Save new password" : "Update password";
+  document.getElementById("pwResetBlock").style.display = rec ? "none" : "";
+  document.getElementById("pwResetEmail").textContent = email;
+  document.getElementById("pwUser").value = email;
+  document.getElementById("pwNew").value = "";
+  document.getElementById("pwNew2").value = "";
+  pwMsg("", "");
+  document.getElementById("acctOverlay").classList.add("open");
+  setTimeout(()=> document.getElementById("pwNew").focus(), 50);
+}
+
+function closeAccount(){
+  const wasRecovery = PW_MODE === "recovery";
+  document.getElementById("acctOverlay").classList.remove("open");
+  PW_MODE = "change";
+  if(wasRecovery) toast("Your password was not changed. You can change it any time from Account.");
+}
+
+function wireAccount(){
+  document.getElementById("acctBtn").addEventListener("click", ()=> openAccount("change"));
+  document.getElementById("closeAcct").addEventListener("click", closeAccount);
+
+  document.getElementById("pwForm").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const pw1 = document.getElementById("pwNew").value;
+    const pw2 = document.getElementById("pwNew2").value;
+    if(pw1.length < 8){ pwMsg("err", "Your password needs to be at least 8 characters."); return; }
+    if(pw1 !== pw2){ pwMsg("err", "Those two passwords do not match."); return; }
+    const btn = document.getElementById("pwSave");
+    btn.disabled = true;
+    pwMsg("", "");
+    try{
+      const {error} = await sb.auth.updateUser({password: pw1});
+      if(error){ pwMsg("err", friendlyError(error)); return; }
+      const rec = PW_MODE === "recovery";
+      PW_MODE = "change";
+      document.getElementById("acctOverlay").classList.remove("open");
+      toast(rec ? "Password saved. You are signed in." : "Password changed.");
+      if(rec && !PW_APP_ENTERED) await enterApp();
+    }finally{
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById("pwResetSend").addEventListener("click", async ()=>{
+    const email = document.getElementById("pwResetEmail").textContent;
+    if(!email) return;
+    const btn = document.getElementById("pwResetSend");
+    btn.disabled = true;
+    try{
+      const {error} = await sb.auth.resetPasswordForEmail(email, {redirectTo: resetRedirectUrl()});
+      if(error){ pwMsg("err", friendlyError(error)); return; }
+      pwMsg("ok", "Reset link sent to " + email + ". It can take a few minutes - check your junk folder too.");
+    }finally{
+      btn.disabled = false;
+    }
+  });
+}
+
+// Back-compat for any older caller.
+function changeOwnPassword(){ return openAccount("change"); }
+
+// The emailed reset link lands here as ?recovery=1#access_token=...&type=recovery
+// (or #error=...&error_code=otp_expired when the link is stale / already used).
+// Returns "recovery" when a recovery session is ready, "expired" for a dead link, or "" otherwise.
+async function handleRecovery(){
+  const hash = BOOT_URL.hash, search = new URLSearchParams(BOOT_URL.search);
+  const flagged = hash.includes("type=recovery") || search.get("recovery") === "1";
+  if(!flagged) return "";
+  const hp = new URLSearchParams(hash.replace(/^#/, ""));
+  const clean = ()=> history.replaceState(null, "", location.pathname);
+  if(hp.get("error") || hp.get("error_code")){ clean(); return "expired"; }
+  const {data:{session}} = await sb.auth.getSession();
+  clean();
+  return session ? "recovery" : "expired";
 }
 
 async function boot(){
@@ -7001,11 +7248,22 @@ async function boot(){
   wireAuth();
   wireTeam();
   wireBilling();
+  wireAccount();
   await checkInvite();
-  await handleRecovery();
+  const recovery = await handleRecovery();
   const {data:{session}} = await sb.auth.getSession();
+  if(recovery === "recovery" && session){
+    // signed in by the reset link: open the app behind a "choose a new password" dialog
+    await enterApp();
+    openAccount("recovery");
+    return;
+  }
   if(session && !INVITE) await enterApp();
   else showAuth();
+  if(recovery === "expired"){
+    setAuthMode("signin");
+    authMsg("err", "That password reset link has expired or has already been used. Enter your email above and choose \"Forgotten your password?\" to get a new one.");
+  }
 }
 
 boot();

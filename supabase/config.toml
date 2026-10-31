@@ -13,3 +13,6 @@ verify_jwt = true
 
 [functions.stripe-webhook]
 verify_jwt = false          # Stripe can't send a Supabase JWT; the Stripe signature is verified instead
+
+[functions.team-invite]
+verify_jwt = true           # owner/admin only; checked again inside via my_billing().can_manage
