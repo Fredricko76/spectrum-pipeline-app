@@ -1918,19 +1918,19 @@
         <div class="plan-card">
           <h3>Starter</h3>
           <div class="price">$149 <small>/ month AUD + GST</small></div>
-          <ul><li>Up to 3 users</li><li>Full pipeline, dashboard and reports</li><li>Website and lead-form enquiries</li></ul>
+          <ul><li>Up to 3 users</li><li>Full pipeline, dashboard and reports</li><li>Sales Reports and KPI targets per consultant</li><li>Website and lead-form enquiries</li></ul>
           <button class="btn btn-light" data-plan="starter">Choose Starter</button>
         </div>
         <div class="plan-card featured">
           <h3>Team</h3>
           <div class="price">$349 <small>/ month AUD + GST</small></div>
-          <ul><li>Up to 10 users</li><li>Everything in Starter</li><li>Sales Reports and KPI targets per consultant</li></ul>
+          <ul><li>Up to 10 users</li><li>Everything in Starter, including Sales Reports and KPI targets</li></ul>
           <button class="btn btn-primary" data-plan="team">Choose Team</button>
         </div>
         <div class="plan-card">
           <h3>Network</h3>
           <div class="price">$799 <small>/ month AUD + GST</small></div>
-          <ul><li>Up to 25 users</li><li>For franchise networks and multi-site builders</li><li>Need more users? Ask us for a quote</li></ul>
+          <ul><li>Up to 25 users</li><li>Everything in Starter, including Sales Reports and KPI targets</li><li>For franchise networks and multi-site builders</li><li>Need more users? Ask us for a quote</li></ul>
           <button class="btn btn-light" data-plan="network">Choose Network</button>
         </div>
       </div>
@@ -7187,7 +7187,7 @@ function paintLeads(loadError){
   const panel = document.getElementById("leadPanel");
   if(!LEAD_AVAILABLE){
     panel.innerHTML = '<div class="lc-note">Lead connections aren\'t switched on for your workspace yet. ' +
-      'Please contact Spectrum Coach support and we\'ll turn them on.</div>' + leadGuide(LEAD_TAB, null);
+      'Please email <a href="mailto:info@spectrumcoach.com.au">info@spectrumcoach.com.au</a> and we\'ll turn them on.</div>' + leadGuide(LEAD_TAB, null);
     wireLeadPanel(); return;
   }
   if(loadError){ panel.innerHTML = '<div class="pw-msg err show">' + esc(loadError) + '</div>'; return; }
@@ -7704,7 +7704,7 @@ async function startCheckout(plan, btn){
       planError(userMsg
         ? "<strong>Checkout couldn't start.</strong> " + esc(userMsg)
         : "<strong>Checkout couldn't start.</strong> Please try again in a minute. If it keeps happening, " +
-          "contact Spectrum Coach and we'll sort it out - your workspace and data are safe.");
+          "email <a href=\"mailto:info@spectrumcoach.com.au\">info@spectrumcoach.com.au</a> and we'll sort it out - your workspace and data are safe.");
       return;
     }
     leaving = true;
@@ -8024,7 +8024,7 @@ async function handleRecovery(){
    This supersedes the paused Getting started tab from PR #9 and
    keeps its Dashboard setup checklist (updated).
    ============================================================ */
-const HELP_EMAIL = "fred@spectrumcoach.com.au";
+const HELP_EMAIL = "info@spectrumcoach.com.au";
 const HU  = t => '<span class="hp-ui">' + t + '</span>';
 const HWHO = {
   all:   ["all", "Everyone"],
@@ -8472,6 +8472,7 @@ const HELP_TOPICS = [
   b:()=>`<h2>Plans, free trial and billing</h2>
   <h3>Plans</h3>
   ${hPlansTable()}
+  <p><strong>Every plan includes everything in the app</strong>, including ${HU("Sales Reports")} and KPI targets. The plans differ only in how many people can use them.</p>
   <p>Prices are in Australian dollars and exclude GST, which is added at checkout.</p>
   <h3>Starting your free trial</h3>
   <ol>
