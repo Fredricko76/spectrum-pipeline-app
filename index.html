@@ -779,6 +779,11 @@
   .invite-row .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
   .pw-msg{margin-top:10px;padding:9px 11px;border-radius:8px;font-size:13px;display:none}
   .pw-msg.show{display:block}
+  /* emailed-link screens must sit above the sign-in screen (.authwrap z-index 9000) */
+  #linkOverlay, #acctOverlay{z-index:9500}
+  #linkOverlay .link-lead{margin:0 0 14px;color:var(--muted);font-size:14px;line-height:1.5}
+  #linkOverlay .link-acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  #linkRetry{margin-top:16px}
   .pw-msg.err{background:#fdf0f0;color:#9b2c2c;border:1px solid #f1d3d3}
   .pw-msg.ok{background:var(--green-soft);color:var(--green-deep);border:1px solid #c9d9ea}
 
@@ -1822,6 +1827,30 @@
 
       <div class="section-title" style="margin-top:22px">Pending invites</div>
       <div id="pendingList"><p style="color:var(--muted)">No pending invites.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="linkOverlay">
+  <div class="modal" style="max-width:460px" role="dialog" aria-modal="true" aria-labelledby="linkTitle">
+    <div class="modal-head">
+      <h2 id="linkTitle">Reset your password</h2>
+    </div>
+    <div class="modal-body">
+      <p class="link-lead" id="linkText"></p>
+      <div class="link-acts" id="linkActs">
+        <button class="btn btn-primary btn-sm" id="linkGo" type="button">Continue</button>
+        <button class="btn btn-light btn-sm" id="linkBack" type="button">Back to sign in</button>
+      </div>
+      <div class="pw-msg" id="linkMsg" role="status"></div>
+      <form id="linkRetry" style="display:none" autocomplete="on">
+        <div class="field"><label for="linkEmail">Your email address</label>
+          <input type="email" id="linkEmail" required autocomplete="email" placeholder="name@company.com.au" /></div>
+        <div class="link-acts">
+          <button class="btn btn-primary btn-sm" id="linkResend" type="submit">Email me a new link</button>
+          <button class="btn btn-light btn-sm" id="linkBack2" type="button">Back to sign in</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -7221,18 +7250,151 @@ function wireAccount(){
 // Back-compat for any older caller.
 function changeOwnPassword(){ return openAccount("change"); }
 
-// The emailed reset link lands here as ?recovery=1#access_token=...&type=recovery
-// (or #error=...&error_code=otp_expired when the link is stale / already used).
-// Returns "recovery" when a recovery session is ready, "expired" for a dead link, or "" otherwise.
+/* ---------- emailed links (password reset, sign-up confirmation) ----------
+   New emails link to  /?recovery=1&token_hash=...&type=recovery  (or type=email / signup).
+   Mail scanners (e.g. Microsoft 365 Safe Links) open links before the person does, and an
+   emailed token works only once. So the page never verifies on load: it shows a screen with
+   a Continue button and only calls verifyOtp() when the person taps it.
+   Older emails use Supabase's own link, which verifies first and lands here as
+   ?recovery=1#access_token=...&type=recovery (or #error=...&error_code=otp_expired). */
+let EMAIL_LINK = null;   // {token_hash, type, kind:"recovery"|"signup"} while the Continue screen is up
+
+const LINK_COPY = {
+  recovery: {
+    title: "Reset your password",
+    text: "Tap Continue to open your password reset link. You will then choose a new password.",
+    deadTitle: "This reset link has expired",
+    dead: "Reset links work once and expire after a while. It may also have been opened already, sometimes by your email provider's security check. Enter your email and we will send you a new one.",
+    sent: e => "If an account exists for " + e + ", a new reset link is on its way. Check your inbox, and your junk folder."
+  },
+  signup: {
+    title: "Confirm your email",
+    text: "Tap Continue to confirm your email address and sign in.",
+    deadTitle: "This confirmation link has expired",
+    dead: "It may have been used already, sometimes by your email provider's security check. If your email is already confirmed you can just sign in. Otherwise enter your email and we will send a new link.",
+    sent: e => "If " + e + " is waiting for confirmation, a new link is on its way. Check your inbox, and your junk folder."
+  }
+};
+
+function readEmailLink(){
+  const sp = new URLSearchParams(BOOT_URL.search);
+  const token_hash = sp.get("token_hash"), type = sp.get("type");
+  if(!token_hash || !type) return null;
+  const kind = type === "recovery" ? "recovery" : (type === "signup" || type === "email") ? "signup" : null;
+  return kind ? {token_hash, type, kind} : null;
+}
+
+function cleanLinkUrl(){ history.replaceState(null, "", location.pathname); }
+
+function linkMsg(kind, text){
+  const el = document.getElementById("linkMsg");
+  el.className = "pw-msg" + (text ? " show " + kind : "");
+  el.textContent = text || "";
+}
+
+function showLinkPrompt(link){
+  EMAIL_LINK = link;
+  const c = LINK_COPY[link.kind];
+  document.getElementById("linkTitle").textContent = c.title;
+  document.getElementById("linkText").textContent = c.text;
+  document.getElementById("linkActs").style.display = "";
+  document.getElementById("linkRetry").style.display = "none";
+  document.getElementById("linkGo").disabled = false;
+  linkMsg("", "");
+  document.getElementById("linkOverlay").classList.add("open");
+  setTimeout(()=> document.getElementById("linkGo").focus(), 50);
+}
+
+function showLinkDead(kind){
+  EMAIL_LINK = null;
+  const c = LINK_COPY[kind] || LINK_COPY.recovery;
+  document.getElementById("linkOverlay").dataset.kind = kind;
+  document.getElementById("linkTitle").textContent = c.deadTitle;
+  document.getElementById("linkText").textContent = c.dead;
+  document.getElementById("linkActs").style.display = "none";
+  document.getElementById("linkRetry").style.display = "";
+  document.getElementById("linkResend").disabled = false;
+  linkMsg("", "");
+  document.getElementById("linkOverlay").classList.add("open");
+  setTimeout(()=> document.getElementById("linkEmail").focus(), 50);
+}
+
+async function closeLinkScreen(){
+  EMAIL_LINK = null;
+  cleanLinkUrl();
+  document.getElementById("linkOverlay").classList.remove("open");
+  const {data:{session}} = await sb.auth.getSession();
+  if(session && !PW_APP_ENTERED) await enterApp();
+  else if(!session){ showAuth(); setAuthMode("signin"); }
+}
+
+function wireEmailLinks(){
+  document.getElementById("linkBack").addEventListener("click", closeLinkScreen);
+  document.getElementById("linkBack2").addEventListener("click", closeLinkScreen);
+
+  document.getElementById("linkGo").addEventListener("click", async ()=>{
+    const link = EMAIL_LINK;
+    if(!link) return;
+    const btn = document.getElementById("linkGo");
+    btn.disabled = true;
+    linkMsg("", "");
+    let res;
+    try{
+      res = await sb.auth.verifyOtp({token_hash: link.token_hash, type: link.type});
+    }catch(err){
+      res = {error: err};
+    }
+    cleanLinkUrl();
+    EMAIL_LINK = null;
+    const session = res && res.data && res.data.session;
+    if(res.error || !session){
+      const m = String((res.error && (res.error.message || res.error.code)) || "").toLowerCase();
+      if(m.includes("fetch") || m.includes("network")){
+        // keep the link usable: nothing was consumed if the request never reached Supabase
+        EMAIL_LINK = link;
+        btn.disabled = false;
+        linkMsg("err", "Could not reach the server. Check your connection and tap Continue again.");
+        return;
+      }
+      showLinkDead(link.kind);
+      return;
+    }
+    document.getElementById("linkOverlay").classList.remove("open");
+    await enterApp();
+    if(link.kind === "recovery") openAccount("recovery");
+    else toast("Email confirmed. Welcome to Spectrum Sales Pipeline.");
+  });
+
+  document.getElementById("linkRetry").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const email = document.getElementById("linkEmail").value.trim();
+    if(!email) return;
+    const kind = document.getElementById("linkOverlay").dataset.kind || "recovery";
+    const btn = document.getElementById("linkResend");
+    btn.disabled = true;
+    linkMsg("", "");
+    try{
+      const {error} = kind === "signup"
+        ? await sb.auth.resend({type: "signup", email, options: {emailRedirectTo: location.origin + location.pathname}})
+        : await sb.auth.resetPasswordForEmail(email, {redirectTo: resetRedirectUrl()});
+      if(error){ linkMsg("err", friendlyError(error)); return; }
+      linkMsg("ok", LINK_COPY[kind].sent(email));
+    }finally{
+      btn.disabled = false;
+    }
+  });
+}
+
+// Older reset emails (Supabase-verified link). Returns "recovery" when a recovery session
+// is ready, "expired" for a dead link, or "" otherwise.
 async function handleRecovery(){
   const hash = BOOT_URL.hash, search = new URLSearchParams(BOOT_URL.search);
   const flagged = hash.includes("type=recovery") || search.get("recovery") === "1";
   if(!flagged) return "";
   const hp = new URLSearchParams(hash.replace(/^#/, ""));
-  const clean = ()=> history.replaceState(null, "", location.pathname);
-  if(hp.get("error") || hp.get("error_code")){ clean(); return "expired"; }
+  if(hp.get("error") || hp.get("error_code")){ cleanLinkUrl(); return "expired"; }
   const {data:{session}} = await sb.auth.getSession();
-  clean();
+  cleanLinkUrl();
   return session ? "recovery" : "expired";
 }
 
@@ -7249,7 +7411,18 @@ async function boot(){
   wireTeam();
   wireBilling();
   wireAccount();
+  wireEmailLinks();
   await checkInvite();
+
+  // New-style emailed link: wait for a tap before using the one-time token.
+  const link = readEmailLink();
+  if(link){
+    showAuth();
+    setAuthMode("signin");
+    showLinkPrompt(link);
+    return;
+  }
+
   const recovery = await handleRecovery();
   const {data:{session}} = await sb.auth.getSession();
   if(recovery === "recovery" && session){
@@ -7262,7 +7435,7 @@ async function boot(){
   else showAuth();
   if(recovery === "expired"){
     setAuthMode("signin");
-    authMsg("err", "That password reset link has expired or has already been used. Enter your email above and choose \"Forgotten your password?\" to get a new one.");
+    showLinkDead("recovery");
   }
 }
 
