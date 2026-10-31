@@ -1334,6 +1334,108 @@
     .lc-val{flex-direction:column}
     .lc-tab{padding:8px 8px;font-size:13px}
   }
+
+  /* ---------- Help centre (overlay) + Dashboard setup checklist ---------- */
+  :root{--help-accent:#2FA36B;--help-accent-soft:#e8f6ef}
+  #helpOverlay{position:fixed;inset:0;z-index:9700;background:rgba(15,23,42,.5);display:none}
+  #helpOverlay.open{display:block}
+  .hp{position:absolute;inset:18px;max-width:1200px;margin:0 auto;background:#fff;border-radius:14px;display:flex;flex-direction:column;
+    overflow:hidden;box-shadow:0 20px 50px rgba(15,23,42,.3)}
+  .hp-head{display:flex;align-items:center;gap:12px;padding:14px 20px;background:#1d3b5c;color:#fff}
+  .hp-head h2{margin:0;font-size:18px;font-weight:700;color:#fff;flex:1}
+  .hp-head .hp-role{font-size:12px;color:#cfe0f1}
+  .hp-head .x{background:transparent;border:0;color:#fff;font-size:26px;line-height:1;cursor:pointer;padding:0 4px}
+  .hp-navbtn{display:none}
+  .hp-body{flex:1;display:flex;min-height:0}
+  .hp-nav{width:290px;flex:none;border-right:1px solid var(--line);background:#f7f9fc;display:flex;flex-direction:column;min-height:0}
+  .hp-search{padding:14px 14px 8px}
+  .hp-search input{width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid #c9d6e4;border-radius:8px;font:inherit;background:#fff}
+  .hp-search input:focus{outline:none;border-color:#2a5b8c;box-shadow:0 0 0 3px #eaf1f8}
+  .hp-list{overflow:auto;padding:0 8px 16px;flex:1}
+  .hp-group{margin:12px 8px 4px;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#64748b}
+  .hp-link{display:flex;align-items:center;gap:6px;width:100%;text-align:left;background:transparent;border:0;border-radius:7px;
+    padding:7px 10px;font:inherit;font-size:13.5px;color:#1f2937;cursor:pointer}
+  .hp-link:hover{background:#eaf1f8}
+  .hp-link.on{background:#1d3b5c;color:#fff}
+  .hp-link .hp-tag{margin-left:auto}
+  .hp-link.on .hp-tag{background:rgba(255,255,255,.18);color:#fff;border-color:transparent}
+  .hp-none{padding:10px 12px;font-size:13px;color:#64748b}
+  .hp-main{flex:1;overflow:auto;padding:26px 34px 48px;min-width:0}
+  .hp-art{max-width:780px}
+  .hp-art h2{margin:0 0 6px;font-size:24px;color:#1d3b5c}
+  .hp-art .lead{margin:0 0 16px;color:#475569;font-size:14.5px;line-height:1.55}
+  .hp-art h3{margin:22px 0 6px;font-size:16px;color:#1d3b5c}
+  .hp-art h4{margin:16px 0 4px;font-size:14px;color:#1f2937}
+  .hp-art p,.hp-art li{font-size:14px;line-height:1.6;color:#1f2937}
+  .hp-art p{margin:6px 0}
+  .hp-art ol,.hp-art ul{margin:4px 0 8px;padding-left:22px}
+  .hp-art li{margin:3px 0}
+  .hp-ui{font-weight:700;color:#1d3b5c;background:#eaf1f8;border-radius:4px;padding:0 5px;white-space:nowrap}
+  .hp-tag{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid #c9d6e4;
+    background:#fff;color:#2a5b8c;white-space:nowrap;vertical-align:middle}
+  .hp-tag.all{border-color:#b9e3cc;color:#1f7a4f;background:var(--help-accent-soft)}
+  .hp-tags{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+  .hp-tip{margin:12px 0;padding:10px 14px;border-left:3px solid var(--help-accent);background:#f4f8fc;border-radius:0 8px 8px 0;font-size:13.5px;line-height:1.55}
+  .hp-note{margin:12px 0;padding:10px 14px;border:1px solid #c9d6e4;background:#f7f9fc;border-radius:8px;font-size:13.5px;line-height:1.55}
+  .hp-table{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0 10px}
+  .hp-table th,.hp-table td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+  .hp-table th{color:#64748b;font-weight:600;font-size:12px;background:#f7f9fc}
+  .hp-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0 6px}
+  .hp-step{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:#fff;cursor:pointer;text-align:left;font:inherit}
+  .hp-step:hover{border-color:#2a5b8c;background:#f7f9fc}
+  .hp-step .n{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--help-accent);
+    color:#fff;font-size:12.5px;font-weight:700;margin-bottom:6px}
+  .hp-step strong{display:block;color:#1d3b5c;font-size:14px;margin-bottom:2px}
+  .hp-step span.d{color:#64748b;font-size:13px;line-height:1.45}
+  .hp-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+  .hp-next{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .hp-next button{background:transparent;border:0;color:#2a5b8c;font:inherit;font-weight:600;cursor:pointer;padding:0}
+  .hp-res{display:block;width:100%;text-align:left;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:0 0 10px;background:#fff;font:inherit;cursor:pointer}
+  .hp-res:hover{border-color:#2a5b8c;background:#f7f9fc}
+  .hp-res strong{color:#1d3b5c}
+  .hp-res .s{display:block;color:#475569;font-size:13px;margin-top:3px;line-height:1.45}
+  .hp-res mark,.hp-art mark{background:#fff3bf;padding:0 1px}
+  .hp-stages{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 8px}
+  .help-link{background:transparent;border:1px solid #c9d6e4;color:#2a5b8c;border-radius:999px;padding:3px 10px;font:inherit;font-size:12px;
+    font-weight:600;cursor:pointer;margin-left:auto;margin-right:8px;white-space:nowrap}
+  .help-link:hover{background:#eaf1f8}
+  .authfoot .help-link{margin:0 0 0 10px}
+  .modal-head .help-link{align-self:center;color:#fff;border-color:rgba(255,255,255,.45)}
+  .modal-head .help-link:hover{background:rgba(255,255,255,.14)}
+
+  #gsChecklist{padding:16px 26px 0}
+  #gsChecklist[hidden]{display:none}
+  .gsc{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 20px}
+  .gsc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .gsc-top h3{margin:0;font-size:16px;color:var(--navy)}
+  .gsc-top .sub{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+  .gsc-bar{height:6px;border-radius:999px;background:var(--line);margin:12px 0 10px;overflow:hidden}
+  .gsc-bar i{display:block;height:100%;background:var(--help-accent);border-radius:999px}
+  .gsc-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+  .gsc-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px}
+  .gsc-item.done{background:#f7f9fc}
+  .gsc-item.done .gsc-t{color:var(--muted);text-decoration:line-through}
+  .gsc-tick{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:inline-flex;
+    align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:700}
+  .gsc-item.done .gsc-tick{background:var(--help-accent);border-color:var(--help-accent)}
+  .gsc-t{flex:1;color:var(--heading);font-weight:600}
+  .gsc-item .btn{padding:4px 10px;font-size:12px}
+
+  @media(max-width:760px){
+    .hp{inset:0;border-radius:0}
+    .hp-head{padding:12px 14px}
+    .hp-navbtn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);
+      color:#fff;border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+    .hp-body{flex-direction:column;position:relative}
+    .hp-nav{width:auto;border-right:0;border-bottom:1px solid var(--line);max-height:none}
+    .hp-nav .hp-list{display:none;max-height:55vh}
+    .hp.nav-open .hp-nav .hp-list{display:block}
+    .hp-main{padding:18px 16px 40px}
+    .hp-art h2{font-size:21px}
+    .hp-table{display:block;overflow-x:auto}
+    #gsChecklist{padding:12px 14px 0}
+  }
+
 </style>
 </head>
 <body>
@@ -1496,6 +1598,7 @@
       <div class="authmsg" id="auMsg"></div>
       <div class="authfoot" id="authFoot">
         <button type="button" class="link-btn" id="forgotBtn">Forgotten your password?</button>
+        <button type="button" class="help-link" data-help="signin">Need help?</button>
       </div>
     </form>
     <div class="authlegal" id="authLegal">
@@ -1524,6 +1627,7 @@
         <div class="co"><span id="waCompany"></span><select class="co-switch" id="coSwitch" style="display:none" title="Switch company"></select> &middot; <span class="syncdot" id="syncDot"><i></i><span id="syncText">Saved</span></span></div>
       </div>
     </div>
+    <button class="btn btn-ghost" id="helpBtn" title="Help and how-to guides">Help</button>
     <button class="btn btn-ghost" id="teamBtn" style="display:none" title="Manage your team">Team</button>
     <button class="btn btn-ghost" id="leadBtn" style="display:none" title="Connect your website and ad lead forms">Lead connections</button>
     <button class="btn btn-ghost" id="billBtn" style="display:none" title="Plan and billing">Billing</button>
@@ -1552,6 +1656,7 @@
   <button class="tab plat-only" data-view="platform" style="margin-left:auto">Platform</button>
 </nav>
 
+<div id="gsChecklist" hidden></div>
 <div id="view-dashboard"></div>
 
 <section class="kpis" id="kpis"></section>
@@ -1662,6 +1767,7 @@
         <h2 id="modalTitle">Add Client</h2>
         <p class="cm-sub">Client record for the sales pipeline. Fields marked <span class="cm-req-key">*</span> are required.</p>
       </div>
+      <button type="button" class="help-link" data-help="client-form">Help</button>
       <button class="x" id="closeModal" aria-label="Close">&times;</button>
     </div>
     <div class="modal-body">
@@ -1803,6 +1909,7 @@
   <div class="modal" style="max-width:920px" role="dialog" aria-modal="true" aria-labelledby="planTitle">
     <div class="modal-head">
       <h2 id="planTitle">Choose your plan</h2>
+      <button type="button" class="help-link" data-help="billing">Help</button>
       <button class="x" id="closePlan" title="Not now">&times;</button>
     </div>
     <div class="modal-body">
@@ -1811,19 +1918,19 @@
         <div class="plan-card">
           <h3>Starter</h3>
           <div class="price">$149 <small>/ month AUD + GST</small></div>
-          <ul><li>Up to 3 users</li><li>Full pipeline, dashboard and reports</li><li>Website and lead-form enquiries</li></ul>
+          <ul><li>Up to 3 users</li><li>Full pipeline, dashboard and reports</li><li>Sales Reports and KPI targets per consultant</li><li>Website and lead-form enquiries</li></ul>
           <button class="btn btn-light" data-plan="starter">Choose Starter</button>
         </div>
         <div class="plan-card featured">
           <h3>Team</h3>
           <div class="price">$349 <small>/ month AUD + GST</small></div>
-          <ul><li>Up to 10 users</li><li>Everything in Starter</li><li>Sales Reports and KPI targets per consultant</li></ul>
+          <ul><li>Up to 10 users</li><li>Everything in Starter, including Sales Reports and KPI targets</li></ul>
           <button class="btn btn-primary" data-plan="team">Choose Team</button>
         </div>
         <div class="plan-card">
           <h3>Network</h3>
           <div class="price">$799 <small>/ month AUD + GST</small></div>
-          <ul><li>Up to 25 users</li><li>For franchise networks and multi-site builders</li><li>Need more users? Ask us for a quote</li></ul>
+          <ul><li>Up to 25 users</li><li>Everything in Starter, including Sales Reports and KPI targets</li><li>For franchise networks and multi-site builders</li><li>Need more users? Ask us for a quote</li></ul>
           <button class="btn btn-light" data-plan="network">Choose Network</button>
         </div>
       </div>
@@ -1837,6 +1944,7 @@
   <div class="modal" style="max-width:640px">
     <div class="modal-head">
       <h2>Team &amp; company</h2>
+      <button type="button" class="help-link" data-help="team">Help</button>
       <button class="x" id="closeTeam">&times;</button>
     </div>
     <div class="modal-body">
@@ -1902,6 +2010,7 @@
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="leadTitle">
     <div class="modal-head">
       <h2 id="leadTitle">Lead connections</h2>
+      <button type="button" class="help-link" data-help="leads">Help</button>
       <button class="x" id="closeLead" aria-label="Close">&times;</button>
     </div>
     <div class="modal-body">
@@ -1948,6 +2057,7 @@
   <div class="modal" style="max-width:480px" role="dialog" aria-modal="true" aria-labelledby="acctTitle">
     <div class="modal-head">
       <h2 id="acctTitle">Your account</h2>
+      <button type="button" class="help-link" data-help="account">Help</button>
       <button class="x" id="closeAcct" aria-label="Close">&times;</button>
     </div>
     <div class="modal-body">
@@ -2861,6 +2971,7 @@ function render(){
   const chromeless = (currentView==="forecast" || currentView==="salesreports" || currentView==="platform"
                       || currentView==="dashboard" || currentView==="export" || currentView==="import");
   if(currentView==="pipeline") renderKPIs(list);
+  renderChecklist();
   if(currentView==="dashboard") { renderDashboard(); }
   else if(currentView==="import") { renderImport(); }
   else if(currentView==="export") { renderExport(); }
@@ -7076,7 +7187,7 @@ function paintLeads(loadError){
   const panel = document.getElementById("leadPanel");
   if(!LEAD_AVAILABLE){
     panel.innerHTML = '<div class="lc-note">Lead connections aren\'t switched on for your workspace yet. ' +
-      'Please contact Spectrum Coach support and we\'ll turn them on.</div>' + leadGuide(LEAD_TAB, null);
+      'Please email <a href="mailto:info@spectrumcoach.com.au">info@spectrumcoach.com.au</a> and we\'ll turn them on.</div>' + leadGuide(LEAD_TAB, null);
     wireLeadPanel(); return;
   }
   if(loadError){ panel.innerHTML = '<div class="pw-msg err show">' + esc(loadError) + '</div>'; return; }
@@ -7425,7 +7536,7 @@ function wireTeam(){
     const {error} = await sb.from("companies")
       .update({name, brand_colour: colour}).eq("id", ME.company_id);
     if(error){ toast("Could not save: " + error.message); return; }
-    await loadMe(); paintIdentity(); toast("Company saved.");
+    await loadMe(); paintIdentity(); gsMark("company"); toast("Company saved.");
   });
 
   document.getElementById("sendInvite").addEventListener("click", async ()=>{
@@ -7593,7 +7704,7 @@ async function startCheckout(plan, btn){
       planError(userMsg
         ? "<strong>Checkout couldn't start.</strong> " + esc(userMsg)
         : "<strong>Checkout couldn't start.</strong> Please try again in a minute. If it keeps happening, " +
-          "contact Spectrum Coach and we'll sort it out - your workspace and data are safe.");
+          "email <a href=\"mailto:info@spectrumcoach.com.au\">info@spectrumcoach.com.au</a> and we'll sort it out - your workspace and data are safe.");
       return;
     }
     leaving = true;
@@ -7899,6 +8010,871 @@ async function handleRecovery(){
   return session ? "recovery" : "expired";
 }
 
+
+/* ============================================================
+   HELP CENTRE
+   A searchable guide to every screen, opened from the Help button
+   in the header (every screen, every role), the "Need help?" link on
+   the sign-in screen and the small Help links in the main windows.
+   Content is static: nothing here reads or writes the database.
+   Topics are labelled by who can use the feature; owner/admin
+   topics stay visible to consultants (so they know what to ask
+   for) but carry a note saying who does it. Platform admin tools
+   are deliberately not documented here.
+   This supersedes the paused Getting started tab from PR #9 and
+   keeps its Dashboard setup checklist (updated).
+   ============================================================ */
+const HELP_EMAIL = "info@spectrumcoach.com.au";
+const HU  = t => '<span class="hp-ui">' + t + '</span>';
+const HWHO = {
+  all:   ["all", "Everyone"],
+  mgr:   ["",    "Owners & admins"],
+  owner: ["",    "Owners only"]
+};
+function hTag(who){ const w = HWHO[who] || HWHO.all; return '<span class="hp-tag ' + w[0] + '">' + w[1] + '</span>'; }
+function hGo(id, label){ return '<a href="#" data-help-go="' + id + '">' + label + '</a>'; }
+function hBtn(act, label, primary){
+  return '<button class="btn ' + (primary ? "btn-primary" : "btn-light") + ' btn-sm" type="button" data-help-act="' + act + '">' + label + '</button>';
+}
+const H_STAGES = () => '<div class="hp-stages">' + STAGES.map(s => stageBadge(s.key, "")).join("") + '</div>';
+const H_MAIL = () => '<a href="mailto:' + HELP_EMAIL + '">' + HELP_EMAIL + '</a>';
+
+const HELP_GROUPS = ["Start here", "Getting started", "Your account", "Your team", "Clients", "Pipeline and reports",
+                     "Leads, import and export", "Billing and legal", "FAQ and troubleshooting"];
+
+const HELP_TOPICS = [
+/* ---------------- Start here ---------------- */
+{ id:"home", g:"Start here", t:"Help home", who:"all", k:"welcome overview start contents",
+  b:()=>`<h2>Help</h2>
+  <p class="lead">Everything you need to run your sales pipeline in Spectrum Sales Pipeline. Pick a topic on the left, or type in the search box &ndash; for example <em>invite</em>, <em>KPI</em> or <em>reset password</em>.</p>
+  <h3>Getting started</h3>
+  <div class="hp-steps">
+    <button class="hp-step" type="button" data-help-go="gs-team"><span class="n">1</span><strong>Set up your team</strong><span class="d">Company name, brand colour and emailed invites.</span></button>
+    <button class="hp-step" type="button" data-help-go="gs-kpis"><span class="n">2</span><strong>Set your KPIs</strong><span class="d">Conversion rates and sales targets for each consultant.</span></button>
+    <button class="hp-step" type="button" data-help-go="gs-clients"><span class="n">3</span><strong>Add your first clients</strong><span class="d">One at a time, from the Pipeline, or import a spreadsheet.</span></button>
+    <button class="hp-step" type="button" data-help-go="gs-leads"><span class="n">4</span><strong>Connect your lead forms</strong><span class="d">Website, Facebook and Instagram, and Google Ads enquiries.</span></button>
+  </div>
+  <h3>Popular topics</h3>
+  <ul>
+    <li>${hGo("client-form","Adding and editing a client")}</li>
+    <li>${hGo("pipeline","Pipeline board and quick add")}</li>
+    <li>${hGo("stages","Sales stages and stage dates")}</li>
+    <li>${hGo("roles","Roles: who can do what")}</li>
+    <li>${hGo("faq-reset","My password reset email hasn't arrived")}</li>
+  </ul>
+  <div class="hp-tip">Labels on each topic show who can use the feature: ${hTag("all")} ${hTag("mgr")} ${hTag("owner")}. Can't find what you need? Email ${H_MAIL()}.</div>` },
+
+{ id:"roles", g:"Start here", t:"Roles: who can do what", who:"all", k:"owner admin consultant permissions access role sees",
+  b:()=>`<h2>Roles: who can do what</h2>
+  <p class="lead">Everyone in your company has one of three roles. Your role shows next to your name in the top bar.</p>
+  <table class="hp-table"><thead><tr><th>Role</th><th>What they can do</th></tr></thead><tbody>
+    <tr><td><strong>Consultant</strong></td><td>Sees and works only the clients assigned to them: ${HU("Dashboard")}, ${HU("Clients")}, ${HU("Pipeline")}, ${HU("Reports &amp; Sales Forecast")} and ${HU("Export")}. Sees ${HU("Sales Reports")} (their own figures only) if an owner switches it on.</td></tr>
+    <tr><td><strong>Admin</strong></td><td>Sees the whole company pipeline. Can use ${HU("Team")}, ${HU("Lead connections")}, ${HU("Billing")} and ${HU("Import")}, invite people as consultants or admins, and assign clients to anyone. Sees ${HU("Sales Reports")} for the whole team, and can edit KPIs, if an owner switches it on.</td></tr>
+    <tr><td><strong>Owner</strong></td><td>Everything an admin can do, plus giving or removing the owner role, and choosing who can see ${HU("Sales Reports")} (${HU("Manage access")}). Owners always have Sales Reports.</td></tr>
+  </tbody></table>
+  <div class="hp-tip">To change someone's role, an owner or admin opens ${HU("Team")} and picks a new role next to their name. See ${hGo("team","Team &amp; company")}.</div>` },
+
+/* ---------------- Getting started ---------------- */
+{ id:"gs-team", g:"Getting started", t:"1. Set up your company and team", who:"mgr", k:"getting started setup company brand colour invite team first steps",
+  b:()=>`<h2>1. Set up your company and team</h2>
+  <p class="lead">Do this once when you first sign in as the owner. It takes about five minutes.</p>
+  <h3>Check your company details</h3>
+  <ol>
+    <li>Click ${HU("Team")} in the top bar. The ${HU("Team &amp; company")} window opens.</li>
+    <li>Under <strong>Company</strong>, check the ${HU("Company name")}. Pick a ${HU("Brand colour")} if you like &ndash; it colours the top bar for everyone in your company.</li>
+    <li>Click ${HU("Save company")}.</li>
+  </ol>
+  <h3>Invite your sales team</h3>
+  <ol>
+    <li>In the same window, go to <strong>Invite someone</strong>.</li>
+    <li>Type their ${HU("Email")}, choose a ${HU("Role")} (${HU("Consultant")}, ${HU("Admin")} or ${HU("Owner")}) and click ${HU("Email invite")}.</li>
+    <li>We email them a link straight away. The link is also shown on screen with ${HU("Copy link")} if you'd rather send it yourself.</li>
+    <li>They open the link, choose a password and click ${HU("Join")} <em>your company</em>. They then appear under <strong>Members</strong>.</li>
+  </ol>
+  <div class="hp-tip">Invites last 14 days. Anything not yet accepted sits under <strong>Pending invites</strong>, where you can ${HU("Resend")}, ${HU("Copy link")} or ${HU("Cancel")}. See ${hGo("invites","Inviting people")}.</div>
+  <p>Each person uses one seat. Your plan sets how many seats you have &ndash; the top of the Team window shows <em>x of y seats used</em>.</p>
+  <div class="hp-actions">${isManager() ? hBtn("team","Open Team",true) : ""}</div>` },
+
+{ id:"gs-kpis", g:"Getting started", t:"2. Set your KPI targets", who:"mgr", k:"getting started kpi targets conversion rates sales won goals",
+  b:()=>`<h2>2. Set your KPI targets</h2>
+  <p class="lead">KPIs are the monthly targets each consultant works towards. You enter four conversion rates and a sales target; the app works out how many leads and appointments are needed.</p>
+  <ol>
+    <li>Open the ${HU("Sales Reports")} tab. (Owners always see it. Admins see it once an owner switches it on &ndash; see ${hGo("salesreports","Sales Reports")}.)</li>
+    <li>Choose a ${HU("Sales Consultant")} and the ${HU("Year")} at the top. KPIs are set per consultant, not for ${HU("Whole team")}.</li>
+    <li>In <strong>KPI targets</strong>, enter the four conversion rates as percentages, from leads through to sales won.</li>
+    <li>Enter the <strong>Sales won</strong> target for each month. Use ${HU("Copy January's sales across the year")} to fill the rest of the year from January.</li>
+    <li>Everything saves as you type. Repeat for each consultant.</li>
+  </ol>
+  <div class="hp-tip">The other numbers (leads, discovery appointments, presentations and review meetings needed) are worked out for you and rounded up to whole appointments.</div>
+  <div class="hp-actions">${(typeof CAN_SR !== "undefined" && CAN_SR) ? hBtn("salesreports","Open Sales Reports",true) : ""}</div>` },
+
+{ id:"gs-clients", g:"Getting started", t:"3. Add your first clients", who:"all", k:"getting started add client first quick add import spreadsheet",
+  b:()=>`<h2>3. Add your first clients</h2>
+  <p class="lead">There are three ways to get clients into the app. Use whichever suits you.</p>
+  <h3>One at a time</h3>
+  <ol>
+    <li>Click ${HU("Add Client")} at the top right of any screen.</li>
+    <li>Fill in ${HU("First name")} and ${HU("Surname")} (the only required fields), plus anything else you know.</li>
+    <li>Choose the ${HU("Current stage")}. If it is a stage with a date, enter that date too.</li>
+    <li>Click ${HU("Save client")}.</li>
+  </ol>
+  <h3>Quick add from the Pipeline</h3>
+  <p>On the ${HU("Pipeline")} tab, type a first name and surname into the box at the top of the <strong>New Enquiry</strong> column and press <strong>Enter</strong>. The client is added with today's enquiry date. Open the card later to fill in the details.</p>
+  <h3>Import a spreadsheet ${hTag("mgr")}</h3>
+  <p>If you already track clients in Excel or a CSV, an owner or admin can bring them all in at once with the ${HU("Import")} tab. See ${hGo("import","Importing clients")}.</p>
+  <div class="hp-actions">${(helpSignedIn() && !isReadOnly()) ? hBtn("add","Add Client",true) : ""}${helpSignedIn() ? hBtn("view:pipeline","Open the Pipeline") : ""}</div>` },
+
+{ id:"gs-leads", g:"Getting started", t:"4. Connect your lead forms", who:"mgr", k:"getting started lead forms website meta facebook instagram google ads connect",
+  b:()=>`<h2>4. Connect your lead forms</h2>
+  <p class="lead">Send enquiries from your website, Facebook and Instagram lead ads and Google Ads lead forms straight into your pipeline. You can set this up yourself.</p>
+  <ol>
+    <li>Click ${HU("Lead connections")} in the top bar (or ${HU("Open lead connections")} in the Team window).</li>
+    <li>Pick a tab: ${HU("Website form")}, ${HU("Meta Lead Ads")} or ${HU("Google Ads")}.</li>
+    <li>Click ${HU("Create connection key")}. You get your own private connection link and key.</li>
+    <li>Choose who ${HU("New leads go to")}.</li>
+    <li>Follow the step-by-step guide on that tab to paste the link or code into your website, Zapier or Make, or Google Ads.</li>
+    <li>Click ${HU("Send a test enquiry")} and check it lands in <strong>New Enquiry</strong>. Then click ${HU("Delete test enquiry")}.</li>
+  </ol>
+  <p>Full details: ${hGo("leads","Lead connections")}.</p>
+  <div class="hp-actions">${isManager() ? hBtn("leads","Open Lead connections",true) : ""}</div>` },
+
+{ id:"gs-daily", g:"Getting started", t:"5. Your day-to-day routine", who:"all", k:"daily routine every day habits follow up tasks",
+  b:()=>`<h2>5. Your day-to-day routine</h2>
+  <p class="lead">A simple routine that keeps the pipeline accurate and the reports honest.</p>
+  <ul>
+    <li><strong>Start on the Dashboard.</strong> Check <em>Tasks due today</em> and this month's activity.</li>
+    <li><strong>Work the Pipeline.</strong> Drag each client to their new stage as things happen. The app records today's date for that stage.</li>
+    <li><strong>Add a task for every follow-up</strong> so nothing slips. Tasks due within three days are highlighted.</li>
+    <li><strong>Set a Forecast month</strong> on clients you expect to win, so the Sales forecast is right.</li>
+    <li><strong>Use the Client update email</strong> in the client window to send a quick, professional summary after each meeting.</li>
+    <li><strong>Owners and admins:</strong> check ${HU("Reports &amp; Sales Forecast")} and ${HU("Sales Reports")} each week.</li>
+  </ul>` },
+
+/* ---------------- Your account ---------------- */
+{ id:"signin", g:"Your account", t:"Signing in and creating an account", who:"all", k:"sign in log in login create account sign up register confirm email terms join invited",
+  b:()=>`<h2>Signing in and creating an account</h2>
+  <h3>Sign in</h3>
+  <p>On the sign-in screen, enter your ${HU("Email")} and ${HU("Password")} and click ${HU("Sign in")}.</p>
+  <h3>Create a new company account</h3>
+  <ol>
+    <li>Click the ${HU("Create account")} tab.</li>
+    <li>Enter ${HU("Your name")}, ${HU("Company name")}, ${HU("Email")} and a ${HU("Password")} of at least 8 characters.</li>
+    <li>Tick the box to agree to the Terms of Service and Privacy Policy, then click ${HU("Create account")}.</li>
+    <li>If we ask you to confirm your email, open the email, click the link and tap ${HU("Continue")}.</li>
+  </ol>
+  <p>You become the owner of the new company, and you're asked to ${hGo("billing","choose a plan")} to start the free trial.</p>
+  <h3>Joining a team you were invited to</h3>
+  <p>Open the invite link from your email. The sign-in screen says <em>You have been invited to join&hellip;</em>, with your email already filled in. Enter your name and a password, tick the agreement box and click ${HU("Join")} <em>company name</em>. You don't enter a company name &ndash; you join theirs.</p>
+  <div class="hp-tip">Trouble? See ${hGo("faq-reset","reset email not arriving")} or ${hGo("faq-invite","invite problems")}.</div>` },
+
+{ id:"password", g:"Your account", t:"Forgotten or changing your password", who:"all", k:"password reset forgot forgotten change new password link email",
+  b:()=>`<h2>Forgotten or changing your password</h2>
+  <h3>Forgotten your password</h3>
+  <ol>
+    <li>On the sign-in screen, type your email address in the ${HU("Email")} box.</li>
+    <li>Click ${HU("Forgotten your password?")}. We email you a reset link.</li>
+    <li>Open the email and click the link. A <strong>Reset your password</strong> screen opens: tap ${HU("Continue")}.</li>
+    <li>Enter your new password twice and click ${HU("Save new password")}. You're signed in.</li>
+  </ol>
+  <p>Reset links work once and expire after a while. If the link says it has expired, enter your email on that screen and click ${HU("Email me a new link")}.</p>
+  <h3>Change your password while signed in</h3>
+  <ol>
+    <li>Click ${HU("Account")} in the top bar.</li>
+    <li>Under <strong>Change your password</strong>, enter a ${HU("New password")} (at least 8 characters) and confirm it.</li>
+    <li>Click ${HU("Update password")}.</li>
+  </ol>
+  <p>Prefer an email? In the same window click ${HU("Email me a reset link")}.</p>
+  <div class="hp-tip">Email not arriving? See ${hGo("faq-reset","My password reset email hasn't arrived")}.</div>` },
+
+{ id:"account", g:"Your account", t:"Account, switching company and signing out", who:"all", k:"account my account sign out log out switch company multiple companies sync saved",
+  b:()=>`<h2>Account, switching company and signing out</h2>
+  <h3>Your account</h3>
+  <p>Everyone has an ${HU("Account")} button in the top bar. It shows the email you're signed in with, and lets you change your password or email yourself a reset link. Owners and admins can also reach it from ${HU("My account &amp; password")} in the Team window.</p>
+  <h3>Working in more than one company</h3>
+  <p>If you belong to more than one company, a drop-down appears under your name in the top bar. Choose a company to switch to it. Each company's clients, team and settings are kept completely separate.</p>
+  <h3>Saving</h3>
+  <p>There's no save-all button. Changes save automatically, and the dot under your name shows <strong>Saved</strong> once they're stored. Changes made by your teammates appear on your screen on their own.</p>
+  <h3>Signing out</h3>
+  <p>Click ${HU("Sign out")} in the top bar. Always do this on shared computers.</p>
+  <div class="hp-actions">${helpSignedIn() ? hBtn("account","Open Account",true) : ""}</div>` },
+
+/* ---------------- Your team ---------------- */
+{ id:"team", g:"Your team", t:"Team & company", who:"mgr", k:"team company name brand colour seats members role remove access restore",
+  b:()=>`<h2>Team &amp; company</h2>
+  <p class="lead">Click ${HU("Team")} in the top bar to open the ${HU("Team &amp; company")} window.</p>
+  <h3>Seats</h3>
+  <p>The top line shows how many seats are used out of how many your plan includes. Seats come with your plan &ndash; to get more, upgrade in ${HU("Billing")}. When all seats are used it says <em>no seats left</em>.</p>
+  <h3>Company</h3>
+  <p>Change the ${HU("Company name")} or ${HU("Brand colour")} and click ${HU("Save company")}.</p>
+  <h3>Members</h3>
+  <ul>
+    <li><strong>Change a role:</strong> pick a new role in the drop-down next to their name. Only an owner can give or remove the owner role.</li>
+    <li>${HU("Remove access")} stops them signing in to this company and frees their seat. Their clients stay exactly where they are.</li>
+    <li>${HU("Restore access")} lets them back in at any time.</li>
+  </ul>
+  <p>You can't change your own role or remove yourself.</p>
+  <h3>Also in this window</h3>
+  <ul><li>${HU("My account &amp; password")} &ndash; your own account (${hGo("account","Account")}).</li>
+      <li>${HU("Open lead connections")} &ndash; see ${hGo("leads","Lead connections")}.</li>
+      <li><strong>Invite someone</strong> and <strong>Pending invites</strong> &ndash; see ${hGo("invites","Inviting people")}.</li></ul>
+  <div class="hp-actions">${isManager() ? hBtn("team","Open Team",true) : ""}</div>` },
+
+{ id:"invites", g:"Your team", t:"Inviting people and pending invites", who:"mgr", k:"invite email invite pending resend renew cancel copy link expired 14 days",
+  b:()=>`<h2>Inviting people and pending invites</h2>
+  <h3>Send an invite</h3>
+  <ol>
+    <li>Open ${HU("Team")} and go to <strong>Invite someone</strong>.</li>
+    <li>Enter their ${HU("Email")} and choose a ${HU("Role")}. Only owners see the ${HU("Owner")} option.</li>
+    <li>Click ${HU("Email invite")}.</li>
+  </ol>
+  <p>A message under the button confirms <em>Invite emailed to&hellip;</em> and shows the link with ${HU("Copy link")} as a back-up. If the email couldn't be sent, it says so &ndash; copy the link and send it to them yourself (a text or your own email is fine).</p>
+  <h3>Pending invites</h3>
+  <p>Invites not yet accepted are listed with their role, when they expire and when they were last emailed.</p>
+  <ul>
+    <li>${HU("Resend")} emails the same invite again.</li>
+    <li>${HU("Renew &amp; resend")} appears once an invite has expired. It gives it another 14 days and emails it again.</li>
+    <li>${HU("Copy link")} copies the invite link.</li>
+    <li>${HU("Cancel")} stops the link working straight away. You can invite them again later.</li>
+  </ul>
+  <div class="hp-tip">Invites last 14 days. The person signs up with the email address the invite was sent to.</div>` },
+
+/* ---------------- Clients ---------------- */
+{ id:"dashboard", g:"Clients", t:"Dashboard", who:"all", k:"dashboard activity month leads discovery estimates presented review won tasks due today checklist",
+  b:()=>`<h2>Dashboard</h2>
+  <p class="lead">The ${HU("Dashboard")} is the first screen after you sign in. It shows a month of sales activity at a glance.</p>
+  <ul>
+    <li>${HU("Reporting month")} &ndash; choose any of the last 12 months.</li>
+    <li>${HU("Sales Consultants")} ${hTag("mgr")} &ndash; see the whole company or one consultant. Consultants always see their own clients.</li>
+    <li><strong>Activity by month</strong> &ndash; Leads, Discovery, Estimates presented, Review meetings and Won for the month, against the month before. Counted when each thing happened (the enquiry, appointment or won date), not where clients sit today.</li>
+    <li><strong>Discovery calls completed</strong>, <strong>Estimates presented</strong> and <strong>Won sales</strong> &ndash; the names behind the figures.</li>
+    <li><strong>Tasks due today</strong> &ndash; open tasks due today or earlier.</li>
+  </ul>
+  <h3>Get your team started checklist ${hTag("mgr")}</h3>
+  <p>New companies see a short checklist at the top of the Dashboard: choose a plan, check company details, invite your team, set KPIs, add your first client and connect a lead form. Items tick themselves off as you do them. Click ${HU("Hide checklist")} to put it away &ndash; this guide is always under ${HU("Help")}.</p>` },
+
+{ id:"clients", g:"Clients", t:"Clients list, search and filters", who:"all", k:"clients list table search filter stage build type buyer type lead source forecast assigned clear filters expand",
+  b:()=>`<h2>Clients list, search and filters</h2>
+  <p class="lead">The ${HU("Clients")} tab lists every client you can see, soonest next action first.</p>
+  <h3>Search and filters</h3>
+  <ul>
+    <li><strong>Search</strong> &ndash; name, email, suburb, estate or address.</li>
+    <li>${HU("Forecast month")}, ${HU("Stage")} (tick several, or ${HU("Select all")} / ${HU("Clear")}), ${HU("Build type")}, ${HU("Buyer type")} and ${HU("Lead source")} (including <em>Not recorded</em>).</li>
+    <li>${HU("Assigned to")} ${hTag("mgr")} &ndash; one consultant, or ${HU("All Sales Consultants")}.</li>
+    <li>${HU("Clear filters")} puts everything back.</li>
+  </ul>
+  <p>The same search and filters apply on the ${HU("Pipeline")} tab.</p>
+  <h3>The table</h3>
+  <p>Columns: Assigned (owners and admins), Client, Build Address, Build Type, Forecast, Current Stage, Next Action and Dwellings. Next actions due within 7 days are marked <em>soon</em>; past ones are marked <em>overdue</em>.</p>
+  <ul>
+    <li><strong>Click a row</strong> to expand it and see the details, stage dates, tasks (with a quick ${HU("Add")} box) and documents (${HU("+ Upload document")}).</li>
+    <li>Click ${HU("Edit")} or ${HU("Edit client")} to open the full client window.</li>
+  </ul>
+  <h3>Tasks Due Today</h3>
+  <p>The panel above the table lists open tasks due today or earlier for the clients in view. Tick one to mark it done, or add a task: choose the client, type the task, add an optional date and click ${HU("Add")}.</p>` },
+
+{ id:"client-form", g:"Clients", t:"Adding and editing a client", who:"all", k:"add client edit client form save delete details contact address sales information budget timing notes assigned",
+  b:()=>`<h2>Adding and editing a client</h2>
+  <p class="lead">Click ${HU("Add Client")} (top right) for a new client, or ${HU("Edit")} on an existing one. The window has these sections:</p>
+  <table class="hp-table"><tbody>
+    <tr><td><strong>Client details</strong></td><td>${HU("First name")} and ${HU("Surname")} &ndash; required.</td></tr>
+    <tr><td><strong>Contact</strong></td><td>${HU("Email address")} and ${HU("Phone number")}.</td></tr>
+    <tr><td><strong>Property / build address</strong></td><td>Street no., Street name, Suburb and Estate. This is dwelling 1.</td></tr>
+    <tr><td><strong>Sales information</strong></td><td>${HU("Enquiry date")}, ${HU("Build type")}, ${HU("Buyer type")}, ${HU("Lead source")}, ${HU("Forecast month")} (the month you expect to win them), ${HU("Budget")}, ${HU("Timing")} and, for owners and admins, ${HU("Assigned to")}.</td></tr>
+    <tr><td><strong>Stage &amp; next action</strong></td><td>${HU("Current stage")}, stage dates, ${HU("Next stage")}, ${HU("Next action date")} and ${HU("Appointment date")}. See ${hGo("stages","Sales stages")}.</td></tr>
+    <tr><td><strong>Client update email</strong></td><td>A ready-made email for the client. See ${hGo("client-email","Client update emails")}.</td></tr>
+    <tr><td><strong>Notes</strong></td><td>Site cuts, budget, competitors, follow-up context.</td></tr>
+    <tr><td><strong>Tasks</strong></td><td>${HU("+ Add task")}. See ${hGo("tasks","Tasks")}.</td></tr>
+    <tr><td><strong>Documents</strong></td><td>${HU("+ Upload")}. See ${hGo("documents","Documents")}.</td></tr>
+    <tr><td><strong>Additional dwellings</strong></td><td>${HU("+ Add dwelling")}. See ${hGo("dwellings","Dwellings")}.</td></tr>
+  </tbody></table>
+  <p>Click ${HU("Save client")} to save, or ${HU("Cancel")} to close without saving. ${HU("Delete client")} removes a client for good &ndash; it can't be undone.</p>
+  <div class="hp-tip">A consultant's new clients are assigned to them. Owners and admins can assign a client to anyone with ${HU("Assigned to")}.</div>` },
+
+{ id:"stages", g:"Clients", t:"Sales stages and stage dates", who:"all", k:"stages stage dates won lost presenting estimate plans next stage sales completed discovery presentation review closing initial contact new enquiry",
+  b:()=>`<h2>Sales stages and stage dates</h2>
+  <p class="lead">Every client sits in one stage. The stages run in this order:</p>
+  ${H_STAGES()}
+  <h3>Presenting: Estimate or Plans</h3>
+  <p>At <strong>Presentation Appointment</strong>, a ${HU("Presenting")} box appears so you can record whether you're presenting an <em>Estimate</em> or <em>Plans</em>.</p>
+  <h3>Stage dates</h3>
+  <p>Discovery Appointment, Presentation Appointment, Review / Closing, Won and Lost each have their own date: the day it actually happened. The client keeps the date of every stage it has been through, which keeps month-by-month reporting honest.</p>
+  <ul>
+    <li>The date for the current stage is required before you can save.</li>
+    <li>When you drag a card on the Pipeline, that stage's date is set to today. Open the client to change it.</li>
+  </ul>
+  <h3>Next stage and next action</h3>
+  <p>${HU("Next stage")} is what you're booked to do next, with a ${HU("Next action date")} and an optional ${HU("Appointment date")}. Upcoming appointments show on ${HU("Reports &amp; Sales Forecast")}.</p>
+  <h3>Won and Lost</h3>
+  <ul>
+    <li><strong>Won</strong>: the next stage becomes <em>Sales Completed</em>, and the next action and appointment are cleared. The forecast month is kept.</li>
+    <li><strong>Lost</strong>: the forecast month, next action and appointment are cleared.</li>
+  </ul>
+  <div class="hp-note">The stage names are the same for every company and can't be renamed.</div>` },
+
+{ id:"client-email", g:"Clients", t:"Client update emails", who:"all", k:"client update email template copy clipboard follow up message",
+  b:()=>`<h2>Client update emails</h2>
+  <p class="lead">Once a client has a stage, the client window shows a <strong>Client update email</strong>: a short, friendly message for the client, written for that stage.</p>
+  <ul>
+    <li>It uses the client's first name and the assigned consultant's name.</li>
+    <li>If a next stage and appointment date are set, it mentions the booked meeting and its date.</li>
+    <li>Edit the text as you like, click ${HU("Copy to clipboard")} and paste it into your own email.</li>
+  </ul>
+  <div class="hp-note">The app doesn't send this email for you &ndash; you send it from your own email. The wording is built in and the same for every company.</div>` },
+
+{ id:"tasks", g:"Clients", t:"Tasks", who:"all", k:"tasks follow up due today overdue reminders done",
+  b:()=>`<h2>Tasks</h2>
+  <p class="lead">Tasks are follow-ups attached to a client, with an optional due date.</p>
+  <h3>Adding tasks</h3>
+  <ul>
+    <li>In the client window: ${HU("+ Add task")} in the <strong>Tasks</strong> section.</li>
+    <li>On the Clients list: expand a client's row and use the ${HU("Add")} box, or use the <strong>Tasks Due Today</strong> panel.</li>
+  </ul>
+  <h3>Where tasks show up</h3>
+  <ul>
+    <li>On the client's Pipeline card: the next task and its date (amber when due within 3 days, red when overdue).</li>
+    <li>On the ${HU("Dashboard")} and the Clients list, under <strong>Tasks due today</strong>.</li>
+    <li>In the Pipeline's top figures, as <em>Tasks due &le;3 days</em>.</li>
+  </ul>
+  <p>Tick a task to mark it done. Click &times; to delete it. Tasks can be downloaded from ${HU("Export")}.</p>` },
+
+{ id:"documents", g:"Clients", t:"Documents", who:"all", k:"documents upload files plans contracts quotes photos pdf attach delete",
+  b:()=>`<h2>Documents</h2>
+  <p class="lead">Attach plans, contracts, quotes or photos to a client.</p>
+  <ul>
+    <li>In the client window, click ${HU("+ Upload")} or drop files onto the <strong>Documents</strong> box. On the Clients list, expand a row and click ${HU("+ Upload document")}.</li>
+    <li>Accepted: PDF, images (JPG, PNG, WEBP, HEIC), Word, Excel, CSV and text files, up to 20&nbsp;MB each.</li>
+    <li>Click a document to open it.</li>
+    <li>Deleting a document removes it for everyone.</li>
+  </ul>
+  <div class="hp-tip">Files uploaded in the client window are kept when you click ${HU("Save client")}. If you click ${HU("Cancel")} instead, the files you just uploaded are discarded.</div>` },
+
+{ id:"dwellings", g:"Clients", t:"Dwellings", who:"all", k:"dwellings additional dwelling multiple homes house and land packages",
+  b:()=>`<h2>Dwellings</h2>
+  <p class="lead">The build address in the client window is dwelling 1. If a client is building or considering more than one home, or several house-and-land packages, add more under <strong>Additional dwellings</strong> with ${HU("+ Add dwelling")}.</p>
+  <p>The Clients list shows how many dwellings each client has, and the Pipeline's top figures include <em>Total dwellings</em>.</p>` },
+
+{ id:"lists", g:"Clients", t:"Lead sources, build types and buyer types", who:"all", k:"lead source build type buyer type timing lists options website meta google referral walk-in display home phone",
+  b:()=>`<h2>Lead sources, build types and buyer types</h2>
+  <p class="lead">These drop-down lists are the same for every company, so reports compare like with like.</p>
+  <table class="hp-table"><tbody>
+    <tr><td><strong>Lead source</strong></td><td>${LEAD_SOURCES.map(esc).join(", ")}</td></tr>
+    <tr><td><strong>Build type</strong></td><td>${BUILD_TYPES.map(esc).join(", ")}</td></tr>
+    <tr><td><strong>Buyer type</strong></td><td>${BUYER_TYPES.map(esc).join(", ")}</td></tr>
+    <tr><td><strong>Timing</strong></td><td>${TIMING_OPTIONS.map(esc).join(", ")}</td></tr>
+  </tbody></table>
+  <p>Enquiries that come in through ${hGo("leads","Lead connections")} get <em>Website</em>, <em>Meta</em> or <em>Google</em> automatically.</p>
+  <div class="hp-note">These lists can't be edited from the app.</div>` },
+
+/* ---------------- Pipeline and reports ---------------- */
+{ id:"pipeline", g:"Pipeline and reports", t:"Pipeline board and quick add", who:"all", k:"pipeline board kanban drag drop quick add new enquiry cards columns",
+  b:()=>`<h2>Pipeline board and quick add</h2>
+  <p class="lead">The ${HU("Pipeline")} tab shows a column for each stage, with a card for each client.</p>
+  <h3>Moving clients</h3>
+  <ul>
+    <li><strong>Drag a card</strong> to a new column. The next stage moves on to match, the old next action date is cleared, and the new stage's date is set to today if it has one.</li>
+    <li>Moving to <strong>Won</strong> or <strong>Lost</strong> also tidies up the forecast and appointment fields (see ${hGo("stages","Sales stages")}).</li>
+    <li><strong>Click a card</strong> to open the client.</li>
+  </ul>
+  <h3>Quick add</h3>
+  <p>Type a first name and surname in the <em>+ Add new client</em> box at the top of <strong>New Enquiry</strong> and press <strong>Enter</strong>. Press <strong>Esc</strong> to clear it. If you're an owner or admin and have filtered to one consultant, the new client goes to that consultant.</p>
+  <h3>Figures across the top</h3>
+  <p>Clients (in view), Active in pipeline, Tasks due &le;3 days, Actions due &le;7 days, Won and Total dwellings. They follow your search and filters.</p>
+  <div class="hp-tip">Dragging works best with a mouse. On a phone, open the client and change ${HU("Current stage")} instead.</div>` },
+
+{ id:"forecast", g:"Pipeline and reports", t:"Reports & Sales Forecast", who:"all", k:"reports forecast sales forecast pdf report upcoming appointments month against last revenue won",
+  b:()=>`<h2>Reports &amp; Sales Forecast</h2>
+  <p class="lead">This tab has three parts. Consultants see their own clients. Owners and admins can choose ${HU("Sales Consultants")} at the top, and the whole tab (and the PDF) follows that choice.</p>
+  <h3>Reports</h3>
+  <p>Pick a ${HU("Reporting month")}. Cards compare Discovery appointments, Presentations, Review meetings, Sales won and Revenue won with the month before, counted on the date each thing happened.</p>
+  <h3>Sales forecast &ndash; 3 months</h3>
+  <p>Every client with a ${HU("Forecast month")} in this month or the next two, grouped by month, plus tables by build type, buyer type and lead source. Owners and admins also get <strong>Forecast by consultant</strong>. Click a row to open the client. The window rolls forward on its own each month.</p>
+  <h3>Upcoming appointments &ndash; next 14 days</h3>
+  <p>Discovery appointments, Presentation appointments and Review / closing meetings booked in the next 14 days, based on each client's next stage and appointment date.</p>
+  <h3>PDF report</h3>
+  <p>Click ${HU("Generate PDF Report")} to download the forecast and appointment lists as a PDF.</p>` },
+
+{ id:"salesreports", g:"Pipeline and reports", t:"Sales Reports and KPI targets", who:"all", k:"sales reports kpi targets running total conversion rates scoreboard enquiries by lead source monthly tracking manage access",
+  b:()=>`<h2>Sales Reports and KPI targets</h2>
+  <p class="lead">${HU("Sales Reports")} compares actual results with each consultant's KPIs, month by month through the year.</p>
+  <h3>Who can see it</h3>
+  <ul>
+    <li><strong>Owners</strong> always see it, for the whole team.</li>
+    <li><strong>Admins</strong> see the whole team and can edit KPIs once an owner switches them on.</li>
+    <li><strong>Consultants</strong> see only their own figures, read-only, once an owner switches them on.</li>
+  </ul>
+  <p>Owners click ${HU("Manage access")} and use the switch next to each person. The change applies the next time that person opens the app. If you can't see the tab, ask your owner.</p>
+  <h3>What's on the page</h3>
+  <ul>
+    <li>Choose ${HU("Sales Consultant")} (or ${HU("Whole team")}), ${HU("Year")} and ${HU("Period")} (year to date, a quarter or a month).</li>
+    <li>Cards for Leads, Discovery appointments, Presentations, Review meetings and Sales won. Click one to change the measure shown in the chart.</li>
+    <li><strong>Running total</strong> &ndash; actual against KPI, added up month by month.</li>
+    <li><strong>Conversion rates</strong> &ndash; your real rates, with a marker for the rate your KPIs assume.</li>
+    <li><strong>Enquiries by lead source</strong> &ndash; where enquiries came from, and how many were won.</li>
+    <li><strong>Monthly tracking &ndash; actual vs KPI</strong> &ndash; this month's KPI is pro-rated to today.</li>
+    <li><strong>Team scoreboard</strong> (Whole team) &ndash; sales won against KPI so far. Click a name to see their report.</li>
+  </ul>
+  <h3>Setting KPI targets</h3>
+  <p>Choose one consultant, then fill in <strong>KPI targets</strong>. See ${hGo("gs-kpis","Set your KPI targets")}.</p>` },
+
+/* ---------------- Leads, import and export ---------------- */
+{ id:"leads", g:"Leads, import and export", t:"Lead connections", who:"mgr", k:"lead connections website form meta lead ads facebook instagram google ads zapier make key link test enquiry regenerate turn off wordpress",
+  b:()=>`<h2>Lead connections</h2>
+  <p class="lead">Each enquiry from your website, Facebook and Instagram lead ads or Google Ads lead forms arrives as a <strong>New Enquiry</strong> client with the right lead source, ready to follow up.</p>
+  <h3>Set up a connection</h3>
+  <ol>
+    <li>Click ${HU("Lead connections")} in the top bar.</li>
+    <li>Choose a tab:
+      <ul><li>${HU("Website form")} &ndash; your own website, including WordPress forms.</li>
+          <li>${HU("Meta Lead Ads")} &ndash; Facebook and Instagram instant forms, sent through Zapier or Make.</li>
+          <li>${HU("Google Ads")} &ndash; lead form assets on Search, YouTube, Display and Performance Max campaigns.</li></ul></li>
+    <li>Click ${HU("Create connection key")} and follow the guide on that tab.</li>
+  </ol>
+  <h3>Controls</h3>
+  <ul>
+    <li>${HU("Copy link")} and ${HU("Copy key")} copy your private link or key. ${HU("Show key")} shows the key on screen.</li>
+    <li>${HU("New leads go to")} &ndash; the person new enquiries are assigned to.</li>
+    <li>${HU("Turn off")} refuses enquiries until you click ${HU("Turn back on")}. The key stays the same.</li>
+    <li>${HU("Regenerate key")} stops the old key and link working straight away. Update your forms with the new one.</li>
+    <li>${HU("Send a test enquiry")} sends <em>Test Enquiry - delete me</em> into New Enquiry. Remove it with ${HU("Delete test enquiry")}.</li>
+  </ul>
+  <h3>Good to know</h3>
+  <ul>
+    <li>If the same person enquires again (same email or phone), we add a note to their existing client rather than create a duplicate.</li>
+    <li>While your workspace is read-only, new enquiries are not added. See ${hGo("readonly","Read-only workspace")}.</li>
+    <li>Keep the link and key private: anyone who has them can send enquiries into your pipeline.</li>
+  </ul>
+  <div class="hp-actions">${isManager() ? hBtn("leads","Open Lead connections",true) : ""}</div>` },
+
+{ id:"import", g:"Leads, import and export", t:"Importing clients", who:"mgr", k:"import excel csv spreadsheet xlsx upload columns duplicates preview",
+  b:()=>`<h2>Importing clients</h2>
+  <p class="lead">Bring clients in from Excel (.xlsx) or CSV with the ${HU("Import")} tab. Nothing is saved until you've seen the preview and pressed Import.</p>
+  <ol>
+    <li>Open ${HU("Import")} and choose your file. Banner rows above your headings are handled for you, and dates are read Australian style (day first).</li>
+    <li><strong>Check the columns</strong> &ndash; columns are matched automatically. Fix any that are wrong, or set them to <em>not imported</em>. You can use one <em>Client name</em> column or separate first name and surname columns. A <em>Next action</em> column becomes a task.</li>
+    <li><strong>Assign these clients to</strong> &ndash; choose the consultant.</li>
+    <li>Click ${HU("Preview the import")}. Check <em>Rows that cannot be imported</em>, <em>Worth checking</em> and <em>Possible duplicates</em> (tick <em>Skip these</em> to leave duplicates out).</li>
+    <li>Click ${HU("Import")} <em>number</em> ${HU("clients")}. When it's done, click ${HU("View the clients")} or ${HU("Import another file")}.</li>
+  </ol>
+  <div class="hp-note">The Import tab is hidden while the workspace is read-only.</div>` },
+
+{ id:"export", g:"Leads, import and export", t:"Exporting data", who:"all", k:"export download excel csv xlsx backup clients leads pipeline sales won tasks forecast dashboard metrics stage history",
+  b:()=>`<h2>Exporting data</h2>
+  <p class="lead">Download your data to Excel or CSV from the ${HU("Export")} tab. Exports cover only what you can see: the whole company for owners and admins, your own clients for consultants.</p>
+  <h3>What to export</h3>
+  <ul>${EXPORT_SETS.map(x => "<li><strong>" + esc(x.name) + "</strong> &ndash; " + esc(x.desc) + "</li>").join("")}</ul>
+  <h3>Filters</h3>
+  <p>Enquiry date from and to, Forecast month, Status, Sales stage and Assigned to. Leave anything blank to include everything. ${HU("Clear filters")} resets them.</p>
+  <h3>Download</h3>
+  <p>Click ${HU("Download Excel (.xlsx)")} or ${HU("Download CSV (.csv)")}.</p>` },
+
+/* ---------------- Billing and legal ---------------- */
+{ id:"billing", g:"Billing and legal", t:"Plans, free trial and billing", who:"mgr", k:"billing plan plans price trial free trial starter team network card invoice cancel upgrade stripe gst",
+  b:()=>`<h2>Plans, free trial and billing</h2>
+  <h3>Plans</h3>
+  ${hPlansTable()}
+  <p><strong>Every plan includes everything in the app</strong>, including ${HU("Sales Reports")} and KPI targets. The plans differ only in how many people can use them.</p>
+  <p>Prices are in Australian dollars and exclude GST, which is added at checkout.</p>
+  <h3>Starting your free trial</h3>
+  <ol>
+    <li>Owners and admins of a new company see <strong>Choose your plan</strong> after signing in. You can also open it from ${HU("Billing")} in the top bar.</li>
+    <li>Click ${HU("Choose Starter")}, ${HU("Choose Team")} or ${HU("Choose Network")}.</li>
+    <li>Enter your card on the secure Stripe checkout page. Nothing is charged for 14 days &ndash; cancel any time before then and you pay nothing.</li>
+  </ol>
+  <h3>Managing your subscription</h3>
+  <p>Click ${HU("Billing")} to open Stripe's secure billing page, where you can update your card, change plan, cancel and see invoices.</p>
+  <h3>The banner under the top bar</h3>
+  <ul>
+    <li><strong>Free trial</strong> &ndash; days left, and the date of your first payment.</li>
+    <li><strong>Payment failed</strong> &ndash; click ${HU("Update card")} before the date shown to avoid going read-only.</li>
+    <li><em>Your subscription ends on&hellip;</em> &ndash; click ${HU("Keep my subscription")} to stay on.</li>
+    <li><strong>Read-only</strong> &ndash; see ${hGo("readonly","Read-only workspace")}.</li>
+  </ul>
+  <div class="hp-note">Consultants don't see the Billing button. If the banner asks you to sort out billing, ask your owner or admin.</div>` },
+
+{ id:"readonly", g:"Billing and legal", t:"Read-only workspace", who:"all", k:"read only read-only locked can't edit cannot save trial ended payment overdue cancelled",
+  b:()=>`<h2>Read-only workspace</h2>
+  <p class="lead">A workspace becomes read-only when no plan has been chosen yet, a payment is still overdue after the grace period, or the subscription has ended. <strong>Your data is safe</strong> &ndash; nothing is deleted.</p>
+  <h3>What read-only means</h3>
+  <ul>
+    <li>You can still sign in, look at every client and report, and export.</li>
+    <li>You can't add or change anything. ${HU("Add Client")} and the ${HU("Import")} tab are hidden.</li>
+    <li>New enquiries from Lead connections are not added while read-only.</li>
+  </ul>
+  <h3>How to fix it ${hTag("mgr")}</h3>
+  <p>Use the button in the red banner: ${HU("Choose a plan")} to start or restart a subscription, or ${HU("Update card")} if a payment failed. Everything unlocks once the payment goes through &ndash; if the banner stays, wait a minute and reload.</p>
+  <p>Consultants: ask your owner or admin to sort out billing.</p>` },
+
+{ id:"legal", g:"Billing and legal", t:"Privacy, terms and your data", who:"all", k:"privacy policy terms of service data processing agreement dpa legal",
+  b:()=>`<h2>Privacy, terms and your data</h2>
+  <p>Our legal documents are linked at the bottom of every screen and on the sign-in screen:</p>
+  <ul>
+    <li><a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a></li>
+    <li><a href="/terms.html" target="_blank" rel="noopener">Terms of Service</a></li>
+    <li><a href="/dpa.html" target="_blank" rel="noopener">Data Processing Agreement</a></li>
+  </ul>
+  <p>Each company's clients, team and settings are kept separate. Consultants only see the clients assigned to them.</p>
+  <p>Questions about your data: ${H_MAIL()}.</p>` },
+
+/* ---------------- FAQ ---------------- */
+{ id:"faq-reset", g:"FAQ and troubleshooting", t:"My password reset email hasn't arrived", who:"all", k:"faq reset email not arriving missing junk spam forgot password",
+  b:()=>`<h2>My password reset email hasn't arrived</h2>
+  <ol>
+    <li>Wait a few minutes &ndash; it can take a little while.</li>
+    <li>Check your junk or spam folder, and any <em>Other</em> or <em>Promotions</em> tab.</li>
+    <li>Make sure you typed the email address you signed up with. For privacy, we say a link is on its way even if there's no account for that address.</li>
+    <li>Try again with ${HU("Forgotten your password?")}. Use the newest email you get.</li>
+    <li>If your company filters email, ask your IT person to let our emails through.</li>
+  </ol>
+  <p>Still nothing? Email ${H_MAIL()} from the address you sign in with.</p>` },
+
+{ id:"faq-link", g:"FAQ and troubleshooting", t:"My reset or confirmation link has expired", who:"all", k:"faq link expired reset link confirm email link used already",
+  b:()=>`<h2>My reset or confirmation link has expired</h2>
+  <p>Links work once and expire after a while. Some email providers' security checks open links before you do, which can use them up.</p>
+  <p>On the <em>This link has expired</em> screen, enter your email and click ${HU("Email me a new link")}. Open the new link straight away and tap ${HU("Continue")}.</p>
+  <p>If your email is already confirmed, just sign in.</p>` },
+
+{ id:"faq-invite", g:"FAQ and troubleshooting", t:"An invite has expired or didn't arrive", who:"all", k:"faq invite expired no longer valid not arrived invitation link",
+  b:()=>`<h2>An invite has expired or didn't arrive</h2>
+  <h3>If you were invited</h3>
+  <ul>
+    <li>Check your junk folder for the invite email.</li>
+    <li>If the sign-in screen says the invite is no longer valid or can't be found, ask the person who invited you to send a new one.</li>
+    <li>You sign up with the email address the invite was sent to &ndash; it's filled in for you.</li>
+    <li>Already have an account with that email? Email ${H_MAIL()} and we'll help.</li>
+  </ul>
+  <h3>If you sent the invite ${hTag("mgr")}</h3>
+  <ul>
+    <li>Open ${HU("Team")} and find them under <strong>Pending invites</strong>.</li>
+    <li>Click ${HU("Renew &amp; resend")} if it has expired, or ${HU("Resend")} if it's still current.</li>
+    <li>Or click ${HU("Copy link")} and send the link yourself by text or email.</li>
+  </ul>` },
+
+{ id:"faq-readonly", g:"FAQ and troubleshooting", t:"Why can't I add or change anything?", who:"all", k:"faq read only cannot edit can't save add client missing hidden",
+  b:()=>`<h2>Why can't I add or change anything?</h2>
+  <p>If there's a red <strong>Read-only</strong> banner under the top bar, your workspace needs a plan or a payment. See ${hGo("readonly","Read-only workspace")}.</p>
+  <p>If there's no banner but a client won't save, check the message at the bottom of the screen:</p>
+  <ul>
+    <li><em>First name and surname are required.</em></li>
+    <li><em>Enter the &hellip; date before saving.</em> &ndash; the current stage needs its date (see ${hGo("stages","stage dates")}).</li>
+  </ul>` },
+
+{ id:"faq-cantsee", g:"FAQ and troubleshooting", t:"I can't see a client, tab or button", who:"all", k:"faq can't see missing client tab button hidden sales reports team import billing",
+  b:()=>`<h2>I can't see a client, tab or button</h2>
+  <ul>
+    <li><strong>A client:</strong> consultants only see clients assigned to them. Also check your search and filters &ndash; click ${HU("Clear filters")}.</li>
+    <li><strong>Sales Reports:</strong> an owner needs to switch it on for you with ${HU("Manage access")}.</li>
+    <li><strong>Team, Lead connections, Billing and Import:</strong> these are for owners and admins.</li>
+    <li><strong>Add Client or Import:</strong> hidden while the workspace is read-only.</li>
+    <li><strong>A different company:</strong> use the company drop-down under your name (see ${hGo("account","switching company")}).</li>
+  </ul>
+  <p>Your role shows next to your name in the top bar. See ${hGo("roles","Roles")}.</p>` },
+
+{ id:"faq-leads", g:"FAQ and troubleshooting", t:"A lead form enquiry hasn't appeared", who:"mgr", k:"faq lead not arriving enquiry missing website form google meta zapier",
+  b:()=>`<h2>A lead form enquiry hasn't appeared</h2>
+  <ol>
+    <li>Open ${HU("Lead connections")} and check the connection hasn't been turned off.</li>
+    <li>Click ${HU("Send a test enquiry")}. If the test arrives, the connection works and the problem is in the form set-up: check the link or key in your form, Zapier, Make or Google Ads matches the one shown. ${HU("Regenerate key")} replaces the old one.</li>
+    <li>Check the form sends the field names listed in the guide (for example email, phone, first_name).</li>
+    <li>If the person had enquired before, the new enquiry is added as a note on their existing client.</li>
+    <li>Google's own <em>Send test data</em> button only checks the link &ndash; nothing is saved.</li>
+    <li>Check your workspace isn't read-only.</li>
+  </ol>
+  <p>Still stuck? Email ${H_MAIL()} with the web address of the form.</p>` },
+
+{ id:"faq-seats", g:"FAQ and troubleshooting", t:"No seats left", who:"mgr", k:"faq seats no seats left users limit upgrade",
+  b:()=>`<h2>No seats left</h2>
+  <p>Each active member uses a seat. When all seats are used, the Team window says <em>no seats left</em>.</p>
+  <ul>
+    <li>Free a seat with ${HU("Remove access")} for someone who has left. Their clients stay put.</li>
+    <li>Or upgrade your plan in ${HU("Billing")}: Starter has up to 3 users, Team 10 and Network 25. Need more than 25? Ask us for a quote.</li>
+  </ul>` },
+
+{ id:"faq-other", g:"FAQ and troubleshooting", t:"Other problems", who:"all", k:"faq pdf excel library did not load slow not saving reload browser phone",
+  b:()=>`<h2>Other problems</h2>
+  <ul>
+    <li><strong>"The Excel library did not load", or the PDF won't build:</strong> reload the page and try again. CSV export always works.</li>
+    <li><strong>A teammate can't see your change:</strong> check the dot under your name says <em>Saved</em>, then ask them to reload.</li>
+    <li><strong>Something looks wrong after an update:</strong> reload the page.</li>
+    <li><strong>Phone or tablet:</strong> everything works in the browser. Swipe the tab bar sideways to see every tab.</li>
+  </ul>
+  <p>Contact us: ${H_MAIL()}.</p>` },
+
+{ id:"contact", g:"FAQ and troubleshooting", t:"Contact support", who:"all", k:"contact support help email spectrum coach",
+  b:()=>`<h2>Contact support</h2>
+  <p class="lead">Can't find the answer here? Email ${H_MAIL()}.</p>
+  <p>It helps if you include:</p>
+  <ul><li>your company name and the email you sign in with</li><li>which screen you were on and what you clicked</li><li>a screenshot, if you can</li></ul>
+  <div class="hp-note">Please never email your password.</div>` }
+];
+
+function hPlansTable(){
+  const cards = [...document.querySelectorAll("#planOverlay .plan-card")];
+  if(!cards.length) return "";
+  return '<table class="hp-table"><thead><tr><th>Plan</th><th>Price</th><th>Includes</th></tr></thead><tbody>' +
+    cards.map(c => {
+      const nm = c.querySelector("h3"), pr = c.querySelector(".price");
+      const lis = [...c.querySelectorAll("li")].map(l => esc(l.textContent));
+      return "<tr><td><strong>" + esc(nm ? nm.textContent : "") + "</strong></td><td>" +
+        esc(pr ? pr.textContent.replace(/\s+/g, " ").trim() : "") + "</td><td>" + lis.join("<br>") + "</td></tr>";
+    }).join("") + "</tbody></table>";
+}
+
+/* which topic the header Help button opens on each tab, and in each window */
+const HELP_FOR_VIEW = {dashboard:"home", clients:"clients", pipeline:"pipeline", forecast:"forecast",
+                       salesreports:"salesreports", import:"import", export:"export", platform:"home"};
+const HELP_FOR_OVERLAY = {overlay:"client-form", teamOverlay:"team", leadOverlay:"leads", planOverlay:"billing",
+                          acctOverlay:"account", linkOverlay:"password"};
+let HELP = {topic:"home", q:""};
+
+function helpSignedIn(){ return typeof ME !== "undefined" && !!ME; }
+function helpRoleText(){
+  if(!helpSignedIn()) return "";
+  return "Showing help for: " + (ME.role === "owner" ? "Owner" : ME.role === "admin" ? "Admin" : "Consultant");
+}
+function helpText(t){
+  const d = document.createElement("div");
+  try{ d.innerHTML = t.b().replace(/<\/(h\d|p|li|td|th|div|strong)>/g, " $&"); }catch(_){ d.textContent = t.t; }
+  return (d.textContent || "").replace(/\s+/g, " ").trim();
+}
+function helpEnsure(){
+  if(document.getElementById("helpOverlay")) return;
+  const o = document.createElement("div");
+  o.id = "helpOverlay";
+  o.setAttribute("role", "dialog"); o.setAttribute("aria-modal", "true"); o.setAttribute("aria-labelledby", "helpTitle");
+  o.innerHTML = `<div class="hp" id="hpBox">
+    <div class="hp-head">
+      <button class="hp-navbtn" id="hpNavBtn" type="button" aria-expanded="false" aria-controls="hpList">&#9776; Topics</button>
+      <h2 id="helpTitle">Help</h2>
+      <span class="hp-role" id="hpRole"></span>
+      <button class="x" id="hpClose" type="button" aria-label="Close help">&times;</button>
+    </div>
+    <div class="hp-body">
+      <nav class="hp-nav" aria-label="Help topics">
+        <div class="hp-search"><input type="search" id="hpSearch" placeholder="Search help, e.g. invite, KPI, reset" aria-label="Search help" autocomplete="off" /></div>
+        <div class="hp-list" id="hpList"></div>
+      </nav>
+      <main class="hp-main" id="hpMain" tabindex="-1"></main>
+    </div>
+  </div>`;
+  document.body.appendChild(o);
+  document.getElementById("hpClose").onclick = closeHelp;
+  document.getElementById("hpNavBtn").onclick = () => helpNav(!document.getElementById("hpBox").classList.contains("nav-open"));
+  const s = document.getElementById("hpSearch");
+  s.addEventListener("input", () => { HELP.q = s.value.trim(); helpPaint(); });
+  s.addEventListener("keydown", e => {
+    if(e.key === "Enter"){ e.preventDefault(); const r = helpMatches(); if(HELP.q && r.length) helpOpenTopic(r[0].id); }
+  });
+  document.addEventListener("keydown", e => {
+    if(e.key === "Escape" && o.classList.contains("open")) closeHelp();
+  });
+  o.addEventListener("click", e => {
+    if(e.target === o){ closeHelp(); return; }
+    const go = e.target.closest("[data-help-go]");
+    if(go){ e.preventDefault(); helpOpenTopic(go.dataset.helpGo); return; }
+    const act = e.target.closest("[data-help-act]");
+    if(act){ e.preventDefault(); helpAct(act.dataset.helpAct); }
+  });
+}
+function helpNav(open){
+  document.getElementById("hpBox").classList.toggle("nav-open", !!open);
+  document.getElementById("hpNavBtn").setAttribute("aria-expanded", open ? "true" : "false");
+}
+function helpMatches(){
+  const q = HELP.q.toLowerCase();
+  if(!q) return HELP_TOPICS;
+  const words = q.split(/\s+/).filter(Boolean);
+  return HELP_TOPICS.map(t => {
+    const title = t.t.toLowerCase(), keys = t.k.toLowerCase(), body = helpText(t).toLowerCase();
+    let score = 0;
+    for(const w of words){
+      if(title.includes(w)) score += 5; else if(keys.includes(w)) score += 3; else if(body.includes(w)) score += 1; else return null;
+    }
+    return {t, score};
+  }).filter(Boolean).sort((a, b) => b.score - a.score).map(x => x.t);
+}
+function helpMark(s){
+  let out = esc(s);
+  HELP.q.split(/\s+/).filter(w => w.length > 1).forEach(w => {
+    out = out.replace(new RegExp("(" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")(?![^<]*>)", "ig"), "<mark>$1</mark>");
+  });
+  return out;
+}
+function helpSnippet(t){
+  const txt = helpText(t);
+  const words = HELP.q.toLowerCase().split(/\s+/).filter(Boolean);
+  let i = -1;
+  for(const w of words){ i = txt.toLowerCase().indexOf(w); if(i >= 0) break; }
+  const start = Math.max(0, i - 60);
+  return (start > 0 ? "\u2026" : "") + txt.slice(start, start + 180) + (txt.length > start + 180 ? "\u2026" : "");
+}
+function helpLinkHTML(t){
+  const tag = t.who === "all" ? "" : '<span class="hp-tag">' + (t.who === "owner" ? "Owners" : "Owners &amp; admins") + '</span>';
+  return '<button class="hp-link' + (!HELP.q && t.id === HELP.topic ? " on" : "") + '" type="button" data-help-go="' + t.id + '"' +
+    (!HELP.q && t.id === HELP.topic ? ' aria-current="page"' : '') + '>' +
+    '<span>' + (HELP.q ? helpMark(t.t) : esc(t.t)) + '</span>' + tag + '</button>';
+}
+function helpPaint(){
+  const list = document.getElementById("hpList");
+  const main = document.getElementById("hpMain");
+  const shown = helpMatches();
+  let html = "";
+  if(HELP.q){
+    html = shown.length
+      ? '<div class="hp-group">' + shown.length + ' result' + (shown.length === 1 ? "" : "s") + '</div>' + shown.map(helpLinkHTML).join("")
+      : '<p class="hp-none">No topics match. Try another word.</p>';
+  }else{
+    HELP_GROUPS.forEach(g => {
+      const ts = HELP_TOPICS.filter(t => t.g === g);
+      if(ts.length) html += '<div class="hp-group">' + esc(g) + '</div>' + ts.map(helpLinkHTML).join("");
+    });
+  }
+  list.innerHTML = html;
+  list.querySelectorAll("[data-help-go]").forEach(b => b.onclick = e => { e.preventDefault(); e.stopPropagation(); helpOpenTopic(b.dataset.helpGo); });
+  if(HELP.q){
+    main.innerHTML = '<div class="hp-art"><h2>Search results</h2><p class="lead">' +
+      (shown.length ? shown.length + ' topic' + (shown.length === 1 ? "" : "s") + ' for &ldquo;' + esc(HELP.q) + '&rdquo;'
+                    : 'Nothing found for &ldquo;' + esc(HELP.q) + '&rdquo;. Try a simpler word, or email ' + H_MAIL() + '.') + '</p>' +
+      shown.map(t => '<button class="hp-res" type="button" data-help-go="' + t.id + '"><strong>' + helpMark(t.t) + '</strong> ' + hTag(t.who) +
+        '<span class="s">' + helpMark(helpSnippet(t)) + '</span></button>').join("") + '</div>';
+    return;
+  }
+  const t = HELP_TOPICS.find(x => x.id === HELP.topic) || HELP_TOPICS[0];
+  const i = HELP_TOPICS.indexOf(t), prev = HELP_TOPICS[i - 1], next = HELP_TOPICS[i + 1];
+  let note = "";
+  if(helpSignedIn() && t.who === "mgr" && !isManager())
+    note = '<div class="hp-note">Owners and admins in your company look after this. It\'s here so you know how it works and what to ask for.</div>';
+  else if(helpSignedIn() && t.who === "owner" && ME.role !== "owner")
+    note = '<div class="hp-note">An owner in your company looks after this.</div>';
+  main.innerHTML = '<article class="hp-art" data-topic="' + t.id + '"><div class="hp-tags">' + hTag(t.who) + '</div>' + note + t.b() +
+    '<div class="hp-next">' + (prev ? '<button type="button" data-help-go="' + prev.id + '">&larr; ' + esc(prev.t) + '</button>' : '<span></span>') +
+    (next ? '<button type="button" data-help-go="' + next.id + '">' + esc(next.t) + ' &rarr;</button>' : '') + '</div></article>';
+}
+function helpOpenTopic(id){
+  HELP.topic = HELP_TOPICS.some(t => t.id === id) ? id : "home";
+  HELP.q = "";
+  const s = document.getElementById("hpSearch"); if(s) s.value = "";
+  helpNav(false);
+  helpPaint();
+  const m = document.getElementById("hpMain"); if(m) m.scrollTop = 0;
+}
+function openHelp(topic){
+  helpEnsure();
+  if(!topic){
+    const open = [...document.querySelectorAll(".overlay.open")].pop();
+    topic = helpSignedIn() ? (HELP_FOR_VIEW[currentView] || "home") : "signin";
+    if(open && HELP_FOR_OVERLAY[open.id]) topic = HELP_FOR_OVERLAY[open.id];
+  }
+  document.getElementById("hpRole").textContent = helpRoleText();
+  document.getElementById("helpOverlay").classList.add("open");
+  helpOpenTopic(topic);
+  if(!(window.matchMedia && window.matchMedia("(max-width:760px)").matches)) document.getElementById("hpSearch").focus();
+}
+function closeHelp(){
+  const o = document.getElementById("helpOverlay");
+  if(o) o.classList.remove("open");
+}
+function helpAct(a){
+  closeHelp();
+  if(!helpSignedIn()) return;
+  if(a === "team") openTeam();
+  else if(a === "leads") openLeads();
+  else if(a === "account") openAccount("change");
+  else if(a === "plan") openPlanPicker();
+  else if(a === "add"){ if(!isReadOnly()) newClient(); }
+  else if(a === "salesreports") switchView("salesreports");
+  else if(a.indexOf("view:") === 0) switchView(a.slice(5));
+}
+function wireHelp(){
+  document.getElementById("helpBtn").addEventListener("click", () => openHelp());
+  document.querySelectorAll("[data-help]").forEach(b => b.addEventListener("click", e => {
+    e.preventDefault(); e.stopPropagation(); openHelp(b.dataset.help);
+  }));
+}
+
+/* ---------- Dashboard setup checklist (from PR #9, updated) ----------
+   For owners and admins while a company is being set up. Ticked from
+   existing data; "hide" lives in this browser's localStorage, per
+   company. The only reads are a head-only count of KPI rows and the
+   lead connection list, at most once a minute while still unticked. */
+function gsKey(name){ return "spa.gs." + name + "." + (ME ? ME.company_id : ""); }
+function gsGet(name){ try{ return localStorage.getItem(gsKey(name)) === "1"; }catch(_){ return false; } }
+function gsMark(name){ try{ localStorage.setItem(gsKey(name), "1"); }catch(_){ } }
+
+let GS_CHK = {cid:null, kpis:false, leads:false, at:0, busy:false};
+async function gsCheck(){
+  if(!sb || !ME || !isManager()) return;
+  if(GS_CHK.cid !== ME.company_id) GS_CHK = {cid:ME.company_id, kpis:false, leads:false, at:0, busy:false};
+  const now = Date.now();
+  if(GS_CHK.busy || now - GS_CHK.at < 60000 || ((GS_CHK.kpis || !SR_FULL) && GS_CHK.leads)) return;
+  GS_CHK.busy = true; GS_CHK.at = now;
+  const cid = ME.company_id;
+  try{
+    if(!GS_CHK.kpis && SR_FULL){
+      const {count, error} = await sb.from("sales_kpis").select("owner_id", {count:"exact", head:true})
+        .eq("company_id", cid).gt("won", 0);
+      if(!error && count > 0 && GS_CHK.cid === cid) GS_CHK.kpis = true;
+    }
+    if(!GS_CHK.leads){
+      const {data, error} = await sb.rpc("my_lead_sources");
+      if(!error && Array.isArray(data) && data.length && GS_CHK.cid === cid) GS_CHK.leads = true;
+    }
+  }catch(_){ /* the checklist simply stays unticked */ }
+  finally{ GS_CHK.busy = false; }
+  if(currentView === "dashboard") renderChecklist(true);
+}
+function gsItems(){
+  const ro = isReadOnly();
+  const mine = GS_CHK.cid === ME.company_id;
+  const items = [];
+  if(billingOn()) items.push({k:"plan", t:"Choose your plan and start the free trial",
+    done: BILLING.subscription_status !== "none", btn:"Choose a plan", act:"plan"});
+  items.push({k:"company", t:"Check your company name and brand colour",
+    done: gsGet("company") || !!(COMPANY && COMPANY.brand_colour && COMPANY.brand_colour.toLowerCase() !== "#1e3a8a"),
+    btn:"Open Team", act:"team"});
+  items.push({k:"team", t:"Invite your sales team", done: TEAM.length > 1, btn:"Invite", act:"team"});
+  if(SR_FULL) items.push({k:"kpis", t:"Set KPI targets for each consultant", done: mine && GS_CHK.kpis,
+    btn:"Set KPIs", act:"salesreports"});
+  items.push({k:"client", t:"Add your first client", done: clients.length > 0, btn:"Add Client", act:"add", off: ro});
+  items.push({k:"leads", t:"Connect your lead forms", done: mine && GS_CHK.leads, btn:"Lead connections", act:"leads", off: ro});
+  return items;
+}
+function renderChecklist(fromCheck){
+  const host = document.getElementById("gsChecklist");
+  if(!host) return;
+  if(!ME || !isManager() || currentView !== "dashboard" || gsGet("hidden")){ host.hidden = true; host.innerHTML = ""; return; }
+  if(!fromCheck) gsCheck();
+  const items = gsItems();
+  const done = items.filter(i => i.done).length;
+  if(done === items.length){ host.hidden = true; host.innerHTML = ""; return; }
+  host.innerHTML = `<div class="gsc" role="region" aria-label="Getting started checklist">
+    <div class="gsc-top">
+      <div><h3>Get your team started</h3>
+        <p class="sub">${done} of ${items.length} done. Work through these and your team will be ready to go. Step-by-step guides are under <strong>Help</strong>.</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-light btn-sm" type="button" data-gs-act="help">Open the guide</button>
+        <button class="btn btn-light btn-sm" type="button" id="gsHide">Hide checklist</button>
+      </div>
+    </div>
+    <div class="gsc-bar"><i style="width:${Math.round(done / items.length * 100)}%"></i></div>
+    <ul class="gsc-list">${items.map(i => `<li class="gsc-item${i.done ? " done" : ""}">
+      <span class="gsc-tick" aria-hidden="true">${i.done ? "&#10003;" : ""}</span>
+      <span class="gsc-t">${esc(i.t)}${i.done ? '<span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"> (done)</span>' : ""}</span>
+      ${i.done ? "" : `<button class="btn btn-light btn-sm" type="button" data-gs-act="${i.act}"${i.off ? ' disabled title="Choose a plan first"' : ""}>${esc(i.btn)}</button>`}
+    </li>`).join("")}</ul>
+  </div>`;
+  host.hidden = false;
+  host.querySelectorAll("[data-gs-act]").forEach(b => b.addEventListener("click", () => {
+    const a = b.dataset.gsAct;
+    if(a === "help") openHelp("gs-team");
+    else helpAct(a);
+  }));
+  document.getElementById("gsHide").onclick = () => {
+    gsMark("hidden"); renderChecklist();
+    toast("Checklist hidden. The guide is always under Help.");
+  };
+}
+
+
 async function boot(){
   if(!SB_READY){
     showAuth();
@@ -7913,6 +8889,7 @@ async function boot(){
   wireLeads();
   wireBilling();
   wireAccount();
+  wireHelp();
   wireEmailLinks();
   await checkInvite();
 
