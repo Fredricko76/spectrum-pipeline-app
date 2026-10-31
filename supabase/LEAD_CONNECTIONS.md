@@ -4,8 +4,8 @@ Lead connections let a company's owners and admins connect website forms, Meta (
 Google Ads lead forms to their pipeline. Every enquiry goes to the existing `website-enquiry` edge function and arrives
 as a **New Enquiry** client with the right lead source.
 
-Status (31 Oct 2026): the screen is built (draft PR). The database functions are **proposed, not applied**. No edge
-function change is needed.
+Status: **live**. The migration was applied to production on 31 Oct 2026 at 12:58 PM AEDT (recorded as version
+`20261031015808` `lead_connections`), and the screen shipped with PR #12. No edge function change was needed.
 
 ## What's already live
 
@@ -23,11 +23,11 @@ function change is needed.
   - Google lead form tests (`is_test: true`) get HTTP 200 and are not saved. There's no test mode for website or
     Zapier/Make posts.
 
-## Proposed migration (not applied)
+## Migration (applied 31 Oct 2026)
 
-- `supabase/proposed/20261031150000_lead_connections.sql`. It only adds new functions: no table, column or policy
+- `supabase/migrations/20261031150000_lead_connections.sql`. It only adds new functions: no table, column or policy
   changes, and `lead_sources` keeps its deny-all policy.
-- Undo: `supabase/proposed/20261031150000_lead_connections_undo.sql`. It drops the five functions and keeps every
+- Undo: `supabase/rollback/20261031150000_lead_connections_undo.sql`. It drops the five functions and keeps every
   `lead_sources` row, so connected forms keep working.
 
 The functions:
@@ -48,7 +48,7 @@ The functions:
 ### Tests
 
 `supabase/tests/run_lead_connections.sh` builds a scratch database on local Postgres 17. It applies the baseline and
-all migrations, then the proposed file, and runs `supabase/tests/lead_connections_test.sql` (21 checks):
+the earlier migrations, then this one, and runs `supabase/tests/lead_connections_test.sql` (21 checks):
 
 - keys aren't readable from the table
 - create is idempotent per channel, and a bad channel is refused
@@ -122,12 +122,12 @@ If you change `FIELD_ALIASES` in `website-enquiry`, update `LEAD_FIELDS` in `ind
 
 ## Going live
 
-1. Review and apply `supabase/proposed/20261031150000_lead_connections.sql` to production (`qjkmkmmrgtoaocygymqo`).
-   Then move it into `supabase/migrations/`.
+1. Done 31 Oct 2026, 12:58 PM AEDT: applied `supabase/migrations/20261031150000_lead_connections.sql` to production
+   (`qjkmkmmrgtoaocygymqo`). There were no `lead_sources` rows at the time, so no duplicates.
 2. No edge function deploy is needed (v17 already matches the repo).
 3. Merge the PR. Sign in as an owner, create a Website key, send a test enquiry, then delete it.
 4. Existing `lead_sources` rows show up in the screen straight away. Any company with more than one key for the same
    channel shows the oldest, so check with
    `select company_id, channel, count(*) from lead_sources group by 1,2 having count(*)>1;`.
 
-Rollback: run the undo file. The screen goes back to "aren't switched on yet", and existing keys keep working.
+Rollback: run `supabase/rollback/20261031150000_lead_connections_undo.sql`. The screen goes back to "aren't switched on yet", and existing keys keep working.
