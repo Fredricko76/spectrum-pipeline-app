@@ -1274,6 +1274,66 @@
   .plan-err strong{color:var(--red)}
   body.is-readonly #addBtn,
   body.is-readonly .tab[data-view="import"]{display:none !important}
+  /* ---------- Lead connections (Oct 2026) ---------- */
+  #leadOverlay .modal{max-width:820px;min-width:0}
+  .lc-lead{margin:0 0 14px;color:var(--muted);font-size:13.5px;line-height:1.55}
+  .lc-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px;border-bottom:1px solid var(--line)}
+  .lc-tab{background:none;border:none;border-bottom:3px solid transparent;padding:9px 12px;font:inherit;font-weight:700;font-size:13.5px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:7px}
+  .lc-tab[aria-selected="true"]{color:var(--navy);border-bottom-color:var(--primary,#2a5b8c)}
+  .lc-tab .dot{width:8px;height:8px;border-radius:50%;background:#cbd5e1;flex:0 0 auto}
+  .lc-tab .dot.on{background:#16a34a}
+  .lc-card{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff;margin-bottom:14px}
+  .lc-card h3{margin:0 0 4px;font-size:15.5px;color:var(--navy)}
+  .lc-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--primary-soft,#eaf1f8);color:var(--navy)}
+  .lc-status.on::before{content:"";width:7px;height:7px;border-radius:50%;background:#16a34a}
+  .lc-status.off{background:#f1f5f9;color:#475569}
+  .lc-row{margin-top:12px}
+  .lc-row label{display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:5px}
+  .lc-val{display:flex;gap:8px;align-items:stretch}
+  .lc-val code{flex:1;min-width:0;display:block;background:#f5f7fa;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font:12.5px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#1f2937;word-break:break-all}
+  .lc-val .btn{flex:0 0 auto}
+  .lc-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+  .lc-owner{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .lc-owner select{padding:7px 10px !important;font-size:13px;max-width:260px}
+  .btn-warn{background:#fff;color:#9b2c2c;border:1px solid #f1d3d3}
+  .btn-warn:hover{background:#fdf0f0}
+  .lc-note{background:#f5f7fa;border-left:4px solid var(--primary,#2a5b8c);border-radius:8px;padding:10px 12px;font-size:13px;color:#334155;margin:12px 0;line-height:1.5}
+  .lc-note.warn{background:#FFF7E6;border-left-color:#d69e2e}
+  .lc-guide{font-size:13.5px;line-height:1.6;color:#1f2937}
+  .lc-guide h4{margin:18px 0 6px;font-size:14.5px;color:var(--navy)}
+  .lc-guide ol,.lc-guide ul{margin:6px 0 10px;padding-left:22px}
+  .lc-guide li{margin:4px 0}
+  .lc-guide details{border:1px solid var(--line);border-radius:10px;padding:0 14px;margin:10px 0;background:#fff}
+  .lc-guide summary{cursor:pointer;font-weight:700;color:var(--navy);padding:12px 0;list-style-position:outside}
+  .lc-guide details[open] summary{border-bottom:1px solid var(--line);margin-bottom:8px}
+  .lc-guide .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--primary-soft,#eaf1f8);color:var(--navy);margin-left:6px;vertical-align:1px}
+  .lc-guide .tag.free{background:#ecfdf3;color:#166534}
+  .lc-guide b.ui{font-weight:700;color:#0f172a}
+  .lc-guide code{background:#f1f5f9;border-radius:5px;padding:1px 5px;font:12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  #leadPanel,.lc-guide,.lc-guide details{min-width:0;max-width:100%}
+  .lc-guide li,.lc-guide p{overflow-wrap:anywhere}
+  .lc-pre{position:relative;margin:8px 0 12px;max-width:100%;min-width:0}
+  .lc-pre pre{background:#0f2238;color:#e2e8f0;border-radius:10px;padding:14px;overflow:auto;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;max-height:340px;margin:0;white-space:pre}
+  .lc-pre .btn{position:absolute;top:8px;right:8px}
+  .lc-fields{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0 12px}
+  .lc-fields th,.lc-fields td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  .lc-fields th{background:#f5f7fa;color:#334155;font-weight:700}
+  .lc-fields td:first-child{white-space:nowrap}
+  .lc-test{border:1px dashed #9fb6cf;background:#f8fbfe;border-radius:12px;padding:14px 16px;margin:16px 0 4px}
+  .lc-test h4{margin:0 0 4px;color:var(--navy);font-size:14.5px}
+  @media(max-width:600px){
+    #leadOverlay{padding:0}
+    /* The main tab bar was wider than a phone screen, which made the whole page (and every pop-up) wider than the screen. Let it scroll sideways instead. */
+    .tabs{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .tabs .tab{flex:0 0 auto}
+    #leadOverlay .modal{border-radius:0;min-height:100vh;width:100%;overflow-x:hidden}
+    .lc-fields{display:block;overflow-x:auto}
+    .lc-guide li code,.lc-guide p code{overflow-wrap:anywhere}
+    #leadOverlay .modal-head{border-radius:0;padding:16px}
+    #leadOverlay .modal-body{padding:16px;max-height:none}
+    .lc-val{flex-direction:column}
+    .lc-tab{padding:8px 8px;font-size:13px}
+  }
 </style>
 </head>
 <body>
@@ -1465,6 +1525,7 @@
       </div>
     </div>
     <button class="btn btn-ghost" id="teamBtn" style="display:none" title="Manage your team">Team</button>
+    <button class="btn btn-ghost" id="leadBtn" style="display:none" title="Connect your website and ad lead forms">Lead connections</button>
     <button class="btn btn-ghost" id="billBtn" style="display:none" title="Plan and billing">Billing</button>
     <button class="btn btn-ghost" id="acctBtn" style="display:none" title="Your account and password">Account</button>
     <button class="btn btn-ghost" id="signOutBtn" style="display:none">Sign out</button>
@@ -1802,6 +1863,12 @@
       <button class="btn btn-light btn-sm" id="saveCompany">Save company</button>
       <button class="btn btn-light btn-sm" id="myPassword" style="margin-left:8px">My account &amp; password</button>
 
+      <div class="section-title" style="margin-top:22px">Lead connections</div>
+      <p style="margin:0 0 10px;color:var(--muted);font-size:13px">
+        Send enquiries from your website, Meta (Facebook and Instagram) lead ads and Google Ads lead forms straight into New Enquiry.
+      </p>
+      <button class="btn btn-light btn-sm" id="teamLeadBtn" type="button">Open lead connections</button>
+
       <div class="section-title" style="margin-top:22px">Members</div>
       <div id="teamList"></div>
 
@@ -1827,6 +1894,28 @@
 
       <div class="section-title" style="margin-top:22px">Pending invites</div>
       <div id="pendingList"><p style="color:var(--muted)">No pending invites.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="leadOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="leadTitle">
+    <div class="modal-head">
+      <h2 id="leadTitle">Lead connections</h2>
+      <button class="x" id="closeLead" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="lc-lead">
+        Send enquiries from your website, Facebook and Instagram ads and Google ads straight into your pipeline.
+        Each one arrives as a <strong>New Enquiry</strong> client with the right lead source, ready to follow up.
+      </p>
+      <div id="leadReadOnly" class="lc-note warn" style="display:none"></div>
+      <div class="lc-tabs" role="tablist" id="leadTabs">
+        <button class="lc-tab" role="tab" data-ch="Website" aria-selected="true"><span class="dot"></span>Website form</button>
+        <button class="lc-tab" role="tab" data-ch="Meta" aria-selected="false"><span class="dot"></span>Meta Lead Ads</button>
+        <button class="lc-tab" role="tab" data-ch="Google" aria-selected="false"><span class="dot"></span>Google Ads</button>
+      </div>
+      <div id="leadPanel" role="tabpanel"></div>
     </div>
   </div>
 </div>
@@ -6625,6 +6714,7 @@ function paintIdentity(){
   document.getElementById("signOutBtn").style.display = "";
   document.getElementById("acctBtn").style.display = "";
   document.getElementById("teamBtn").style.display = isManager() ? "" : "none";
+  document.getElementById("leadBtn").style.display = isManager() ? "" : "none";
   document.body.classList.toggle("is-manager", isManager());
   document.body.classList.toggle("is-platform", IS_PLATFORM);
   document.querySelector('.tab[data-view="salesreports"]').style.display = CAN_SR ? "" : "none";
@@ -6662,6 +6752,8 @@ async function switchCompany(companyId){
   dwSig.clear();
   tkSig.clear();
   selectedId = null;
+  LEAD_SOURCES_ROWS = []; LEAD_TEST = {}; LEAD_SHOW = {};   // lead keys belong to the old company
+  document.getElementById("leadOverlay").classList.remove("open");
   REP_OWNER = "";   // a rep id from the old company means nothing in the new one
   DASH_OWNER = "";  // same for the dashboard's consultant filter
 
@@ -6897,6 +6989,415 @@ async function cancelInvite(id){
   toast("Invite cancelled.");
   document.getElementById("inviteLink").className = "invitelink";
   refreshInvites();
+}
+
+/* ============================================================
+   LEAD CONNECTIONS (owners and admins)
+   Each company gets one key per channel (Website / Meta / Google). The key
+   lives in lead_sources, which the browser can't read directly: the
+   my_lead_sources / lead_source_* database functions only ever return or
+   change rows for the signed-in manager's own company. The website-enquiry
+   edge function uses the key to work out which company a lead belongs to.
+   ============================================================ */
+const LEAD_ENDPOINT = SUPABASE_URL + "/functions/v1/website-enquiry";
+const LEAD_CHANNELS = {
+  Website: {tab:"Website form",  title:"Website form",
+            blurb:"Enquiry forms on your own website, including WordPress forms."},
+  Meta:    {tab:"Meta Lead Ads", title:"Meta Lead Ads (Facebook and Instagram)",
+            blurb:"Instant forms on Facebook and Instagram ads, sent through Zapier or Make."},
+  Google:  {tab:"Google Ads",    title:"Google Ads lead forms",
+            blurb:"Lead form assets on Google Search, YouTube, Display and Performance Max campaigns."}
+};
+// Mirrors FIELD_ALIASES in supabase/functions/website-enquiry/index.ts
+const LEAD_FIELDS = [
+  ["first_name",     "First name",        "first_name, firstname, first"],
+  ["last_name",      "Surname",           "last_name, lastname, surname, last"],
+  ["full_name",      "Full name (instead of first name and surname)", "full_name, name, fullname"],
+  ["email",          "Email",             "email, email_address"],
+  ["phone",          "Phone or mobile",   "phone, phone_number, mobile"],
+  ["interested_in",  "What they're interested in", "interested_in, interest, build_type"],
+  ["build_location", "Where they want to build", "build_location, location, suburb, city, postcode, postal_code"],
+  ["journey_stage",  "Stage of their journey", "journey_stage, stage_of_journey, building_stage"],
+  ["has_land",       "Do they have land?", "has_land, land, own_land"],
+  ["comments",       "Message or comments", "comments, message, comment, notes"],
+  ["campaign",       "Campaign or form name", "campaign, campaign_name, ad_name, form_name"],
+  ["lead_id",        "Lead ID (stops the same lead arriving twice)", "lead_id, leadgen_id, external_lead_id"]
+];
+let LEAD_SOURCES_ROWS = [], LEAD_TAB = "Website", LEAD_AVAILABLE = true, LEAD_SHOW = {}, LEAD_TEST = {}, LEAD_BUSY = false;
+
+const leadRow  = ch => LEAD_SOURCES_ROWS.find(r => r.channel === ch) || null;
+const leadLink = r  => LEAD_ENDPOINT + "?key=" + encodeURIComponent(r.site_key);
+const leadMask = k  => k.length > 12 ? k.slice(0, 7) + "\u2022".repeat(10) + k.slice(-4) : "\u2022".repeat(10);
+function leadCopy(text, what){
+  navigator.clipboard.writeText(text).then(()=>toast(what + " copied."), ()=>toast("Copy failed - select it and copy it manually."));
+}
+
+function openLeads(ch){
+  if(!isManager()){ toast("Only owners and admins can manage lead connections."); return; }
+  if(ch && LEAD_CHANNELS[ch]) LEAD_TAB = ch;
+  closeTeam();
+  document.getElementById("leadOverlay").classList.add("open");
+  document.getElementById("leadPanel").innerHTML = '<p style="color:var(--muted)">Loading&hellip;</p>';
+  refreshLeads();
+}
+function closeLeads(){ document.getElementById("leadOverlay").classList.remove("open"); LEAD_SHOW = {}; }
+
+async function refreshLeads(){
+  const {data, error} = await sb.rpc("my_lead_sources");
+  if(error){
+    // PGRST202 / 404: the database functions haven't been added yet
+    LEAD_AVAILABLE = !(error.code === "PGRST202" || error.code === "42883" || /could not find the function/i.test(error.message||""));
+    LEAD_SOURCES_ROWS = [];
+    paintLeads(LEAD_AVAILABLE ? ("Could not load your lead connections: " + friendlyError(error)) : "");
+    return;
+  }
+  LEAD_AVAILABLE = true;
+  LEAD_SOURCES_ROWS = Array.isArray(data) ? data : [];
+  paintLeads();
+}
+
+function paintLeads(loadError){
+  const ro = document.getElementById("leadReadOnly");
+  if(isReadOnly()){
+    ro.innerHTML = "<strong>Your workspace is read-only, so new enquiries aren't being saved.</strong> " +
+      "Forms and ads can stay connected; leads start arriving again as soon as a plan is active. " +
+      '<a href="#" id="leadToBilling">Open Billing</a>';
+    ro.style.display = "";
+    const a = document.getElementById("leadToBilling");
+    if(a) a.onclick = e => { e.preventDefault(); closeLeads(); const b = document.getElementById("billBtn"); if(b) b.click(); };
+  } else ro.style.display = "none";
+
+  document.querySelectorAll("#leadTabs .lc-tab").forEach(t=>{
+    const r = leadRow(t.dataset.ch);
+    t.setAttribute("aria-selected", t.dataset.ch === LEAD_TAB ? "true" : "false");
+    t.querySelector(".dot").className = "dot" + (r && r.active ? " on" : "");
+  });
+
+  const panel = document.getElementById("leadPanel");
+  if(!LEAD_AVAILABLE){
+    panel.innerHTML = '<div class="lc-note">Lead connections aren\'t switched on for your workspace yet. ' +
+      'Please contact Spectrum Coach support and we\'ll turn them on.</div>' + leadGuide(LEAD_TAB, null);
+    wireLeadPanel(); return;
+  }
+  if(loadError){ panel.innerHTML = '<div class="pw-msg err show">' + esc(loadError) + '</div>'; return; }
+  const r = leadRow(LEAD_TAB);
+  panel.innerHTML = leadCard(LEAD_TAB, r) + (r ? leadTestBox(LEAD_TAB, r) : "") + leadGuide(LEAD_TAB, r);
+  wireLeadPanel();
+}
+
+function leadCard(ch, r){
+  const c = LEAD_CHANNELS[ch];
+  if(!r){
+    const ro = isReadOnly();
+    return '<div class="lc-card"><h3>' + esc(c.title) + ' <span class="lc-status off">Not connected</span></h3>' +
+      '<p class="lc-lead" style="margin:6px 0 0">' + esc(c.blurb) + ' Create a connection key to get your own private link.</p>' +
+      '<div class="lc-acts"><button class="btn btn-primary btn-sm" id="leadCreate"' + (ro ? " disabled" : "") + '>Create connection key</button>' +
+      (ro ? '<span style="font-size:12.5px;color:var(--muted)">Choose a plan in Billing to create a key.</span>' : "") + '</div></div>';
+  }
+  const show = !!LEAD_SHOW[ch];
+  const link = leadLink(r);
+  const shownLink = show ? link : LEAD_ENDPOINT + "?key=" + leadMask(r.site_key);
+  const owners = TEAM.filter(p => p.active || p.id === r.default_owner_id);
+  const ownerSel = '<select id="leadOwner" aria-label="New leads go to">' +
+    (r.default_owner_id ? "" : '<option value="" selected>Nobody yet - choose someone</option>') +
+    owners.map(p => '<option value="' + esc(p.id) + '"' + (p.id === r.default_owner_id ? " selected" : "") + '>' +
+      esc(repName(p.id)) + (p.active ? "" : " (no access)") + '</option>').join("") + '</select>';
+  return '<div class="lc-card"><h3>' + esc(c.title) + ' <span class="lc-status ' + (r.active ? "on" : "off") + '">' +
+      (r.active ? "Connected" : "Turned off") + '</span></h3>' +
+    '<p class="lc-lead" style="margin:6px 0 0">' + esc(c.blurb) + ' Keep this link private: anyone who has it can send enquiries into your pipeline.</p>' +
+    '<div class="lc-row"><label>Your connection link</label><div class="lc-val"><code id="leadLinkVal">' + esc(shownLink) + '</code>' +
+      '<button class="btn btn-light btn-sm" data-copy="link">Copy link</button></div></div>' +
+    '<div class="lc-row"><label>Your key' + (ch === "Google" ? " (paste this into Google's Key box)" : "") + '</label><div class="lc-val"><code>' +
+      esc(show ? r.site_key : leadMask(r.site_key)) + '</code><button class="btn btn-light btn-sm" data-copy="key">Copy key</button></div></div>' +
+    '<div class="lc-row"><label for="leadOwner">New leads go to</label><div class="lc-owner">' + ownerSel +
+      '<span style="font-size:12px;color:var(--muted)">You can reassign each lead later.</span></div></div>' +
+    '<div class="lc-acts">' +
+      '<button class="btn btn-light btn-sm" id="leadShow">' + (show ? "Hide key" : "Show key") + '</button>' +
+      '<button class="btn btn-light btn-sm" id="leadToggle">' + (r.active ? "Turn off" : "Turn back on") + '</button>' +
+      '<button class="btn btn-warn btn-sm" id="leadRegen">Regenerate key</button>' +
+    '</div>' +
+    (r.active ? "" : '<div class="lc-note warn">This connection is turned off. Enquiries sent to it are refused until you turn it back on.</div>') +
+  '</div>';
+}
+
+function leadTestBox(ch, r){
+  const t = LEAD_TEST[ch];
+  let res = "";
+  if(t && t.state === "sending") res = '<div class="pw-msg show">Sending&hellip;</div>';
+  else if(t && t.state === "err") res = '<div class="pw-msg err show">' + esc(t.msg) + '</div>';
+  else if(t && t.state === "ro") res = '<div class="pw-msg err show">The link works, but your workspace is read-only so the test wasn\'t saved. Leads are saved again once a plan is active.</div>';
+  else if(t && t.state === "ok") res = '<div class="pw-msg ok show">It worked. <strong>' + esc(t.name) + '</strong> is now in New Enquiry' +
+      (t.found ? '.' : ' (it may take a moment to appear).') + '</div>' +
+      '<div class="lc-acts"><button class="btn btn-warn btn-sm" id="leadTestDel"' + (t.found ? "" : " disabled") + '>Delete test enquiry</button></div>';
+  else if(t && t.state === "deleted") res = '<div class="pw-msg ok show">Test enquiry deleted.</div>';
+  const google = ch === "Google"
+    ? '<p style="margin:6px 0 0;font-size:13px;color:#334155">Google\'s own <b class="ui">Send test data</b> button checks the link but nothing is saved, so it won\'t appear in your pipeline. Use this button if you want to see a lead arrive.</p>'
+    : "";
+  return '<div class="lc-test"><h4>Send a test enquiry</h4>' +
+    '<p style="margin:0;font-size:13px;color:#334155">Sends a clearly marked test, <strong>Test Enquiry - delete me</strong>, through this link. It lands in New Enquiry like a real lead' +
+    (r.active ? "" : " (turn the connection back on first)") + ', and you can delete it here with one click.</p>' + google +
+    '<div class="lc-acts"><button class="btn btn-primary btn-sm" id="leadTest"' + (r.active && !(t && t.state === "sending") ? "" : " disabled") + '>Send a test enquiry</button></div>' +
+    res + '</div>';
+}
+
+// The code shown on screen has the key masked (unless "Show key" is on); Copy always copies the real code.
+const LEAD_PRE = {};
+function leadPre(id, code, shown){
+  LEAD_PRE[id] = code;
+  return '<div class="lc-pre"><pre id="' + id + '">' + esc(shown || code) + '</pre><button class="btn btn-light btn-sm" data-copy-pre="' + id + '">Copy code</button></div>';
+}
+function leadFieldTable(){
+  return '<table class="lc-fields"><thead><tr><th>Field name to use</th><th>What it is</th><th>Also accepted</th></tr></thead><tbody>' +
+    LEAD_FIELDS.map(f => '<tr><td><code>' + f[0] + '</code></td><td>' + esc(f[1]) + '</td><td>' + esc(f[2]) + '</td></tr>').join("") +
+    '</tbody></table><p style="font-size:12.5px;color:var(--muted);margin:0 0 8px">Field names aren\'t case-sensitive. ' +
+    'Every enquiry needs a name and an email or phone number. Fields with other names are ignored, so put anything extra into the message.</p>';
+}
+
+function leadGuide(ch, r){
+  const link = r ? leadLink(r) : "YOUR-CONNECTION-LINK";
+  const key  = r ? r.site_key : "YOUR-KEY";
+  const showKey = r && LEAD_SHOW[ch];
+  const shownLink = r && !showKey ? LEAD_ENDPOINT + "?key=" + leadMask(r.site_key) : link;
+  const keyNote = r || !LEAD_AVAILABLE ? "" : '<div class="lc-note">Create your connection key above and these steps fill in your own link.</div>';
+  if(ch === "Website"){
+    const snippet =
+'<form id="spectrum-enquiry">\n' +
+'  <p><label>First name<br><input name="first_name" required></label></p>\n' +
+'  <p><label>Surname<br><input name="last_name" required></label></p>\n' +
+'  <p><label>Email<br><input type="email" name="email" required></label></p>\n' +
+'  <p><label>Mobile<br><input type="tel" name="phone"></label></p>\n' +
+'  <p><label>Where would you like to build?<br><input name="build_location"></label></p>\n' +
+'  <p><label>How can we help?<br><textarea name="comments" rows="4"></textarea></label></p>\n' +
+'  <\!-- Spam trap: leave this hidden field empty -->\n' +
+'  <input name="website_url" tabindex="-1" autocomplete="off" aria-hidden="true"\n' +
+'         style="position:absolute;left:-9999px">\n' +
+'  <p><button type="submit">Send enquiry</button></p>\n' +
+'  <p class="spectrum-thanks" hidden>Thanks! We\'ll be in touch soon.</p>\n' +
+'</form>\n' +
+'<scr' + 'ipt>\n' +
+'document.getElementById("spectrum-enquiry").addEventListener("submit", function (e) {\n' +
+'  e.preventDefault();\n' +
+'  var form = this, button = form.querySelector("button");\n' +
+'  button.disabled = true;\n' +
+'  fetch("' + link + '", { method: "POST", body: new FormData(form) })\n' +
+'    .then(function (res) { if (!res.ok) throw new Error(res.status); })\n' +
+'    .then(function () { form.reset(); form.querySelector(".spectrum-thanks").hidden = false; })\n' +
+'    .catch(function () { alert("Sorry, your enquiry didn\'t send. Please call or email us instead."); })\n' +
+'    .then(function () { button.disabled = false; });\n' +
+'});\n' +
+'<\/script>';
+    return '<div class="lc-guide">' + keyNote +
+      '<h4>Connect your website</h4><p style="margin:0">Pick the option that matches how your website is built. You only need one.</p>' +
+      '<details open><summary>Paste-in form (any site that lets you add HTML)<span class="tag free">Free</span></summary>' +
+        '<ol><li>In your website editor, add an <b class="ui">HTML</b>, <b class="ui">Code</b> or <b class="ui">Embed</b> block where the form should go.</li>' +
+        '<li>Copy the code below and paste it into that block. ' + (r ? 'It already contains your link.' : 'Create your key first so the code contains your link.') + '</li>' +
+        '<li>Publish the page, fill in the form yourself, and check the enquiry appears in New Enquiry.</li></ol>' +
+        leadPre("leadSnippet", snippet, r && !showKey ? snippet.split(link).join(shownLink) : snippet) +
+        '<p style="font-size:12.5px;color:var(--muted)">Your web developer can restyle it freely. Keep the <code>name="..."</code> parts as they are, and keep the hidden <code>website_url</code> field, which quietly blocks spam bots.</p>' +
+      '</details>' +
+      '<details><summary>WordPress: Contact Form 7<span class="tag free">Free plugin</span></summary>' +
+        '<ol><li>In WordPress go to <b class="ui">Plugins &rsaquo; Add New</b>, search for <b class="ui">CF7 to Webhook</b> (by Mário Valney), then install and activate it.</li>' +
+        '<li>Open <b class="ui">Contact &rsaquo; Contact Forms</b> and edit your form.</li>' +
+        '<li>On the <b class="ui">Form</b> tab, add a <code>webhook:</code> name to each field so it matches our field names, for example:<br>' +
+          '<code>[text* your-name webhook:full_name]</code> <code>[email* your-email webhook:email]</code> <code>[tel your-phone webhook:phone]</code> <code>[textarea your-message webhook:comments]</code></li>' +
+        '<li>Open the plugin\'s webhook tab (it may be labelled <b class="ui">Zapier</b>), tick the option to send to a webhook, and paste your connection link into <b class="ui">Webhook URL</b>.</li>' +
+        '<li>Save, then send a test through your live form.</li></ol>' +
+      '</details>' +
+      '<details><summary>WordPress: Elementor Pro form<span class="tag">Elementor Pro</span></summary>' +
+        '<ol><li>Edit the page and select your <b class="ui">Form</b> widget.</li>' +
+        '<li>Under <b class="ui">Actions After Submit</b>, add <b class="ui">Webhook</b>.</li>' +
+        '<li>In the new <b class="ui">Webhook</b> section, paste your connection link. Leave <b class="ui">Advanced Data</b> switched off.</li>' +
+        '<li>Elementor sends each field using its <b class="ui">label</b>, so label your fields <b class="ui">Name</b>, <b class="ui">Email</b>, <b class="ui">Phone</b> and <b class="ui">Message</b> (or any field name from the table below).</li>' +
+        '<li>Click <b class="ui">Update</b> and send a test through the live form.</li></ol>' +
+      '</details>' +
+      '<details><summary>WordPress: WPForms<span class="tag">Elite licence</span></summary>' +
+        '<ol><li>The Webhooks addon needs a WPForms <b class="ui">Elite</b> licence. Install it from <b class="ui">WPForms &rsaquo; Addons</b>.</li>' +
+        '<li>Open your form in the form builder and go to <b class="ui">Settings &rsaquo; Webhooks</b>. Switch on <b class="ui">Enable Webhooks</b>.</li>' +
+        '<li>Request URL: your connection link. Request Method: <b class="ui">POST</b>. Request Format: <b class="ui">JSON</b>.</li>' +
+        '<li>Under <b class="ui">Request Body</b>, add one row per field: type our field name on the left (for example <code>first_name</code>, <code>email</code>, <code>phone</code>, <code>comments</code>) and pick your form field on the right.</li>' +
+        '<li>Save, then send a test through your live form.</li></ol>' +
+      '</details>' +
+      '<details><summary>WordPress: Gravity Forms<span class="tag">Elite licence</span></summary>' +
+        '<ol><li>The Webhooks Add-On comes with a Gravity Forms <b class="ui">Elite</b> (or Nonprofit) licence. Install it from <b class="ui">Forms &rsaquo; Add-Ons</b>.</li>' +
+        '<li>Open your form, go to <b class="ui">Settings &rsaquo; Webhooks</b> and click <b class="ui">Add New</b>.</li>' +
+        '<li>Request URL: your connection link. Request Method: <b class="ui">POST</b>. Request Format: <b class="ui">JSON</b>.</li>' +
+        '<li>Request Body: choose <b class="ui">Select Fields</b> and add a row per field, with our field name as the key (for example <code>first_name</code>, <code>email</code>, <code>phone</code>, <code>comments</code>).</li>' +
+        '<li>Save, then send a test through your live form.</li></ol>' +
+      '</details>' +
+      '<details><summary>Any other form tool, using Zapier<span class="tag">Paid Zapier plan</span></summary>' +
+        '<ol><li>Webhooks by Zapier is a Premium app, so you need a paid Zapier plan (new accounts get a 14-day trial).</li>' +
+        '<li>Trigger: your form app (for example Wix, Squarespace, Jotform or Typeform), event <b class="ui">New Submission</b> or similar.</li>' +
+        '<li>Action: <b class="ui">Webhooks by Zapier</b>, event <b class="ui">POST</b>. URL: your connection link. Payload Type: <b class="ui">json</b>.</li>' +
+        '<li>Under <b class="ui">Data</b>, add a row per field using our field names on the left and your form\'s answers on the right. Test the step, then publish.</li></ol>' +
+      '</details>' +
+      '<h4>Field names</h4>' + leadFieldTable() +
+      '<p style="font-size:12.5px;color:var(--muted);margin:0">For developers: send a POST (form data or JSON) to your connection link. Instead of <code>?key=</code> you can send the key in an <code>x-site-key</code> header. Successful posts return <code>{"ok":true}</code>.</p>' +
+    '</div>';
+  }
+  if(ch === "Meta"){
+    return '<div class="lc-guide">' + keyNote +
+      '<h4>Connect Facebook and Instagram lead ads</h4>' +
+      '<p style="margin:0">Meta doesn\'t send leads to other apps by itself, so you link it through <strong>Zapier</strong> or <strong>Make</strong>. ' +
+        'You need to be an admin of the Facebook Page that runs the ads. Use one or the other, not both, or each lead arrives twice.</p>' +
+      '<details open><summary>Using Zapier<span class="tag">Paid Zapier plan</span></summary>' +
+        '<ol><li>Facebook Lead Ads and Webhooks by Zapier are both Premium apps, so you need a paid Zapier plan (new accounts get a 14-day trial).</li>' +
+        '<li>Create a Zap. Trigger: <b class="ui">Facebook Lead Ads</b>, event <b class="ui">New Lead</b>.</li>' +
+        '<li>Connect your Facebook account, then choose your <b class="ui">Page</b> and the lead <b class="ui">Form</b>. Click <b class="ui">Test trigger</b> (Zapier needs at least one lead, see "Make a test lead" below).</li>' +
+        '<li>Action: <b class="ui">Webhooks by Zapier</b>, event <b class="ui">POST</b>.</li>' +
+        '<li>URL: paste your connection link. Payload Type: <b class="ui">json</b>.</li>' +
+        '<li>Under <b class="ui">Data</b>, add these rows (type the left side, pick the right side from your lead):' +
+          '<table class="lc-fields"><thead><tr><th>Type this</th><th>Pick this from Facebook Lead Ads</th></tr></thead><tbody>' +
+          '<tr><td><code>full_name</code></td><td>Full Name (or use <code>first_name</code> and <code>last_name</code>)</td></tr>' +
+          '<tr><td><code>email</code></td><td>Email</td></tr>' +
+          '<tr><td><code>phone</code></td><td>Phone Number</td></tr>' +
+          '<tr><td><code>lead_id</code></td><td>ID (the lead\'s ID, so a lead never arrives twice)</td></tr>' +
+          '<tr><td><code>campaign</code></td><td>Campaign Name or Form Name</td></tr>' +
+          '<tr><td><code>comments</code></td><td>Any extra questions on your form</td></tr>' +
+          '</tbody></table></li>' +
+        '<li>Click <b class="ui">Test step</b>, check the lead appears in New Enquiry, then delete it and <b class="ui">Publish</b> the Zap.</li></ol>' +
+      '</details>' +
+      '<details><summary>Using Make<span class="tag free">Free plan available</span></summary>' +
+        '<ol><li>Make has a free plan with a monthly usage limit, which suits a small number of leads.</li>' +
+        '<li>Create a scenario. Add <b class="ui">Facebook Lead Ads &rsaquo; New Lead</b> (it receives leads instantly). Connect your Facebook account and choose your Page and form.</li>' +
+        '<li>Add <b class="ui">HTTP &rsaquo; Make a request</b>. URL: your connection link. Method: <b class="ui">POST</b>.</li>' +
+        '<li>Body content type: <b class="ui">application/x-www-form-urlencoded</b>. Add one item per field with our field name as the key, for example <code>full_name</code>, <code>email</code>, <code>phone</code>, <code>lead_id</code>, <code>campaign</code>, and map each value from the New Lead module.</li>' +
+        '<li>Click <b class="ui">Run once</b>, send a test lead (below), check it appears in New Enquiry, then switch the scenario on.</li></ol>' +
+      '</details>' +
+      '<details><summary>Make a test lead in Meta</summary>' +
+        '<ol><li>Open Meta\'s <a href="https://developers.facebook.com/tools/lead-ads-testing" target="_blank" rel="noopener">Lead Ads Testing Tool</a>.</li>' +
+        '<li>Choose your Page and form, then click <b class="ui">Create lead</b>. Meta allows one test lead per form, so delete the old one there before making another.</li>' +
+        '<li>That test lead passes through Zapier or Make into your pipeline as a real enquiry, so delete it afterwards.</li></ol>' +
+      '</details>' +
+      '<h4>All field names</h4>' + leadFieldTable() +
+    '</div>';
+  }
+  return '<div class="lc-guide">' + keyNote +
+    '<h4>Connect a Google Ads lead form</h4>' +
+    '<p style="margin:0">Google sends leads straight to your link. No Zapier or Make needed.</p>' +
+    '<ol><li>In Google Ads, go to <b class="ui">Campaigns &rsaquo; Assets</b> and choose <b class="ui">Lead form</b> from the list above the table.</li>' +
+      '<li>Hover over your lead form and click the pencil to edit it. (For a new form, you\'ll see the same options while creating it.)</li>' +
+      '<li>Expand <b class="ui">Export leads from Google Ads</b>, then <b class="ui">Other data integration options</b>.</li>' +
+      '<li>Under <b class="ui">Webhook integration</b>, paste:' +
+        '<table class="lc-fields"><tbody>' +
+        '<tr><td><b class="ui">Webhook URL</b></td><td><code>' + esc(shownLink) + '</code>' + (r ? ' (use <b class="ui">Copy link</b> above)' : "") + '</td></tr>' +
+        '<tr><td><b class="ui">Key</b></td><td><code>' + esc(r && !showKey ? leadMask(key) : key) + '</code>' + (r ? ' (use <b class="ui">Copy key</b> above)' : "") + '</td></tr>' +
+        '</tbody></table></li>' +
+      '<li>Click <b class="ui">Send test data</b>. A green message means it\'s connected. Google\'s test lead isn\'t saved, so nothing new appears in your pipeline.</li>' +
+      '<li>Click <b class="ui">Save</b>. Repeat for each lead form you run.</li></ol>' +
+    '<h4>What comes through</h4>' +
+    '<p style="margin:0 0 6px">Name, email, phone, postcode and city fill in the client. Any other questions on your form, plus the Google campaign and form IDs, go into the client\'s notes. Leads show <strong>Google</strong> as the lead source.</p>' +
+    '<div class="lc-note">If you regenerate your Google key, update <strong>both</strong> the Webhook URL and the Key in every Google lead form.</div>' +
+  '</div>';
+}
+
+function wireLeadPanel(){
+  const panel = document.getElementById("leadPanel");
+  const r = leadRow(LEAD_TAB);
+  panel.querySelectorAll("[data-copy]").forEach(b => b.onclick = () => {
+    if(!r) return;
+    if(b.dataset.copy === "link") leadCopy(leadLink(r), "Link"); else leadCopy(r.site_key, "Key");
+  });
+  panel.querySelectorAll("[data-copy-pre]").forEach(b => b.onclick = () => {
+    const code = LEAD_PRE[b.dataset.copyPre]; if(code) leadCopy(code, "Code");
+  });
+  const on = (id, fn) => { const el = document.getElementById(id); if(el) el.onclick = fn; };
+  on("leadCreate", leadCreate);
+  on("leadShow", () => { LEAD_SHOW[LEAD_TAB] = !LEAD_SHOW[LEAD_TAB]; paintLeads(); });
+  on("leadRegen", leadRegenerate);
+  on("leadToggle", leadToggle);
+  on("leadTest", leadSendTest);
+  on("leadTestDel", leadDeleteTest);
+  const sel = document.getElementById("leadOwner");
+  if(sel) sel.onchange = () => leadSetOwner(sel.value);
+}
+
+async function leadRpc(name, args, okMsg){
+  if(LEAD_BUSY) return false;
+  LEAD_BUSY = true;
+  try{
+    const {error} = await sb.rpc(name, args);
+    if(error){ toast(error.message || friendlyError(error)); return false; }
+    if(okMsg) toast(okMsg);
+    await refreshLeads();
+    return true;
+  } finally { LEAD_BUSY = false; }
+}
+function leadCreate(){
+  let tz = "Australia/Sydney";
+  try{ tz = Intl.DateTimeFormat().resolvedOptions().timeZone || tz; }catch(e){}
+  return leadRpc("lead_source_create", {p_channel: LEAD_TAB, p_timezone: tz}, "Connection key created.");
+}
+function leadRegenerate(){
+  const r = leadRow(LEAD_TAB); if(!r) return;
+  const where = {Website:"your website form", Meta:"your Zapier or Make step", Google:"every Google Ads lead form"}[LEAD_TAB];
+  if(!confirm("Regenerate this key?\n\nThe old key and link stop working straight away. Any form, Zap or lead form still using them " +
+              "will stop sending enquiries until you paste the new link into " + where + ".")) return;
+  LEAD_SHOW[LEAD_TAB] = true;
+  LEAD_TEST[LEAD_TAB] = null;
+  return leadRpc("lead_source_regenerate", {p_id: r.id}, "New key created. Update " + where + " now.");
+}
+function leadToggle(){
+  const r = leadRow(LEAD_TAB); if(!r) return;
+  if(r.active && !confirm("Turn off this connection?\n\nEnquiries sent to it will be refused until you turn it back on. Your key stays the same.")) return;
+  return leadRpc("lead_source_update", {p_id: r.id, p_default_owner: null, p_active: !r.active}, r.active ? "Connection turned off." : "Connection turned back on.");
+}
+function leadSetOwner(uid){
+  const r = leadRow(LEAD_TAB); if(!r || !uid) return;
+  return leadRpc("lead_source_update", {p_id: r.id, p_default_owner: uid, p_active: null}, "New leads will go to " + repName(uid) + ".");
+}
+
+async function leadSendTest(){
+  const r = leadRow(LEAD_TAB); if(!r) return;
+  const ch = LEAD_TAB;
+  const stamp = new Date();
+  const email = "test+" + stamp.getTime() + "@example.com";
+  const when = stamp.toLocaleString("en-AU", {dateStyle:"medium", timeStyle:"short"});
+  LEAD_TEST[ch] = {state:"sending"}; paintLeads();
+  let body;
+  try{
+    const res = await fetch(leadLink(r), {
+      method: "POST", headers: {"content-type": "application/json"},
+      body: JSON.stringify({
+        first_name: "Test", last_name: "Enquiry - delete me", email,
+        campaign: "Connection test",
+        comments: "Test sent from Lead connections on " + when + ". Safe to delete."
+      })
+    });
+    body = await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(body && body.error ? body.error : ("status " + res.status));
+  }catch(e){
+    LEAD_TEST[ch] = {state:"err", msg:"The test didn't go through (" + (e.message || "network error") + "). Check your connection and try again."};
+    paintLeads(); return;
+  }
+  if(body && body.saved === false){ LEAD_TEST[ch] = {state:"ro"}; paintLeads(); return; }
+  LEAD_TEST[ch] = {state:"ok", email, name:"Test Enquiry - delete me", found:false}; paintLeads();
+  // pick the new client up (live updates usually beat us to it)
+  for(let i = 0; i < 4 && LEAD_TEST[ch] && LEAD_TEST[ch].email === email; i++){
+    try{ await refreshData(true); }catch(e){}
+    const c = clients.find(x => ss(x.email).toLowerCase() === email);
+    if(c){ LEAD_TEST[ch] = Object.assign(LEAD_TEST[ch], {found:true, id:c.id}); paintLeads(); render(); return; }
+    await new Promise(res => setTimeout(res, 1200));
+  }
+}
+function leadDeleteTest(){
+  const t = LEAD_TEST[LEAD_TAB]; if(!t || !t.id) return;
+  const c = clients.find(x => x.id === t.id);
+  // only ever remove the test client this screen created
+  if(!c || ss(c.email).toLowerCase() !== t.email || c.firstName !== "Test"){ LEAD_TEST[LEAD_TAB] = {state:"deleted"}; paintLeads(); return; }
+  keepSessionDocs();
+  clients = clients.filter(x => x.id !== t.id);
+  openDetail.delete(t.id);
+  saveData(); render();
+  LEAD_TEST[LEAD_TAB] = {state:"deleted"}; paintLeads();
+}
+
+function wireLeads(){
+  document.getElementById("leadBtn").addEventListener("click", () => openLeads());
+  document.getElementById("teamLeadBtn").addEventListener("click", () => openLeads());
+  document.getElementById("closeLead").addEventListener("click", closeLeads);
+  document.querySelectorAll("#leadTabs .lc-tab").forEach(t => t.addEventListener("click", () => {
+    LEAD_TAB = t.dataset.ch; paintLeads();
+  }));
 }
 
 function wireTeam(){
@@ -7409,6 +7910,7 @@ async function boot(){
   initOptions();
   wireAuth();
   wireTeam();
+  wireLeads();
   wireBilling();
   wireAccount();
   wireEmailLinks();
