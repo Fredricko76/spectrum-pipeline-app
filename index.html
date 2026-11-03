@@ -3206,7 +3206,7 @@ let REP_OWNER = "";     // "" = all reps. Reports has its own rep control and
 function renderForecast(listIn){
   const wrap = document.getElementById("view-forecast");
   wrap.innerHTML = '<div id="repSection"></div><div id="fcSection"></div><div id="apptSection"></div>';
-  renderReports();
+  renderReportsSafe();
   // One rep control for the whole tab. The Reps dropdown in the Reports
   // header (REP_OWNER) is the only selector visible here, so the forecast,
   // the appointment lists and the PDF all follow it - a manager who picks
@@ -3277,9 +3277,24 @@ function repMoneyCard(label, cur, prev, curLabel, prevLabel, counted, total){
   </div>`;
 }
 
+/* renderReports is async and fired without await (from renderForecast and the
+   month picker), so a second render can replace #repSection while the first is
+   still waiting on reports_kpis. Each run takes a ticket; a run that has been
+   overtaken, or whose section is no longer on the page, stops quietly instead
+   of binding to elements that are not there (Sentry SPECTRUM-PIPELINE-APP-5). */
+let REP_RUN = 0;
+function renderReportsSafe(){
+  return renderReports().catch(err => {
+    console.error("Reports failed to render", err);
+    if(window.Sentry && window.Sentry.captureException) window.Sentry.captureException(err);
+  });
+}
+
 async function renderReports(){
   const host = document.getElementById("repSection");
   if(!host) return;
+  const run = ++REP_RUN;
+  const stale = () => run !== REP_RUN || !host.isConnected;
   if(!REP_MONTH) REP_MONTH = thisMonth();
 
   host.innerHTML = '<div class="fc-card full" style="margin-bottom:18px">' +
@@ -3298,10 +3313,12 @@ async function renderReports(){
     if(error) throw error;
     m = Array.isArray(data) ? data[0] : data;
   }catch(err){
+    if(stale()) return;
     host.innerHTML = '<div class="fc-card full" style="margin-bottom:18px"><h3>Reports</h3>' +
       '<p class="hint" style="color:var(--red)">' + esc(friendlyError(err)) + '</p></div>';
     return;
   }
+  if(stale()) return;
   if(!m){
     host.innerHTML = '<div class="fc-card full" style="margin-bottom:18px"><h3>Reports</h3>' +
       '<p class="hint">No figures came back for that month.</p></div>';
@@ -3357,11 +3374,12 @@ async function renderReports(){
       </div>
     </div>`;
 
-  document.getElementById("repMonth").addEventListener("change", e=>{
+  const rm = host.querySelector("#repMonth");
+  if(rm) rm.addEventListener("change", e=>{
     REP_MONTH = e.target.value;
-    renderReports();
+    renderReportsSafe();
   });
-  const ro = document.getElementById("repOwner");
+  const ro = host.querySelector("#repOwner");
   if(ro) ro.addEventListener("change", e=>{
     REP_OWNER = e.target.value || "";
     render();   // forecast, appointments and the PDF snapshot follow this control too
