@@ -16,3 +16,6 @@ verify_jwt = false          # Stripe can't send a Supabase JWT; the Stripe signa
 
 [functions.team-invite]
 verify_jwt = true           # owner/admin only; checked again inside via my_billing().can_manage
+
+[functions.address-suggest]
+verify_jwt = true           # signed-in users only; keeps the Google key off the public page
